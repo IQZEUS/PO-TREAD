@@ -1,0 +1,403 @@
+</html>
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#05070f" />
+<title>ژورنال معاملات</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div class="bg" aria-hidden="true">
+  <span class="orb orb-a"></span>
+  <span class="orb orb-b"></span>
+  <span class="orb orb-c"></span>
+</div>
+
+<div class="app">
+
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo">📈</span>
+      <div class="brand-text">
+        <h1>ژورنال معاملات</h1>
+        <p>ثبت کن، تحلیل کن، پیشرفت کن</p>
+      </div>
+    </div>
+    <button class="theme-btn" id="theme-btn"><span class="theme-icon">🌙</span></button>
+  </header>
+
+  <nav class="tabs" id="tabs">
+    <button class="tab active" data-view="add">      <span>✍️</span><em>ثبت</em></button>
+    <button class="tab" data-view="analysis">        <span>📊</span><em>آنالیز</em></button>
+    <button class="tab" data-view="calendar">        <span>📅</span><em>تقویم</em></button>
+    <button class="tab" data-view="trades">          <span>📋</span><em>معاملات</em></button>
+    <button class="tab" data-view="settings">        <span>⚙️</span><em>تنظیمات</em></button>
+  </nav>
+
+  <!-- ============ ADD ============ -->
+  <section class="page active" id="page-add">
+    <div class="grid">
+
+      <form class="card" id="trade-form">
+        <div class="card-head">
+          <h2>✍️ ثبت معامله جدید</h2>
+          <span class="muted">🔒 ذخیره در مرورگر</span>
+        </div>
+
+        <div class="form-grid">
+          <div class="field">
+            <label>📅 تاریخ</label>
+            <input type="date" id="f-date" required />
+          </div>
+          <div class="field">
+            <label>💱 نماد</label>
+            <input type="text" id="f-symbol" placeholder="XAUUSD" required />
+          </div>
+          <div class="field full">
+            <label>🎯 استراتژی</label>
+            <input type="text" id="f-strategy" placeholder="بریک‌اوت لندن" required />
+          </div>
+          <div class="field">
+            <label>⚖️ جهت</label>
+            <div class="seg" id="f-side">
+              <button type="button" data-v="buy" class="active">خرید</button>
+              <button type="button" data-v="sell">فروش</button>
+            </div>
+          </div>
+          <div class="field">
+            <label>🏁 نتیجه</label>
+            <div class="seg" id="f-result">
+              <button type="button" data-v="win" class="active">سود</button>
+              <button type="button" data-v="loss">ضرر</button>
+              <button type="button" data-v="be">سربه‌سر</button>
+            </div>
+          </div>
+          <div class="field">
+            <label>💰 مبلغ (دلار)</label>
+            <input type="number" id="f-amount" step="any" min="0" placeholder="0.00" required />
+          </div>
+          <div class="field">
+            <label>🎲 ریسک (اختیاری)</label>
+            <input type="number" id="f-risk" step="any" min="0" placeholder="0.00" />
+          </div>
+
+          <div class="field full">
+            <label>🏷️ تگ‌ها <span class="hint">(با ویرگول جدا کن)</span></label>
+            <input type="text" id="f-tags" placeholder="بریک‌اوت, لندن, M5" />
+            <div class="tags-preview" id="tags-preview"></div>
+          </div>
+
+          <div class="field full">
+            <label>🧠 حالت روحی</label>
+            <div class="emotions" id="f-emotion">
+              <button type="button" data-e="calm"    class="active"><span>😌</span>آرام</button>
+              <button type="button" data-e="focused"><span>🎯</span>متمرکز</button>
+              <button type="button" data-e="fear">   <span>😨</span>ترس</button>
+              <button type="button" data-e="greed">  <span>🤑</span>طمع</button>
+              <button type="button" data-e="fomo">   <span>😤</span>FOMO</button>
+              <button type="button" data-e="revenge"><span>😡</span>انتقام</button>
+            </div>
+          </div>
+
+          <div class="field full">
+            <label>✅ چک‌لیست پیش از معامله</label>
+            <div class="checklist" id="f-checklist"></div>
+          </div>
+
+          <div class="field full">
+            <label>📸 اسکرین‌شات چارت (اختیاری)</label>
+            <div class="upload-zone" id="upload-zone">
+              <input type="file" id="f-screenshot" accept="image/*" hidden />
+              <div class="upload-inner" id="upload-inner">
+                <span class="upload-ico">📷</span>
+                <span class="upload-text">برای انتخاب تصویر کلیک کن</span>
+              </div>
+              <div class="upload-preview" id="upload-preview" hidden>
+                <img id="upload-img" alt="" />
+                <button type="button" class="upload-remove" id="upload-remove">✕</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="field full">
+            <label>📝 یادداشت</label>
+            <textarea id="f-note" rows="2" placeholder="چرا وارد شدی؟ چه درسی گرفتی؟"></textarea>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn primary" id="submit-btn">💾 ثبت معامله</button>
+          <button type="button" class="btn ghost" id="cancel-edit" hidden>انصراف</button>
+          <span class="msg" id="form-msg"></span>
+        </div>
+      </form>
+
+      <div class="card">
+        <div class="card-head">
+          <h2>🕒 آخرین معاملات</h2>
+          <span class="muted" id="recent-count"></span>
+        </div>
+        <div class="trade-list" id="recent-list"></div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ ANALYSIS ============ -->
+  <section class="page" id="page-analysis">
+
+    <div id="rules-banner"></div>
+
+    <div class="card toolbar">
+      <div class="seg" id="range-filter">
+        <button type="button" data-r="7">۷ روز</button>
+        <button type="button" data-r="30" class="active">۳۰ روز</button>
+        <button type="button" data-r="90">۹۰ روز</button>
+        <button type="button" data-r="all">همه</button>
+      </div>
+      <div class="tools">
+        <button type="button" class="btn ghost sm" id="demo-btn">✨ نمونه</button>
+        <button type="button" class="btn ghost sm" id="export-btn">⬇️</button>
+        <label class="btn ghost sm">
+          ⬆️
+          <input type="file" id="import-input" accept=".json,application/json" hidden />
+        </label>
+        <button type="button" class="btn danger sm" id="clear-btn">🗑️</button>
+      </div>
+    </div>
+
+    <div class="kpis" id="kpis"></div>
+
+    <div class="card goals-mini" id="goals-mini-card">
+      <div class="card-head">
+        <h2>🎯 هدف فعلی</h2>
+        <span class="muted" id="goals-mini-period"></span>
+      </div>
+      <div id="goals-mini"></div>
+    </div>
+
+    <div class="grid">
+      <div class="card chart-card">
+        <div class="card-head">
+          <h2>📈 منحنی رشد سرمایه</h2>
+          <span class="muted">سود انباشته</span>
+        </div>
+        <div class="chart-box"><canvas id="equity-chart"></canvas></div>
+      </div>
+
+      <div class="card chart-card">
+        <div class="card-head">
+          <h2>📊 سود / ضرر روزانه</h2>
+          <span class="muted">خالص هر روز</span>
+        </div>
+        <div class="chart-box"><canvas id="daily-chart"></canvas></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <h2>🧠 تحلیل حالت روحی</h2>
+        <span class="muted">سود/ضرر به تفکیک احساس</span>
+      </div>
+      <div class="emotions-stats" id="emotions-stats"></div>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <div class="card-head"><h2>🎯 عملکرد استراتژی‌ها</h2></div>
+        <div class="table-wrap" id="strategy-table"></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><h2>📅 آمار روزانه</h2></div>
+        <div class="table-wrap" id="daily-table"></div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ============ CALENDAR ============ -->
+  <section class="page" id="page-calendar">
+    <div class="card">
+      <div class="card-head cal-head">
+        <button class="btn ghost sm" id="cal-prev">◀</button>
+        <h2 id="cal-title">—</h2>
+        <button class="btn ghost sm" id="cal-next">▶</button>
+      </div>
+
+      <div class="cal-weekdays">
+        <span>شنبه</span><span>یکشنبه</span><span>دوشنبه</span><span>سه‌شنبه</span>
+        <span>چهارشنبه</span><span>پنج‌شنبه</span><span>جمعه</span>
+      </div>
+
+      <div class="cal-grid" id="cal-grid"></div>
+
+      <div class="cal-legend">
+        <span class="legend-item"><span class="dot dot-neg3"></span>ضرر زیاد</span>
+        <span class="legend-item"><span class="dot dot-neg1"></span>ضرر کم</span>
+        <span class="legend-item"><span class="dot dot-zero"></span>بدون معامله</span>
+        <span class="legend-item"><span class="dot dot-pos1"></span>سود کم</span>
+        <span class="legend-item"><span class="dot dot-pos3"></span>سود زیاد</span>
+      </div>
+    </div>
+
+    <div class="card" id="cal-detail-card" hidden>
+      <div class="card-head">
+        <h2 id="cal-detail-title">—</h2>
+        <button class="btn ghost sm" id="cal-detail-close">✕</button>
+      </div>
+      <div class="trade-list" id="cal-detail-list"></div>
+    </div>
+  </section>
+
+  <!-- ============ TRADES (FULL LIST + FILTER) ============ -->
+  <section class="page" id="page-trades">
+    <div class="card filter-card">
+      <div class="card-head">
+        <h2>📋 همه معاملات</h2>
+        <span class="muted" id="all-count"></span>
+      </div>
+
+      <div class="filter-grid">
+        <div class="field">
+          <label>🔍 جستجو</label>
+          <input type="text" id="flt-search" placeholder="نماد، استراتژی، یادداشت..." />
+        </div>
+        <div class="field">
+          <label>🎯 استراتژی</label>
+          <select id="flt-strategy"></select>
+        </div>
+        <div class="field">
+          <label>🏷️ تگ</label>
+          <select id="flt-tag"></select>
+        </div>
+        <div class="field">
+          <label>🏁 نتیجه</label>
+          <select id="flt-result">
+            <option value="all">همه</option>
+            <option value="win">سود</option>
+            <option value="loss">ضرر</option>
+            <option value="be">سربه‌سر</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>🧠 احساس</label>
+          <select id="flt-emotion"></select>
+        </div>
+        <div class="field">
+          <label>⚖️ جهت</label>
+          <select id="flt-side">
+            <option value="all">همه</option>
+            <option value="buy">خرید</option>
+            <option value="sell">فروش</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>📅 از تاریخ</label>
+          <input type="date" id="flt-from" />
+        </div>
+        <div class="field">
+          <label>📅 تا تاریخ</label>
+          <input type="date" id="flt-to" />
+        </div>
+      </div>
+
+      <div class="filter-actions">
+        <button type="button" class="btn ghost sm" id="flt-clear">پاک کردن فیلترها</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="trade-list" id="all-trades-list"></div>
+    </div>
+  </section>
+
+  <!-- ============ SETTINGS (GOALS + RULES) ============ -->
+  <section class="page" id="page-settings">
+
+    <div class="card">
+      <div class="card-head">
+        <h2>🎯 اهداف معاملاتی</h2>
+        <span class="muted">پیشرفتت رو دنبال کن</span>
+      </div>
+
+      <div class="form-grid">
+        <div class="field">
+          <label>دوره هدف</label>
+          <div class="seg" id="goal-period">
+            <button type="button" data-v="week" class="active">هفتگی</button>
+            <button type="button" data-v="month">ماهانه</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>معیار</label>
+          <div class="seg" id="goal-metric">
+            <button type="button" data-v="pnl" class="active">سود $</button>
+            <button type="button" data-v="trades">تعداد</button>
+            <button type="button" data-v="winrate">وین‌ریت %</button>
+          </div>
+        </div>
+        <div class="field full">
+          <label>مقدار هدف</label>
+          <input type="number" id="goal-target" step="any" min="0" placeholder="مثلاً 500" />
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn primary" id="save-goal">💾 ذخیره هدف</button>
+        <button type="button" class="btn ghost" id="clear-goal">پاک کردن هدف</button>
+        <span class="msg" id="goal-msg"></span>
+      </div>
+
+      <div class="goals-preview" id="goals-preview"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <h2>🏦 قوانین پراپ فرم</h2>
+        <span class="muted">هشدار خودکار هنگام نقض قوانین</span>
+      </div>
+
+      <div class="form-grid">
+        <div class="field full">
+          <label class="switch">
+            <input type="checkbox" id="rules-enabled" />
+            <span class="switch-track"><span class="switch-thumb"></span></span>
+            <span>فعال‌سازی ردیابی قوانین</span>
+          </label>
+        </div>
+        <div class="field">
+          <label>💥 حداکثر ضرر روزانه ($)</label>
+          <input type="number" id="rule-daily" step="any" min="0" placeholder="500" />
+        </div>
+        <div class="field">
+          <label>⚠️ حداکثر افت کل ($)</label>
+          <input type="number" id="rule-maxdd" step="any" min="0" placeholder="2000" />
+        </div>
+        <div class="field">
+          <label>🏆 هدف سود ($)</label>
+          <input type="number" id="rule-target" step="any" min="0" placeholder="3000" />
+        </div>
+        <div class="field">
+          <label>💰 موجودی اولیه ($)</label>
+          <input type="number" id="rule-balance" step="any" min="0" placeholder="10000" />
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn primary" id="save-rules">💾 ذخیره قوانین</button>
+        <span class="msg" id="rules-msg"></span>
+      </div>
+
+      <div class="rules-status" id="rules-status"></div>
+    </div>
+
+  </section>
+
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
