@@ -5,11 +5,14 @@
 
 window.PT_BANNER_CONFIG = {
 
+  /* ---------- تنظیمات کلی ---------- */
   settings: {
+    cacheMinutes: 30,
     maxVisible: 3,
     autoDismissAfter: 0
   },
 
+  /* ---------- لیست بنرها ---------- */
   banners: [
 
     /* === بنر 1 === */
@@ -17,7 +20,7 @@ window.PT_BANNER_CONFIG = {
       id: "welcome-2026",
       enabled: true,
       priority: 10,
-      maxShows: 2,
+      maxShows: 10,
       icon: "🎉",
       title: "نسخه جدید منتشر شد!",
       title_en: "New version released!",
@@ -41,7 +44,7 @@ window.PT_BANNER_CONFIG = {
       id: "promo-channel",
       enabled: true,
       priority: 5,
-      maxShows: 1,
+      maxShows: 10,
       icon: "💎",
       title: "تحلیل روزانه طلا",
       title_en: "Daily Gold Analysis",
@@ -67,7 +70,7 @@ window.PT_BANNER_CONFIG = {
       id: "maintenance",
       enabled: true,
       priority: 20,
-      maxShows: 3,
+      maxShows: 4,
       icon: "⚠️",
       title: "تعمیرات سرور",
       title_en: "Server Maintenance",
