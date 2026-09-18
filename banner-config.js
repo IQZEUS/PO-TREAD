@@ -23,7 +23,7 @@ window.PT_BANNER_CONFIG = {
       priority: 10,
       type: 'info',
       icon: '🎉',
-      title: 'نسخه جدید منتشر شد!',
+      title: 'نسخه جدیککککککد منتشر شد!',
       title_en: 'New version released!',
       message: 'قابلیت‌های جدید: تحلیل احساسات، تقویم پیشرفته و مودال زیبا',
       message_en: 'New features: emotion analysis, advanced calendar and beautiful modal',
@@ -44,7 +44,7 @@ window.PT_BANNER_CONFIG = {
     /* === بنر ۲: تبلیغ کانال === */
     {
       id: 'promo-channel',
-      enabled: false,
+      enabled: true,
       priority: 5,
       type: 'success',
       icon: '💎',
