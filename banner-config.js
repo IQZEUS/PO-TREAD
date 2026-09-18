@@ -5,14 +5,11 @@
 
 window.PT_BANNER_CONFIG = {
 
-  /* ---------- تنظیمات کلی ---------- */
   settings: {
-    cacheMinutes: 30,
     maxVisible: 3,
     autoDismissAfter: 0
   },
 
-  /* ---------- لیست بنرها ---------- */
   banners: [
 
     /* === بنر 1 === */
@@ -44,7 +41,7 @@ window.PT_BANNER_CONFIG = {
       id: "promo-channel",
       enabled: true,
       priority: 5,
-      maxShows: 200,
+      maxShows: 30,
       icon: "💎",
       title: "تحلیل روزانه طلا",
       title_en: "Daily Gold Analysis",
