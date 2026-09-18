@@ -1,7 +1,6 @@
 /* ============================================================
    PO-TRADE Banner Config
-   این فایل رو روی گیت‌هاب بذار و از هرجا صداش بزن.
-   هر تغییری اینجا بدی، تو همه اپ‌ها اعمال می‌شه.
+   آخرین بروزرسانی: 2026-09-18
    ============================================================ */
 
 window.PT_BANNER_CONFIG = {
@@ -23,14 +22,14 @@ window.PT_BANNER_CONFIG = {
       enabled: true,
       priority: 10,
       type: 'info',
-      icon: '🎉',                                        // ✅ اضافه شد
-      title: 'نسخهتتتتتت جدید منتشر شد!',
+      icon: '🎉',
+      title: 'نسخه جدید منتشر شد!',
       title_en: 'New version released!',
       message: 'قابلیت‌های جدید: تحلیل احساسات، تقویم پیشرفته و مودال زیبا',
       message_en: 'New features: emotion analysis, advanced calendar and beautiful modal',
       cta: 'مشاهده تغییرات',
       cta_en: "See what's new",
-      ctaUrl: 'https://github.com/IQZEUS/PO-TREAD/releases',  // ✅ لینک خودت
+      ctaUrl: 'https://github.com/IQZEUS/PO-TREAD/releases',
       dismissible: true,
       showOnce: false,
       colors: {
@@ -48,14 +47,14 @@ window.PT_BANNER_CONFIG = {
       enabled: false,
       priority: 5,
       type: 'success',
-      icon: '💎',                                        // ✅ اضافه شد
+      icon: '💎',
       title: 'تحلیل روزانه طلا',
       title_en: 'Daily Gold Analysis',
       message: 'هر روز تحلیل XAUUSD رایگان دریافت کن',
       message_en: 'Get free XAUUSD analysis daily',
       cta: 'عضویت',
       cta_en: 'Join',
-      ctaUrl: 'https://t.me/yourchannel',                // ⚠️ اینو با لینک واقعی عوض کن
+      ctaUrl: 'https://t.me/yourchannel',
       dismissible: true,
       showOnce: false,
       colors: {
