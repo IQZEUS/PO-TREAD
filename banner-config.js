@@ -24,7 +24,7 @@ window.PT_BANNER_CONFIG = {
       priority: 10,
       type: 'info',
       icon: '🎉',                                        // ✅ اضافه شد
-      title: 'نسخه جدید منتشر شد!',
+      title: 'نسخهتتتتتت جدید منتشر شد!',
       title_en: 'New version released!',
       message: 'قابلیت‌های جدید: تحلیل احساسات، تقویم پیشرفته و مودال زیبا',
       message_en: 'New features: emotion analysis, advanced calendar and beautiful modal',
