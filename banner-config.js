@@ -27,7 +27,7 @@ window.PT_BANNER_CONFIG = {
       cta_en: "See what's new",
       ctaUrl: "https://github.com/IQZEUS/PO-TREAD/releases",
       image: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&h=400&fit=crop",
-      dismissible: true,
+      dismissible: false,
       size: "large",
       colors: {
         border: "rgba(214, 163, 92, 0.5)",
