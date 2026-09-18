@@ -17,7 +17,7 @@ window.PT_BANNER_CONFIG = {
       id: "welcome-2026",
       enabled: true,
       priority: 10,
-      maxShows: 52,
+      maxShows: 200,
       icon: "🎉",
       title: "نسخه جدید منتشر شد!",
       title_en: "New version released!",
