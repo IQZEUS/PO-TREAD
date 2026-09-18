@@ -44,7 +44,7 @@ window.PT_BANNER_CONFIG = {
       id: "promo-channel",
       enabled: true,
       priority: 5,
-      maxShows: 25,
+      maxShows: 302,
       icon: "💎",
       title: "تحلیل روزانه طلا",
       title_en: "Daily Gold Analysis",
