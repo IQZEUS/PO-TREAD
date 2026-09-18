@@ -76,12 +76,35 @@ window.PT_BANNER_CONFIG = {
       cta: "",
       ctaUrl: "",
       image: "https://www.beytoote.com/images/stories/fun/profile-pictures02-7.jpg",
-      dismissible: true,
+      dismissible: false,
       size: "medium",
       colors: {
         border: "rgba(255, 176, 32, 0.5)",
         ctaBg: "#ffb020",
         ctaText: "#1a1200"
+      }
+    },
+
+    /* === بنر 4 === */
+    {
+      id: "banner-bjcccp",
+      enabled: true,
+      priority: 5,
+      maxShows: 5,
+      icon: "✨",
+      title: "بنر جدید",
+      title_en: "New Banner",
+      message: "متن پیام رو اینجا بنویس",
+      message_en: "Write your message here",
+      cta: "مشاهده",
+      cta_en: "View",
+      ctaUrl: "https://github.com/IQZEUS/PO-TREAD",
+      dismissible: false,
+      size: "large",
+      colors: {
+        border: "rgba(214, 163, 92, 0.4)",
+        ctaBg: "#d6a35c",
+        ctaText: "#14140f"
       }
     }
 
