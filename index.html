@@ -6,8 +6,160 @@
 <meta name="theme-color" content="#05070f" />
 <title>PO-TRADE | ژورنال معاملات</title>
 <link rel="stylesheet" href="style.css" />
+
+<!-- ========== BANNER STYLES ========== -->
+<style>
+  #banner-host {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    padding: 14px;
+    display: flex; flex-direction: column; gap: 14px;
+    z-index: 9999;
+    max-height: 100vh;
+    overflow-y: auto;
+    pointer-events: none;
+  }
+  #banner-host > * { pointer-events: auto; }
+
+  .pt-banner {
+    position: relative;
+    display: flex; align-items: center; gap: 18px;
+    padding: 24px 28px;
+    border-radius: 24px;
+    background: linear-gradient(180deg, #1e1e2a, #12121a);
+    border: 2px solid rgba(214, 163, 92, 0.4);
+    box-shadow: 0 30px 70px rgba(0,0,0,.65);
+    overflow: hidden;
+    animation: ptSlideIn .5s ease both;
+    flex-shrink: 0;
+    min-height: 100px;
+    font-family: Tahoma, 'Vazirmatn', sans-serif;
+    color: #eae7de;
+    direction: rtl;
+  }
+  @keyframes ptSlideIn {
+    from { transform: translateY(-150%); opacity: 0; }
+    to   { transform: translateY(0);     opacity: 1; }
+  }
+  .pt-banner.pt-closing { animation: ptSlideOut .35s ease forwards; }
+  @keyframes ptSlideOut {
+    to { transform: translateY(-150%); opacity: 0; max-height: 0; padding: 0; margin: 0; border-width: 0; }
+  }
+
+  .pt-banner::before {
+    content: '';
+    position: absolute; top: -60%; right: -20%;
+    width: 240px; height: 240px;
+    background: radial-gradient(circle, rgba(214,163,92,.28), transparent 70%);
+    pointer-events: none;
+  }
+  .pt-banner::after {
+    content: '';
+    position: absolute; bottom: -60%; left: -20%;
+    width: 220px; height: 220px;
+    background: radial-gradient(circle, rgba(147,130,214,.18), transparent 70%);
+    pointer-events: none;
+  }
+
+  .pt-banner.pt-has-bg-image { color: #fff; }
+  .pt-banner.pt-has-bg-image::before {
+    background-size: cover; background-position: center;
+    top: 0; right: 0; bottom: 0; left: 0;
+    width: 100%; height: 100%;
+    filter: brightness(var(--pt-overlay-bright, 0.5));
+    z-index: 0;
+  }
+
+  .pt-banner.pt-has-side-image { padding: 18px; gap: 18px; }
+  .pt-banner-side-img {
+    flex: 0 0 110px; width: 110px; height: 110px;
+    border-radius: 16px;
+    background-size: cover; background-position: center;
+    border: 1px solid rgba(255,255,255,.1);
+    z-index: 2;
+  }
+
+  .pt-banner-icon {
+    flex: 0 0 54px; width: 54px; height: 54px;
+    display: grid; place-items: center;
+    border-radius: 16px; font-size: 26px;
+    background: linear-gradient(135deg, rgba(147,130,214,.2), rgba(214,163,92,.2));
+    border: 1px solid rgba(214,163,92,.35);
+    z-index: 2;
+  }
+
+  .pt-banner-body { flex: 1; min-width: 0; z-index: 2; }
+
+  .pt-banner-title {
+    font-weight: 700; font-size: 18px; margin-bottom: 5px;
+    color: #d6a35c;
+    line-height: 1.3;
+  }
+  .pt-banner.pt-has-bg-image .pt-banner-title {
+    color: #fff;
+    text-shadow: 0 2px 12px rgba(0,0,0,.8);
+  }
+
+  .pt-banner-msg { font-size: 13.5px; color: #a5a2b3; line-height: 1.6; }
+  .pt-banner.pt-has-bg-image .pt-banner-msg {
+    color: rgba(255,255,255,.92);
+    text-shadow: 0 1px 8px rgba(0,0,0,.7);
+  }
+
+  .pt-banner-cta {
+    flex: 0 0 auto;
+    padding: 13px 24px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #e2b06f, #d6a35c);
+    color: #14140f;
+    font: inherit; font-weight: 700; font-size: 13px;
+    text-decoration: none;
+    white-space: nowrap;
+    z-index: 2;
+    display: inline-flex; align-items: center;
+  }
+
+  .pt-banner-close {
+    flex: 0 0 36px; width: 36px; height: 36px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,.1);
+    background: rgba(255,255,255,.05);
+    color: #8d8a9a; font-size: 15px;
+    cursor: pointer;
+    display: grid; place-items: center;
+    z-index: 2;
+    font-family: inherit;
+  }
+
+  .pt-banner-skeleton {
+    height: 110px;
+    border-radius: 24px;
+    background: linear-gradient(90deg, #1e1e2a 25%, #2a2a3a 50%, #1e1e2a 75%);
+    background-size: 200% 100%;
+    animation: ptSkel 1.4s infinite;
+    border: 2px solid rgba(214, 163, 92, 0.15);
+  }
+  @keyframes ptSkel {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  @media (max-width: 640px) {
+    #banner-host { padding: 10px; gap: 10px; }
+    .pt-banner { padding: 18px; gap: 14px; border-radius: 20px; }
+    .pt-banner-icon { width: 44px; height: 44px; flex: 0 0 44px; font-size: 22px; }
+    .pt-banner-title { font-size: 15px; }
+    .pt-banner-msg { font-size: 12px; }
+    .pt-banner-cta { padding: 10px 16px; font-size: 12px; }
+    .pt-banner-close { width: 32px; height: 32px; flex: 0 0 32px; }
+    .pt-banner-side-img { flex: 0 0 80px; width: 80px; height: 80px; }
+  }
+</style>
 </head>
 <body>
+
+<!-- ========== BANNER HOST ========== -->
+<div id="banner-host"></div>
 
 <!-- ========== LOADER ========== -->
 <div class="loader" id="loader">
@@ -442,5 +594,403 @@
 </div>
 
 <script src="app.js"></script>
+
+<!-- ========== BANNER SCRIPT ========== -->
+<script>
+/* ============================================================
+   PO-TRADE Banner v18  — یکپارچه با index.html
+   ============================================================ */
+(function () {
+  'use strict';
+
+  var OWNER  = 'IQZEUS';
+  var REPO   = 'PO-TREAD';
+  var BRANCH = 'main';
+  var FILE   = 'banner-config.js';
+
+  var REF_API  = 'https://api.github.com/repos/' + OWNER + '/' + REPO + '/git/ref/heads/' + BRANCH;
+  var JSDELIVR_API = 'https://data.jsdelivr.com/v1/packages/gh/' + OWNER + '/' + REPO + '/resolved?specifier=' + BRANCH;
+  var RAW_BRANCH = 'https://raw.githubusercontent.com/' + OWNER + '/' + REPO + '/refs/heads/' + BRANCH + '/';
+  var RAW_SHA    = 'https://raw.githubusercontent.com/' + OWNER + '/' + REPO + '/';
+  var JSDELIVR = 'https://cdn.jsdelivr.net/gh/' + OWNER + '/' + REPO + '@';
+  var FASTLY   = 'https://fastly.jsdelivr.net/gh/' + OWNER + '/' + REPO + '@';
+  var STATIC   = 'https://cdn.statically.io/gh/' + OWNER + '/' + REPO + '/';
+  var GHACK    = 'https://rawcdn.githack.com/' + OWNER + '/' + REPO + '/';
+
+  var T_REF  = 4000;
+  var T_FILE = 8000;
+
+  var KEY_SEEN      = 'pt.banner.seen';
+  var KEY_DISMISSED = 'pt.banner.dismissed';
+  var KEY_REF       = 'pt.banner.ref';
+  var KEY_TXT       = 'pt.banner.txt';
+
+  var host = document.getElementById('banner-host');
+  if (!host) { console.warn('[Banner] #banner-host not found'); return; }
+
+  var countedThisLoad = {};
+  var currentRef = '';
+
+  function log(msg) { try { console.log('[Banner]', msg); } catch (e) {} }
+
+  var lang = 'fa';
+  try {
+    var rawP = localStorage.getItem('brain-onboarding');
+    if (rawP) lang = (JSON.parse(rawP) || {}).lang || 'fa';
+  } catch (e) {}
+
+  function getJSON(k, fb) {
+    try { var r = localStorage.getItem(k); return r ? (JSON.parse(r) || fb) : fb; }
+    catch (e) { return fb; }
+  }
+  function setJSON(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c];
+    });
+  }
+  function lsGet(k) { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } }
+  function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+
+  function fetchT(url, opts, ms) {
+    opts = opts || {};
+    var ctrl = ('AbortController' in window) ? new AbortController() : null;
+    var timer = null;
+    if (ctrl) {
+      opts.signal = ctrl.signal;
+      timer = setTimeout(function () { ctrl.abort(); }, ms || T_FILE);
+    }
+    return fetch(url, opts).then(function (res) {
+      if (timer) clearTimeout(timer);
+      return res;
+    }, function (err) {
+      if (timer) clearTimeout(timer);
+      throw err;
+    });
+  }
+
+  function getRefFromGitHub() {
+    return fetchT(REF_API, {
+      cache: 'no-store', mode: 'cors',
+      headers: { 'Accept': 'application/vnd.github+json' }
+    }, T_REF)
+    .then(function (r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    })
+    .then(function (j) {
+      var sha = j && j.object && j.object.sha;
+      if (!sha || !/^[0-9a-f]{7,40}$/i.test(sha)) throw new Error('ref نامعتبر');
+      return sha;
+    });
+  }
+
+  function getRefFromJsDelivr() {
+    return fetchT(JSDELIVR_API, { cache: 'no-store', mode: 'cors' }, T_REF)
+      .then(function (r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      })
+      .then(function (j) {
+        var v = null;
+        if (typeof j === 'string') v = j;
+        else if (j && typeof j.version === 'string') v = j.version;
+        else if (j && j.versions && j.versions[0] && j.versions[0].version) v = j.versions[0].version;
+        else if (Array.isArray(j) && j.length && j[0] && j[0].version) v = j[0].version;
+        if (v && /^[0-9a-f]{7,40}$/i.test(v)) return String(v);
+        throw new Error('بدون SHA');
+      });
+  }
+
+  function getRef() {
+    return getRefFromGitHub().catch(function () { return getRefFromJsDelivr(); });
+  }
+
+  function buildSources(ref) {
+    var pinned = /^[0-9a-f]{40}$/i.test(ref || '');
+    var r = ref || BRANCH;
+    var bust = pinned ? '' : ('?t=' + Date.now());
+    var cmode = pinned ? 'default' : 'no-store';
+    var rawUrl = pinned ? (RAW_SHA + r + '/' + FILE + bust) : (RAW_BRANCH + FILE + bust);
+
+    return [
+      { name: 'raw',        url: rawUrl,                           cache: cmode },
+      { name: 'jsDelivr',   url: JSDELIVR + r + '/' + FILE + bust, cache: cmode },
+      { name: 'fastly',     url: FASTLY   + r + '/' + FILE + bust, cache: cmode },
+      { name: 'statically', url: STATIC   + r + '/' + FILE + bust, cache: cmode },
+      { name: 'githack',    url: GHACK    + r + '/' + FILE + bust, cache: cmode }
+    ];
+  }
+
+  function downloadConfig(ref) {
+    var sources = buildSources(ref);
+
+    return new Promise(function (resolve, reject) {
+      var settled = false, failed = 0, errors = [];
+
+      sources.forEach(function (s, i) {
+        var delay = (i === 0) ? 0 : (800 + (i - 1) * 250);
+
+        setTimeout(function () {
+          if (settled) return;
+
+          fetchT(s.url, { cache: s.cache, mode: 'cors' }, T_FILE)
+            .then(function (r) {
+              if (!r.ok) throw new Error('HTTP ' + r.status);
+              var sha = null;
+              try {
+                sha = r.headers.get('x-jsdelivr-version') ||
+                      r.headers.get('X-Jsdelivr-Version') ||
+                      r.headers.get('x-jsd-version');
+                if (!sha) {
+                  var etag = r.headers.get('ETag') || r.headers.get('etag');
+                  if (etag) {
+                    var m = etag.match(/([0-9a-f]{7,40})/i);
+                    if (m) sha = m[1];
+                  }
+                }
+              } catch (e) {}
+              return r.text().then(function (txt) { return { txt: txt, sha: sha }; });
+            })
+            .then(function (res) {
+              if (settled) return;
+              if (!res.txt || res.txt.indexOf('PT_BANNER_CONFIG') === -1) throw new Error('محتوای نامعتبر');
+              settled = true;
+              log('⚡ ' + s.name + ' → ' + res.txt.length + ' بایت' +
+                  (res.sha ? ' [SHA ' + res.sha.slice(0, 7) + ']' : ''));
+              resolve({ text: res.txt, source: s.name, sha: res.sha });
+            })
+            .catch(function (e) {
+              if (settled) return;
+              errors.push(s.name + ': ' + e.message);
+              log('⚠️ ' + s.name + ' ناموفق — ' + e.message);
+              if (++failed === sources.length) reject(new Error(errors.join(' | ')));
+            });
+        }, delay);
+      });
+    });
+  }
+
+  function parseConfig(text) {
+    var fakeWindow = {};
+    var fn = new Function('window', text + '\nreturn window.PT_BANNER_CONFIG;');
+    var cfg = fn(fakeWindow);
+    if (!cfg || !cfg.banners) throw new Error('ساختار کانفیگ نامعتبر');
+    return cfg;
+  }
+
+  function renderBanner(b) {
+    var el = document.createElement('div');
+    el.className = 'pt-banner';
+    el.setAttribute('data-id', b.id);
+
+    var hasImage = b.image && String(b.image).trim();
+    var imgPos = b.imagePosition || 'background';
+
+    if (hasImage && imgPos === 'background') el.classList.add('pt-has-bg-image');
+    else if (hasImage && (imgPos === 'left' || imgPos === 'right')) el.classList.add('pt-has-side-image');
+
+    if (b.colors && b.colors.border) el.style.borderColor = b.colors.border;
+
+    if (hasImage && imgPos === 'background') {
+      var overlay = (b.imageOverlay != null) ? b.imageOverlay : 0.55;
+      el.style.setProperty('--pt-overlay-bright', overlay);
+      var styleId = 'pt-bg-' + b.id.replace(/[^a-z0-9_-]/gi, '_');
+      if (!document.getElementById(styleId)) {
+        var st = document.createElement('style');
+        st.id = styleId;
+        st.textContent = '.pt-banner[data-id="' + b.id + '"]::before { background-image: url("' + b.image + '"); }';
+        document.head.appendChild(st);
+      }
+    }
+
+    var title = (lang === 'en' && b.title_en) ? b.title_en : (b.title || '');
+    var msg   = (lang === 'en' && b.message_en) ? b.message_en : (b.message || '');
+    var cta   = (lang === 'en' && b.cta_en) ? b.cta_en : (b.cta || '');
+
+    var inner = '';
+
+    if (hasImage && imgPos === 'left') {
+      inner += '<div class="pt-banner-side-img" style="background-image:url(\'' + b.image + '\')"></div>';
+    }
+    if (b.icon) inner += '<div class="pt-banner-icon">' + esc(b.icon) + '</div>';
+    inner += '<div class="pt-banner-body">';
+    if (title) inner += '<div class="pt-banner-title">' + esc(title) + '</div>';
+    if (msg)   inner += '<div class="pt-banner-msg">'   + esc(msg)   + '</div>';
+    inner += '</div>';
+
+    if (cta && b.ctaUrl) {
+      var ctaBg   = (b.colors && b.colors.ctaBg)   || '#d6a35c';
+      var ctaText = (b.colors && b.colors.ctaText) || '#14140f';
+      inner += '<a class="pt-banner-cta" href="' + esc(b.ctaUrl) + '" target="_blank" rel="noopener" ' +
+               'style="background:' + ctaBg + ';color:' + ctaText + ';">' + esc(cta) + '</a>';
+    }
+
+    if (hasImage && imgPos === 'right') {
+      inner += '<div class="pt-banner-side-img" style="background-image:url(\'' + b.image + '\')"></div>';
+    }
+    if (b.dismissible !== false) {
+      inner += '<button class="pt-banner-close" type="button" aria-label="بستن">✕</button>';
+    }
+
+    el.innerHTML = inner;
+
+    var closeBtn = el.querySelector('.pt-banner-close');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', function () {
+        el.classList.add('pt-closing');
+        setTimeout(function () { el.remove(); }, 350);
+        var d = getJSON(KEY_DISMISSED, {});
+        d[b.id] = Date.now();
+        setJSON(KEY_DISMISSED, d);
+      });
+    }
+
+    host.appendChild(el);
+  }
+
+  function renderConfig(config) {
+    var dismissed = getJSON(KEY_DISMISSED, {});
+    var seen = getJSON(KEY_SEEN, {});
+
+    var list = (config.banners || []).filter(function (b) {
+      if (!b || !b.id) return false;
+      if (b.enabled === false) { log('⏭️ ' + b.id + ' خاموش'); return false; }
+      if (dismissed[b.id])     { log('⏭️ ' + b.id + ' قبلاً بسته شده'); return false; }
+
+      var maxShows = (typeof b.maxShows === 'number') ? b.maxShows : -1;
+      var shown = seen[b.id] || 0;
+      if (countedThisLoad[b.id]) shown -= 1;
+
+      if (maxShows === -1) return true;
+      if (maxShows === 0)  { log('⏭️ ' + b.id + ' maxShows=0'); return false; }
+      if (shown >= maxShows) {
+        log('⏭️ ' + b.id + ' به سقف رسید (' + shown + '/' + maxShows + ')');
+        return false;
+      }
+      log('✅ ' + b.id + ' قابل نمایش (' + shown + '/' + maxShows + ')');
+      return true;
+    });
+
+    list.sort(function (a, b) { return (b.priority || 0) - (a.priority || 0); });
+
+    var max = (config.settings && config.settings.maxVisible) || 3;
+    if (max > 0) list = list.slice(0, max);
+
+    if (!list.length) { log('⚠️ هیچ بنر فعالی نیست'); return; }
+
+    list.forEach(function (b, i) {
+      setTimeout(function () {
+        if (host.querySelector('.pt-banner[data-id="' + b.id + '"]')) return;
+        renderBanner(b);
+        if (!countedThisLoad[b.id]) {
+          countedThisLoad[b.id] = true;
+          var s = getJSON(KEY_SEEN, {});
+          s[b.id] = (s[b.id] || 0) + 1;
+          setJSON(KEY_SEEN, s);
+        }
+      }, i * 120);
+    });
+  }
+
+  function applyConfig(text, refToSave, cachedTxt, alreadyRendered) {
+    var cfg;
+    try { cfg = parseConfig(text); }
+    catch (e) { log('❌ کانفیگ نامعتبر: ' + e.message); return; }
+
+    var oldRef = lsGet(KEY_REF);
+    if (refToSave && refToSave !== oldRef) {
+      var seen = getJSON(KEY_SEEN, {});
+      (cfg.banners || []).forEach(function (b) { if (b && b.id) seen[b.id] = 0; });
+      setJSON(KEY_SEEN, seen);
+      setJSON(KEY_DISMISSED, {});
+      if (oldRef) log('🔄 ref عوض شد (' + oldRef.slice(0, 7) + ' → ' + refToSave.slice(0, 7) + ')');
+    }
+
+    if (alreadyRendered && text === cachedTxt) {
+      log('✅ محتوا عوض نشده (کش معتبر)');
+      return;
+    }
+
+    lsSet(KEY_TXT, text);
+    if (refToSave) lsSet(KEY_REF, refToSave);
+
+    if (alreadyRendered) host.innerHTML = '';
+    renderConfig(cfg);
+    log('🏁 آماده');
+  }
+
+  function fetchConfig(refForPin, cachedTxt, alreadyRendered, refToSave) {
+    downloadConfig(refForPin).then(function (res) {
+      var finalRef = refToSave || res.sha || null;
+      applyConfig(res.text, finalRef, cachedTxt, alreadyRendered);
+    }, function (e) {
+      log('❌ دانلود ناموفق: ' + e.message);
+      if (!alreadyRendered) host.innerHTML = '';
+    });
+  }
+
+  function checkAndUpdate(cachedRef, cachedTxt, alreadyRendered) {
+    getRef().then(function (ref) {
+      currentRef = ref;
+      log('🔎 ref: ' + ref.slice(0, 7));
+      log('📥 دریافت از گیت (همیشه)');
+      fetchConfig(ref, cachedTxt, alreadyRendered, ref);
+    }, function (e) {
+      log('⚠️ ref در دسترس نیست (' + e.message + ') → دانلود مستقیم');
+      fetchConfig(null, cachedTxt, alreadyRendered, null);
+    });
+  }
+
+  function init() {
+    countedThisLoad = {};
+    host.innerHTML = '';
+    log('🚀 شروع...');
+
+    var cachedRef = lsGet(KEY_REF);
+    var cachedTxt = lsGet(KEY_TXT);
+    var alreadyRendered = false;
+
+    if (cachedTxt) {
+      try {
+        var cfg = parseConfig(cachedTxt);
+        renderConfig(cfg);
+        alreadyRendered = true;
+        log('📦 رندر فوری از کش (ref: ' + (cachedRef ? cachedRef.slice(0, 7) : '?') + ')');
+      } catch (e) {
+        log('⚠️ کش خراب بود: ' + e.message);
+        lsSet(KEY_TXT, '');
+      }
+    }
+
+    if (!alreadyRendered) host.innerHTML = '<div class="pt-banner-skeleton"></div>';
+
+    if (!navigator.onLine) {
+      log('📴 آفلاین — فقط کش');
+      if (!alreadyRendered) host.innerHTML = '';
+      return;
+    }
+
+    checkAndUpdate(cachedRef, cachedTxt, alreadyRendered);
+  }
+
+  window.PT_Banner = {
+    reload: init,
+    ref: function () { return currentRef; },
+    reset: function () {
+      [KEY_SEEN, KEY_DISMISSED, KEY_REF, KEY_TXT].forEach(function (k) {
+        try { localStorage.removeItem(k); } catch (e) {}
+      });
+      init();
+    }
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>
 </body>
 </html>
