@@ -75,6 +75,7 @@ window.PT_BANNER_CONFIG = {
       message_en: "Service unavailable tonight 2-4 AM",
       cta: "",
       ctaUrl: "",
+      image: "https://www.beytoote.com/images/stories/fun/profile-pictures02-7.jpg",
       dismissible: true,
       size: "medium",
       colors: {
