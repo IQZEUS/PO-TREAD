@@ -76,7 +76,7 @@ window.PT_BANNER_CONFIG = {
       cta: "",
       ctaUrl: "",
       image: "https://www.beytoote.com/images/stories/fun/profile-pictures02-7.jpg",
-      dismissible: false,
+      dismissible: true,
       size: "medium",
       colors: {
         border: "rgba(255, 176, 32, 0.5)",
