@@ -7,7 +7,7 @@ window.PT_BANNER_CONFIG = {
 
   settings: {
     maxVisible: 3,
-    autoDismissAfter: 0
+    autoDismissAfter: 10
   },
 
   banners: [
@@ -17,7 +17,7 @@ window.PT_BANNER_CONFIG = {
       id: "welcome-2026",
       enabled: true,
       priority: 10,
-      maxShows: 5,
+      maxShows: 1,
       icon: "🎉",
       title: "نسخه جدید منتشر شد!",
       title_en: "New version released!",
@@ -39,7 +39,7 @@ window.PT_BANNER_CONFIG = {
     /* === بنر 2 === */
     {
       id: "promo-channel",
-      enabled: true,
+      enabled: false,
       priority: 5,
       maxShows: -1,
       icon: "💎",
@@ -88,7 +88,7 @@ window.PT_BANNER_CONFIG = {
     /* === بنر 4 === */
     {
       id: "banner-bjcccp",
-      enabled: true,
+      enabled: false,
       priority: 5,
       maxShows: 5,
       icon: "✨",
