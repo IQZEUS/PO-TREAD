@@ -7,7 +7,7 @@ window.PT_BANNER_CONFIG = {
 
   settings: {
     maxVisible: 3,
-    autoDismissAfter: 10
+    autoDismissAfter: 0
   },
 
   banners: [
