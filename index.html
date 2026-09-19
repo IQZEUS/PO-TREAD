@@ -7,9 +7,8 @@
 <title>PO-TRADE | ژورنال معاملات</title>
 <link rel="stylesheet" href="style.css" />
 
-<!-- ========== BANNER STYLES ========== -->
+<!-- ========== BANNER STYLES v22 ========== -->
 <style>
-  /* ===== HOST ===== */
   #banner-host {
     position: fixed;
     top: 0; left: 0; right: 0;
@@ -17,7 +16,7 @@
     display: flex;
     flex-direction: column;
     gap: 12px;
-    z-index: 9999;
+    z-index: 10000;
     max-height: 100dvh;
     overflow-y: auto;
     overflow-x: hidden;
@@ -32,7 +31,6 @@
   }
   #banner-host > * { pointer-events: auto; }
 
-  /* ===== BANNER ===== */
   .pt-banner {
     position: relative;
     display: flex;
@@ -77,7 +75,6 @@
     }
   }
 
-  /* دکور پیش‌فرض (بنر بدون عکس) */
   .pt-banner::before {
     content: '';
     position: absolute; top: -60%; right: -20%;
@@ -93,7 +90,6 @@
     pointer-events: none; z-index: 0;
   }
 
-  /* ===== بنر عکس پس‌زمینه ===== */
   .pt-banner.pt-has-bg-image {
     color: #fff;
     min-height: 130px;
@@ -111,12 +107,18 @@
   .pt-banner.pt-has-bg-image::after {
     top: 0; right: 0; bottom: 0; left: 0;
     width: 100%; height: 100%;
-    background: linear-gradient(270deg,
+    background: linear-gradient(90deg,
       rgba(0,0,0,.15) 0%,
-      rgba(0,0,0,.55) 55%,
+      rgba(0,0,0,.55) 45%,
       rgba(0,0,0,.88) 100%);
     z-index: 1;
     pointer-events: none;
+  }
+  html[dir="ltr"] .pt-banner.pt-has-bg-image::after {
+    background: linear-gradient(270deg,
+      rgba(0,0,0,.15) 0%,
+      rgba(0,0,0,.55) 45%,
+      rgba(0,0,0,.88) 100%);
   }
   .pt-banner.pt-has-bg-image .pt-banner-title {
     color: #fff;
@@ -127,7 +129,6 @@
     text-shadow: 0 1px 10px rgba(0,0,0,.8);
   }
 
-  /* ===== بنر عکس کناری ===== */
   .pt-banner.pt-has-side-image { padding: 16px; gap: 16px; }
   .pt-banner-side-img {
     flex: 0 0 96px; width: 96px; height: 96px;
@@ -140,7 +141,6 @@
     box-shadow: 0 8px 24px -10px rgba(0,0,0,.7);
   }
 
-  /* ===== آیکون ===== */
   .pt-banner-icon {
     flex: 0 0 48px; width: 48px; height: 48px;
     display: grid; place-items: center;
@@ -150,10 +150,7 @@
     z-index: 2;
   }
 
-  /* ===== بدنه ===== */
-  .pt-banner-body {
-    flex: 1 1 auto; min-width: 0; z-index: 2;
-  }
+  .pt-banner-body { flex: 1 1 auto; min-width: 0; z-index: 2; }
   .pt-banner-title {
     font-weight: 700; font-size: 17px; margin-bottom: 5px;
     color: #d6a35c; line-height: 1.35;
@@ -164,7 +161,6 @@
     word-break: break-word;
   }
 
-  /* ===== CTA ===== */
   .pt-banner-cta {
     flex: 0 0 auto;
     padding: 12px 22px;
@@ -182,7 +178,6 @@
   .pt-banner-cta:active { transform: scale(.97); }
   .pt-banner-cta:hover { box-shadow: 0 12px 26px -8px rgba(214,163,92,.85); }
 
-  /* ===== CLOSE ===== */
   .pt-banner-close {
     flex: 0 0 34px; width: 34px; height: 34px;
     border-radius: 10px;
@@ -196,57 +191,100 @@
     transition: background .15s ease, color .15s ease, transform .15s ease;
     backdrop-filter: blur(6px);
   }
-  .pt-banner-close:hover {
-    background: rgba(255,255,255,.15); color: #fff;
-  }
+  .pt-banner-close:hover { background: rgba(255,255,255,.15); color: #fff; }
   .pt-banner-close:active { transform: scale(.9); }
 
-  /* ===== SKELETON ===== */
+  .pt-banner-progress {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 3px;
+    background: rgba(255,255,255,.08);
+    z-index: 4;
+    overflow: hidden;
+    border-radius: 0 0 18px 18px;
+  }
+  .pt-banner-progress-fill {
+    height: 100%;
+    width: 100%;
+    background: linear-gradient(90deg, #e2b06f, #d6a35c);
+    transform-origin: right center;
+    animation: ptProgress linear forwards;
+  }
+  html[dir="ltr"] .pt-banner-progress-fill {
+    transform-origin: left center;
+  }
+  @keyframes ptProgress {
+    from { transform: scaleX(1); }
+    to   { transform: scaleX(0); }
+  }
+
+  /* ==== SIZE ==== */
+  .pt-banner.pt-size-sm {
+    padding: 12px 16px; gap: 10px; min-height: 60px; border-radius: 14px;
+  }
+  .pt-banner.pt-size-sm .pt-banner-icon {
+    width: 36px; height: 36px; flex: 0 0 36px; font-size: 17px; border-radius: 11px;
+  }
+  .pt-banner.pt-size-sm .pt-banner-title { font-size: 14.5px; margin-bottom: 3px; }
+  .pt-banner.pt-size-sm .pt-banner-msg { font-size: 11.5px; line-height: 1.55; }
+  .pt-banner.pt-size-sm .pt-banner-cta { padding: 9px 16px; font-size: 12px; border-radius: 10px; }
+  .pt-banner.pt-size-sm .pt-banner-side-img {
+    flex: 0 0 64px; width: 64px; height: 64px; border-radius: 11px;
+  }
+
+  .pt-banner.pt-size-lg {
+    padding: 22px 26px; gap: 16px; min-height: 100px; border-radius: 20px;
+  }
+  .pt-banner.pt-size-lg.pt-has-bg-image { min-height: 160px; }
+  .pt-banner.pt-size-lg .pt-banner-icon {
+    width: 56px; height: 56px; flex: 0 0 56px; font-size: 26px; border-radius: 17px;
+  }
+  .pt-banner.pt-size-lg .pt-banner-title { font-size: 19px; margin-bottom: 6px; }
+  .pt-banner.pt-size-lg .pt-banner-msg { font-size: 14px; line-height: 1.7; }
+  .pt-banner.pt-size-lg .pt-banner-cta { padding: 13px 26px; font-size: 13.5px; border-radius: 13px; }
+  .pt-banner.pt-size-lg .pt-banner-side-img {
+    flex: 0 0 120px; width: 120px; height: 120px; border-radius: 16px;
+  }
+
   .pt-banner-skeleton {
-    height: 100px;
-    border-radius: 18px;
+    height: 100px; border-radius: 18px;
     background: linear-gradient(90deg, #1e1e2a 25%, #2a2a3a 50%, #1e1e2a 75%);
     background-size: 200% 100%;
     animation: ptSkel 1.4s infinite;
     border: 2px solid rgba(214, 163, 92, 0.15);
-    max-width: 1100px;
-    width: 100%;
-    margin: 0 auto;
-    box-sizing: border-box;
+    max-width: 1100px; width: 100%; margin: 0 auto; box-sizing: border-box;
   }
   @keyframes ptSkel {
     0%   { background-position: 200% 0; }
     100% { background-position: -200% 0; }
   }
 
-  /* ===== TABLET ===== */
   @media (max-width: 900px) {
-    .pt-banner {
-      padding: 16px 20px; gap: 12px; min-height: 78px;
-    }
+    .pt-banner { padding: 16px 20px; gap: 12px; min-height: 78px; }
     .pt-banner.pt-has-bg-image { min-height: 124px; }
     .pt-banner-side-img { flex: 0 0 84px; width: 84px; height: 84px; }
     .pt-banner-title { font-size: 15.5px; }
     .pt-banner-msg { font-size: 12.5px; }
+    .pt-banner.pt-size-lg { padding: 18px 20px; gap: 14px; }
+    .pt-banner.pt-size-lg.pt-has-bg-image { min-height: 140px; }
+    .pt-banner.pt-size-lg .pt-banner-title { font-size: 17px; }
+    .pt-banner.pt-size-lg .pt-banner-msg { font-size: 13px; }
+    .pt-banner.pt-size-lg .pt-banner-icon { width: 48px; height: 48px; flex: 0 0 48px; font-size: 22px; }
+    .pt-banner.pt-size-lg .pt-banner-side-img { flex: 0 0 100px; width: 100px; height: 100px; }
   }
 
-  /* ===== MOBILE ===== */
   @media (max-width: 640px) {
     #banner-host {
       padding: calc(8px + env(safe-area-inset-top, 0px)) 8px 8px;
       gap: 8px;
     }
     .pt-banner {
-      padding: 14px 14px 14px 44px; /* فضا برای دکمه بستن */
+      padding: 14px 14px 14px 44px;
       gap: 10px;
       border-radius: 14px;
       min-height: 0;
       align-items: flex-start;
       flex-wrap: wrap;
-    }
-    .pt-banner.pt-has-bg-image {
-      min-height: 118px;
-      padding: 16px 16px 16px 44px;
     }
     .pt-banner.pt-has-side-image {
       padding: 12px 14px 12px 44px;
@@ -282,22 +320,75 @@
       flex: 0 0 60px; width: 60px; height: 60px;
       border-radius: 10px;
     }
+
+    .pt-banner.pt-has-bg-image {
+      align-items: flex-start;
+      min-height: 0;
+      padding: 14px 14px 14px 44px;
+      gap: 10px;
+    }
+    .pt-banner.pt-has-bg-image .pt-banner-icon {
+      width: 32px; height: 32px; flex: 0 0 32px;
+      font-size: 15px; border-radius: 9px;
+      margin-top: 1px;
+    }
+    .pt-banner.pt-has-bg-image .pt-banner-title {
+      font-size: 13.5px; line-height: 1.35; margin-bottom: 3px;
+    }
+    .pt-banner.pt-has-bg-image .pt-banner-msg {
+      font-size: 11px; line-height: 1.55;
+    }
+    .pt-banner.pt-has-bg-image::before {
+      filter: brightness(calc(var(--pt-overlay-bright, 0.6) * 0.85));
+    }
+
+    .pt-banner.pt-size-sm,
+    .pt-banner.pt-size-lg {
+      padding: 14px 14px 14px 44px;
+      gap: 10px; min-height: 0; border-radius: 14px;
+    }
+    .pt-banner.pt-size-sm .pt-banner-icon,
+    .pt-banner.pt-size-lg .pt-banner-icon {
+      width: 32px; height: 32px; flex: 0 0 32px; font-size: 15px; border-radius: 9px;
+    }
+    .pt-banner.pt-size-sm .pt-banner-title,
+    .pt-banner.pt-size-lg .pt-banner-title { font-size: 13.5px; margin-bottom: 3px; }
+    .pt-banner.pt-size-sm .pt-banner-msg,
+    .pt-banner.pt-size-lg .pt-banner-msg { font-size: 11px; line-height: 1.55; }
+    .pt-banner.pt-size-sm .pt-banner-cta,
+    .pt-banner.pt-size-lg .pt-banner-cta { padding: 10px 14px; font-size: 12px; }
+
+    .pt-banner-progress { border-radius: 0 0 14px 14px; }
   }
 
-  /* ===== NARROW ===== */
   @media (max-width: 400px) {
     .pt-banner { padding: 12px 12px 12px 40px; gap: 8px; }
-    .pt-banner.pt-has-bg-image { min-height: 108px; }
     .pt-banner-title { font-size: 13px; }
     .pt-banner-msg { font-size: 11px; line-height: 1.5; }
     .pt-banner-icon { width: 30px; height: 30px; flex: 0 0 30px; font-size: 14px; }
     .pt-banner-side-img { flex: 0 0 48px; width: 48px; height: 48px; }
     .pt-banner-body { flex: 1 1 100px; }
     .pt-banner-cta { padding: 9px 12px; font-size: 11.5px; }
+    .pt-banner.pt-has-bg-image { padding: 12px 12px 12px 38px; gap: 8px; }
+    .pt-banner.pt-has-bg-image .pt-banner-icon {
+      width: 28px; height: 28px; flex: 0 0 28px; font-size: 13px;
+    }
+    .pt-banner.pt-has-bg-image .pt-banner-title { font-size: 13px; }
+    .pt-banner.pt-has-bg-image .pt-banner-msg { font-size: 10.5px; }
+  }
+
+  @media (max-width: 360px) {
+    .pt-banner.pt-has-bg-image .pt-banner-msg {
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {
     .pt-banner, .pt-banner.pt-closing { animation-duration: .01ms; }
+    .pt-banner-progress-fill { animation-duration: .01ms; }
   }
 </style>
 </head>
@@ -730,10 +821,12 @@
 
 <script src="app.js"></script>
 
-<!-- ========== BANNER SCRIPT v19 ========== -->
+<!-- ========== BANNER SCRIPT v22 ========== -->
 <script>
 /* ============================================================
-   PO-TRADE Banner v19 — بهینه، هوشمند، موبایل‌فرندلی
+   PO-TRADE Banner v22
+   - maxVisible از کانفیگ خونده می‌شه، بدون محدودیت خودکار موبایل
+   - اختیاری: settings.mobileMaxVisible / tabletMaxVisible
    ============================================================ */
 (function () {
   'use strict';
@@ -752,9 +845,9 @@
   var STATIC       = 'https://cdn.statically.io/gh/' + OWNER + '/' + REPO + '/';
   var GHACK        = 'https://rawcdn.githack.com/' + OWNER + '/' + REPO + '/';
 
-  var T_REF  = 4000;   // timeout گرفتن SHA
-  var T_FILE = 8000;   // timeout دانلود فایل
-  var CACHE_TTL = 3 * 60 * 1000; // ۳ دقیقه
+  var T_REF  = 4000;
+  var T_FILE = 8000;
+  var CACHE_TTL = 3 * 60 * 1000;
 
   var KEY_SEEN      = 'pt.banner.seen';
   var KEY_DISMISSED = 'pt.banner.dismissed';
@@ -767,8 +860,8 @@
 
   var countedThisLoad = {};
   var currentRef = '';
+  var globalAutoMs = 0;
 
-  /* ---------- helpers ---------- */
   function log(m){ try { console.log('[Banner]', m); } catch(e){} }
   function lsGet(k){ try { return localStorage.getItem(k) || ''; } catch(e){ return ''; } }
   function lsSet(k,v){ try { localStorage.setItem(k,v); } catch(e){} }
@@ -780,18 +873,12 @@
     });
   }
 
-  /* ---------- زبان: با app.js هم‌خوانی ---------- */
   var lang = 'fa';
   try {
     var langStored = localStorage.getItem('po.lang');
     if (langStored === 'en' || langStored === 'fa') lang = langStored;
-    else {
-      var rawP = localStorage.getItem('brain-onboarding');
-      if (rawP) { var p = JSON.parse(rawP); if (p && p.lang) lang = p.lang; }
-    }
   } catch(e){}
 
-  /* ---------- fetch با timeout ---------- */
   function fetchT(url, opts, ms) {
     opts = opts || {};
     var ctrl = ('AbortController' in window) ? new AbortController() : null;
@@ -808,7 +895,6 @@
 
   function isValidSha(s){ return s && /^[0-9a-f]{7,40}$/i.test(s); }
 
-  /* ---------- گرفتن SHA ---------- */
   function getRefFromGitHub() {
     return fetchT(REF_API, {
       cache: 'no-store', mode: 'cors',
@@ -835,13 +921,12 @@
       });
   }
   function getRef() {
-    // موازی: اولین جواب برنده (کوتاه‌ترین زمان)
-    return Promise.any
-      ? Promise.any([getRefFromGitHub(), getRefFromJsDelivr()])
-      : getRefFromGitHub().catch(function(){ return getRefFromJsDelivr(); });
+    if (typeof Promise.any === 'function') {
+      return Promise.any([getRefFromGitHub(), getRefFromJsDelivr()]);
+    }
+    return getRefFromGitHub().catch(function(){ return getRefFromJsDelivr(); });
   }
 
-  /* ---------- منابع دانلود (jsDelivr اول) ---------- */
   function buildSources(ref) {
     var pinned = /^[0-9a-f]{40}$/i.test(ref || '');
     var r = ref || BRANCH;
@@ -877,13 +962,12 @@
               if (settled) return;
               if (!res.txt || res.txt.indexOf('PT_BANNER_CONFIG') === -1) throw new Error('invalid content');
               settled = true;
-              log('✅ ' + s.name + ' → ' + res.txt.length + 'B' + (res.sha ? ' [' + res.sha.slice(0,7) + ']' : ''));
+              log('✅ ' + s.name + ' → ' + res.txt.length + 'B');
               resolve({ text: res.txt, source: s.name, sha: res.sha });
             })
             .catch(function(e){
               if (settled) return;
               errors.push(s.name + ':' + e.message);
-              log('⚠️ ' + s.name + ' fail — ' + e.message);
               if (++failed === sources.length) reject(new Error(errors.join(' | ')));
             });
         }, i * 250);
@@ -895,21 +979,49 @@
     var fakeWindow = {};
     var fn = new Function('window', text + '\nreturn window.PT_BANNER_CONFIG;');
     var cfg = fn(fakeWindow);
-    if (!cfg || !cfg.banners) throw new Error('invalid config structure');
+    if (!cfg || !cfg.banners) throw new Error('invalid config');
     return cfg;
   }
 
-  /* ---------- رندر یک بنر ---------- */
+  function getAutoCloseMs(b) {
+    var v = b.autoClose != null ? b.autoClose
+          : b.duration  != null ? b.duration
+          : b.autoDismiss != null ? b.autoDismiss
+          : globalAutoMs;
+    v = Number(v) || 0;
+    return v > 0 ? v : 0;
+  }
+
+  function closeBanner(el, id, remember) {
+    if (!el || el.classList.contains('pt-closing')) return;
+    if (el.__ptTimers) {
+      el.__ptTimers.forEach(function(t){ clearTimeout(t); });
+      el.__ptTimers = null;
+    }
+    el.classList.add('pt-closing');
+    setTimeout(function(){ el.remove(); }, 340);
+    if (remember && id) {
+      var d = getJSON(KEY_DISMISSED, {});
+      d[id] = Date.now();
+      setJSON(KEY_DISMISSED, d);
+    }
+  }
+
   function renderBanner(b) {
     var el = document.createElement('div');
     el.className = 'pt-banner';
     el.setAttribute('data-id', b.id);
+    el.__ptTimers = [];
 
     var hasImage = b.image && String(b.image).trim();
     var imgPos = b.imagePosition || 'background';
 
     if (hasImage && imgPos === 'background') el.classList.add('pt-has-bg-image');
     else if (hasImage && (imgPos === 'left' || imgPos === 'right')) el.classList.add('pt-has-side-image');
+
+    var size = String(b.size || '').toLowerCase();
+    if (size === 'small' || size === 'sm') el.classList.add('pt-size-sm');
+    else if (size === 'large' || size === 'lg') el.classList.add('pt-size-lg');
 
     if (b.colors && b.colors.border) el.style.borderColor = b.colors.border;
 
@@ -928,6 +1040,9 @@
     var title = (lang === 'en' && b.title_en)   ? b.title_en   : (b.title   || '');
     var msg   = (lang === 'en' && b.message_en) ? b.message_en : (b.message || '');
     var cta   = (lang === 'en' && b.cta_en)     ? b.cta_en     : (b.cta     || '');
+
+    var autoMs = getAutoCloseMs(b);
+    var showProgress = b.showProgress === true && autoMs > 0;
 
     var inner = '';
     if (hasImage && imgPos === 'left') {
@@ -950,33 +1065,100 @@
     if (b.dismissible !== false) {
       inner += '<button class="pt-banner-close" type="button" aria-label="بستن">✕</button>';
     }
+    if (showProgress) {
+      inner += '<div class="pt-banner-progress"><div class="pt-banner-progress-fill" ' +
+               'style="animation-duration:' + autoMs + 'ms"></div></div>';
+    }
 
     el.innerHTML = inner;
 
     var closeBtn = el.querySelector('.pt-banner-close');
     if (closeBtn) {
       closeBtn.addEventListener('click', function(){
-        el.classList.add('pt-closing');
-        setTimeout(function(){ el.remove(); }, 340);
-        var d = getJSON(KEY_DISMISSED, {});
-        d[b.id] = Date.now();
-        setJSON(KEY_DISMISSED, d);
+        closeBanner(el, b.id, true);
       });
     }
 
     host.appendChild(el);
+
+    if (autoMs > 0) {
+      var pauseOnHover = b.pauseOnHover !== false;
+      var fill = el.querySelector('.pt-banner-progress-fill');
+      var remaining = autoMs;
+      var startAt = Date.now();
+      var timerId = null;
+
+      function schedule(ms) {
+        if (timerId) clearTimeout(timerId);
+        timerId = setTimeout(function(){
+          closeBanner(el, b.id, true);
+        }, ms);
+        el.__ptTimers.push(timerId);
+      }
+      function pause() {
+        if (!pauseOnHover) return;
+        if (timerId) clearTimeout(timerId);
+        remaining -= (Date.now() - startAt);
+        if (remaining < 0) remaining = 0;
+        if (fill) {
+          var cur = window.getComputedStyle(fill).transform;
+          fill.style.animation = 'none';
+          fill.style.transform = cur;
+        }
+      }
+      function resume() {
+        if (!pauseOnHover) return;
+        if (remaining <= 0) return;
+        startAt = Date.now();
+        if (fill) {
+          fill.style.animation = 'none';
+          void fill.offsetWidth;
+          fill.style.animation = 'ptProgress ' + remaining + 'ms linear forwards';
+          fill.style.transformOrigin = (document.documentElement.dir === 'ltr') ? 'left center' : 'right center';
+          fill.style.transform = 'scaleX(1)';
+        }
+        schedule(remaining);
+      }
+
+      schedule(autoMs);
+      if (pauseOnHover) {
+        el.addEventListener('mouseenter', pause);
+        el.addEventListener('mouseleave', resume);
+        el.addEventListener('focusin', pause);
+        el.addEventListener('focusout', resume);
+        el.addEventListener('touchstart', pause, { passive: true });
+        el.addEventListener('touchend', resume, { passive: true });
+        el.addEventListener('touchcancel', resume, { passive: true });
+      }
+    }
+
+    return el;
   }
 
-  /* ---------- maxVisible داینامیک ---------- */
-  function dynamicMaxVisible(cfgMax) {
-    var w = window.innerWidth || document.documentElement.clientWidth;
-    var hard = (typeof cfgMax === 'number' && cfgMax > 0) ? cfgMax : 3;
-    if (w <= 640) return Math.min(hard, 1);   // موبایل: فقط ۱ بنر
-    if (w <= 900) return Math.min(hard, 2);   // تبلت: ۲ بنر
-    return hard;
+  /* ✅ v22: maxVisible فقط از کانفیگ، بدون محدودیت خودکار */
+  function getMaxVisible(settings) {
+    settings = settings || {};
+    var w = document.documentElement.clientWidth || window.innerWidth;
+
+    /* اگه کاربر خواست موبایل/تبلت محدود بشه، از کانفیگ می‌خونیم */
+    if (w <= 640 && typeof settings.mobileMaxVisible === 'number' && settings.mobileMaxVisible > 0) {
+      return settings.mobileMaxVisible;
+    }
+    if (w <= 900 && typeof settings.tabletMaxVisible === 'number' && settings.tabletMaxVisible > 0) {
+      return settings.tabletMaxVisible;
+    }
+
+    /* پیش‌فرض: هرچی توی maxVisible هست، روی همه دستگاه‌ها */
+    var v = Number(settings.maxVisible);
+    if (v > 0) return v;
+    return 3;
   }
 
   function renderConfig(config) {
+    if (config.settings && config.settings.autoDismissAfter != null) {
+      globalAutoMs = Number(config.settings.autoDismissAfter) || 0;
+    }
+
     var dismissed = getJSON(KEY_DISMISSED, {});
     var seen = getJSON(KEY_SEEN, {});
 
@@ -993,11 +1175,19 @@
     });
 
     list.sort(function(a,b){ return (b.priority||0) - (a.priority||0); });
-    var max = dynamicMaxVisible(config.settings && config.settings.maxVisible);
+
+    var max = getMaxVisible(config.settings);
     if (max > 0) list = list.slice(0, max);
-    if (!list.length) { log('⚠️ no active banners'); return; }
+
+    log('📋 active: ' + list.length + ' (max=' + max + ')');
+
+    if (!list.length) { log('⚠️ no banners'); return; }
 
     list.forEach(function(b, i){
+      if (host.querySelector('.pt-banner[data-id="' + b.id + '"]')) {
+        log('⏭️ already rendered: ' + b.id);
+        return;
+      }
       setTimeout(function(){
         if (host.querySelector('.pt-banner[data-id="' + b.id + '"]')) return;
         renderBanner(b);
@@ -1011,10 +1201,8 @@
     });
   }
 
-  /* ---------- اعمال کانفیگ ---------- */
-  function applyConfig(text, refToSave, cachedTxt, alreadyRendered) {
-    // محتوا عوض نشده؟ فقط تایم‌استمپ رو آپدیت کن
-    if (alreadyRendered && text === cachedTxt) {
+  function applyConfig(text, refToSave, cachedTxt) {
+    if (text === cachedTxt) {
       log('✅ content unchanged');
       lsSet(KEY_LASTCHECK, String(Date.now()));
       if (refToSave) lsSet(KEY_REF, refToSave);
@@ -1027,8 +1215,7 @@
 
     var oldRef = lsGet(KEY_REF);
     if (refToSave && refToSave !== oldRef && oldRef) {
-      log('🔄 ref changed (' + oldRef.slice(0,7) + ' → ' + refToSave.slice(0,7) + ')');
-      // با تغییر ref، شمارنده‌ها ریست میشن
+      log('🔄 ref changed');
       var seen = getJSON(KEY_SEEN, {});
       (cfg.banners || []).forEach(function(b){ if (b && b.id) seen[b.id] = 0; });
       setJSON(KEY_SEEN, seen);
@@ -1039,35 +1226,53 @@
     if (refToSave) lsSet(KEY_REF, refToSave);
     lsSet(KEY_LASTCHECK, String(Date.now()));
 
-    if (alreadyRendered) host.innerHTML = '';
     renderConfig(cfg);
-    log('🏁 rendered');
+    log('🏁 applied');
   }
 
-  /* ---------- دانلود + اعمال ---------- */
-  function fetchLatest(cachedTxt, alreadyRendered, cachedRef) {
+  function fetchLatest(cachedTxt, cachedRef) {
     getRef()
       .then(function(ref){
         currentRef = ref;
         log('🔎 ref: ' + ref.slice(0,7));
-        if (alreadyRendered && ref === cachedRef && cachedTxt) {
+        if (ref === cachedRef && cachedTxt) {
           log('✅ ref unchanged — skip download');
           lsSet(KEY_LASTCHECK, String(Date.now()));
           return;
         }
         downloadConfig(ref)
-          .then(function(res){ applyConfig(res.text, res.sha || ref, cachedTxt, alreadyRendered); })
+          .then(function(res){ applyConfig(res.text, res.sha || ref, cachedTxt); })
           .catch(function(e){ log('❌ download failed: ' + e.message); });
       })
       .catch(function(e){
-        log('⚠️ ref unavailable (' + e.message + ') — direct download');
+        log('⚠️ ref unavailable — direct download');
         downloadConfig(null)
-          .then(function(res){ applyConfig(res.text, res.sha, cachedTxt, alreadyRendered); })
+          .then(function(res){ applyConfig(res.text, res.sha, cachedTxt); })
           .catch(function(e2){ log('❌ download failed: ' + e2.message); });
       });
   }
 
-  /* ---------- INIT ---------- */
+  function isLoaderVisible() {
+    var l = document.getElementById('loader');
+    if (!l) return false;
+    var s = window.getComputedStyle(l);
+    if (s.display === 'none') return false;
+    if (s.visibility === 'hidden') return false;
+    if (parseFloat(s.opacity || '1') < 0.05) return false;
+    return true;
+  }
+
+  function whenLoaderHidden(cb) {
+    if (!isLoaderVisible()) return cb();
+    var check = setInterval(function(){
+      if (!isLoaderVisible()) {
+        clearInterval(check);
+        cb();
+      }
+    }, 150);
+    setTimeout(function(){ clearInterval(check); cb(); }, 6000);
+  }
+
   function init() {
     countedThisLoad = {};
     host.innerHTML = '';
@@ -1079,39 +1284,35 @@
     var fresh = lastCheck > 0 && (Date.now() - lastCheck < CACHE_TTL);
     var alreadyRendered = false;
 
-    // ۱) رندر فوری از کش
-    if (cachedTxt) {
-      try {
-        renderConfig(parseConfig(cachedTxt));
-        alreadyRendered = true;
-        log('📦 cache rendered');
-      } catch (e) {
-        log('⚠️ bad cache: ' + e.message);
-        lsSet(KEY_TXT, '');
+    whenLoaderHidden(function(){
+      if (cachedTxt) {
+        try {
+          renderConfig(parseConfig(cachedTxt));
+          alreadyRendered = true;
+          log('📦 cache rendered');
+        } catch (e) {
+          log('⚠️ bad cache: ' + e.message);
+          lsSet(KEY_TXT, '');
+        }
       }
-    }
 
-    // ۲) اسکلتون
-    if (!alreadyRendered) host.innerHTML = '<div class="pt-banner-skeleton"></div>';
+      if (!alreadyRendered) host.innerHTML = '<div class="pt-banner-skeleton"></div>';
 
-    // ۳) آفلاین؟ فقط کش
-    if (!navigator.onLine) {
-      log('📴 offline — cache only');
-      if (!alreadyRendered) host.innerHTML = '';
-      return;
-    }
+      if (!navigator.onLine) {
+        log('📴 offline');
+        if (!alreadyRendered) host.innerHTML = '';
+        return;
+      }
 
-    // ۴) کش تازه و رندر شده؟ پرش کن
-    if (fresh && alreadyRendered) {
-      log('✅ cache fresh — skip network');
-      return;
-    }
+      if (fresh && alreadyRendered) {
+        log('✅ cache fresh — skip network');
+        return;
+      }
 
-    // ۵) وگرنه آپدیت کن
-    fetchLatest(cachedTxt, alreadyRendered, cachedRef);
+      fetchLatest(cachedTxt, cachedRef);
+    });
   }
 
-  /* ---------- API عمومی ---------- */
   window.PT_Banner = {
     reload: init,
     ref: function(){ return currentRef; },
@@ -1122,22 +1323,6 @@
       init();
     }
   };
-
-  // واکنش‌گرایی: تغییر سایز → شاید تعداد بنرها رو محدود کنه
-  var resizeTimer;
-  window.addEventListener('resize', function(){
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(function(){
-      // اگه موبایل شد و بیش از ۱ بنر نشون داده بود، اضافی‌ها رو پاک کن
-      var w = window.innerWidth;
-      var banners = host.querySelectorAll('.pt-banner');
-      var max = w <= 640 ? 1 : w <= 900 ? 2 : 3;
-      for (var i = max; i < banners.length; i++) {
-        banners[i].classList.add('pt-closing');
-        (function(el){ setTimeout(function(){ el.remove(); }, 340); })(banners[i]);
-      }
-    }, 200);
-  }, { passive: true });
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
