@@ -1,6 +1,6 @@
 /* ============================================================
    PO-TRADE Banner Config
-   آخرین بروزرسانی: 2026-09-18
+   آخرین بروزرسانی: 2026-09-19
    ============================================================ */
 
 window.PT_BANNER_CONFIG = {
@@ -43,7 +43,7 @@ window.PT_BANNER_CONFIG = {
       priority: 5,
       maxShows: 5,
       icon: "💎",
-      title: "تحلیل روزانه طلا",
+      title: "تحلیل روزانه طلااااااااا",
       title_en: "Daily Gold Analysis",
       message: "هر روز تحلیل XAUUSD رایگان دریافت کن — سیگنال‌های دقیق و به‌روز",
       message_en: "Get free XAUUSD analysis daily — precise and up-to-date signals",
