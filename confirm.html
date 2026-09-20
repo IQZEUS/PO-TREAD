@@ -101,6 +101,9 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const $ = id => document.getElementById(id);
 
+/* ============ مهم: نام فایل اصلی = index.html (حروف کوچک) ============ */
+const MAIN_PAGE = 'index.html';
+
 function setStatus(type, text, icon){
   $('status').className = 'status ' + type;
   $('statusText').textContent = text;
@@ -159,7 +162,7 @@ async function handleConfirmed(user){
   const existingName = user.user_metadata && user.user_metadata.full_name;
   if (existingName && existingName.trim()) {
     setStatus('success', 'خوش آمدی ' + existingName + '! در حال ورود…', '✅');
-    setTimeout(() => window.location.href = 'INDEX.html', 1200);
+    setTimeout(() => window.location.href = MAIN_PAGE, 1200);
     return;
   }
 
@@ -198,7 +201,7 @@ $('nameForm').addEventListener('submit', async (e) => {
       $('sec').textContent = sec;
       if (sec <= 0) {
         clearInterval(timer);
-        window.location.href = 'INDEX.html';
+        window.location.href = MAIN_PAGE;
       }
     }, 1000);
   } catch (err) {
@@ -208,7 +211,7 @@ $('nameForm').addEventListener('submit', async (e) => {
 });
 
 $('skipBtn').addEventListener('click', () => {
-  window.location.href = 'INDEX.html';
+  window.location.href = MAIN_PAGE;
 });
 </script>
 </body>
