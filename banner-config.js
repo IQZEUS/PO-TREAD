@@ -1,6 +1,6 @@
 /* ============================================================
    PO-TRADE Banner Config
-   آخرین بروزرسانی: 2026-09-19
+   آخرین بروزرسانی: 2026-09-20
    ============================================================ */
 
 window.PT_BANNER_CONFIG = {
@@ -19,7 +19,7 @@ window.PT_BANNER_CONFIG = {
       priority: 10,
       maxShows: 2,
       icon: "🎉",
-      title: "نسخه جدید منتشر شد!",
+      title: "نسخه جدید منتشر شد!!!",
       title_en: "New version released!",
       message: "قابلیت‌های جدید: تحلیل احساسات، تقویم پیشرفته و مودال زیبا",
       message_en: "New features: emotion analysis, advanced calendar and beautiful modal",
@@ -27,7 +27,7 @@ window.PT_BANNER_CONFIG = {
       cta_en: "See what's new",
       ctaUrl: "https://github.com/IQZEUS/PO-TREAD/releases",
       image: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&h=400&fit=crop",
-      dismissible: false,
+      dismissible: true,
       size: "large",
       colors: {
         border: "rgba(214, 163, 92, 0.5)",
