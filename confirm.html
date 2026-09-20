@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>خوش آمدی | PO-TRADE</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800;900&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{background:#03040a;color:#eef3ff;font-family:'Vazirmatn',system-ui,Tahoma,sans-serif;min-height:100vh;display:grid;place-items:center;padding:20px;position:relative;overflow-x:hidden}
+.bg{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.orb{position:absolute;border-radius:50%;filter:blur(90px);opacity:.55;animation:orbFloat 20s ease-in-out infinite}
+.orb-a{width:520px;height:520px;background:radial-gradient(circle,#2ee6a6 0%,transparent 70%);top:-200px;right:-160px}
+.orb-b{width:560px;height:560px;background:radial-gradient(circle,#5b8cff 0%,transparent 70%);bottom:-240px;left:-180px;animation-delay:-7s}
+.orb-c{width:420px;height:420px;background:radial-gradient(circle,#ff5fa2 0%,transparent 70%);top:35%;left:45%;opacity:.25;animation-delay:-13s}
+@keyframes orbFloat{0%,100%{transform:translate3d(0,0,0) scale(1)}33%{transform:translate3d(40px,-30px,0) scale(1.08)}66%{transform:translate3d(-30px,30px,0) scale(.94)}}
+.grid-overlay{position:absolute;inset:0;background-image:linear-gradient(rgba(120,150,200,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(120,150,200,.05) 1px,transparent 1px);background-size:48px 48px;mask-image:radial-gradient(ellipse at center,#000 20%,transparent 75%);-webkit-mask-image:radial-gradient(ellipse at center,#000 20%,transparent 75%)}
+.card{
+  position:relative;z-index:1;width:100%;max-width:480px;
+  background:linear-gradient(160deg,rgba(20,29,51,.85),rgba(15,23,42,.95));
+  border:1px solid rgba(120,150,200,.2);border-radius:28px;
+  padding:44px 34px 34px;backdrop-filter:blur(30px) saturate(150%);
+  box-shadow:0 50px 100px -30px rgba(0,0,0,.95);
+  text-align:center;animation:cardIn .8s cubic-bezier(.2,.9,.3,1.1) both;
+}
+@keyframes cardIn{from{opacity:0;transform:translateY(30px) scale(.94)}to{opacity:1;transform:none}}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#2ee6a6,#5b8cff,#ff5fa2);border-radius:28px 28px 0 0}
+.icon-wrap{position:relative;display:inline-block;margin-bottom:24px}
+.icon{
+  position:relative;z-index:2;width:90px;height:90px;border-radius:26px;
+  display:grid;place-items:center;font-size:44px;
+  background:linear-gradient(135deg,rgba(46,230,166,.2),rgba(91,140,255,.2));
+  border:1.5px solid rgba(46,230,166,.4);
+  animation:iconBounce 3s ease-in-out infinite;
+}
+@keyframes iconBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.icon-wrap::before{
+  content:'';position:absolute;inset:-14px;border-radius:50%;
+  background:conic-gradient(from 0deg,transparent 0deg,#2ee6a6 90deg,transparent 180deg,#5b8cff 270deg,transparent 360deg);
+  animation:spin 4s linear infinite;filter:blur(10px);opacity:.7;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+h1{font-size:24px;font-weight:900;margin-bottom:12px;background:linear-gradient(90deg,#eef3ff,#2ee6a6 60%,#5b8cff);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+p{font-size:14px;color:#8697b8;line-height:1.8;margin-bottom:10px}
+.email-box{display:inline-block;padding:10px 18px;border-radius:12px;background:rgba(46,230,166,.1);border:1px solid rgba(46,230,166,.3);color:#2ee6a6;font-family:monospace;font-size:13px;margin:14px 0 24px;direction:ltr;word-break:break-all}
+.status{display:flex;align-items:center;justify-content:center;gap:10px;padding:14px 18px;border-radius:14px;font-size:13px;font-weight:700;margin-bottom:18px;animation:statusIn .5s ease}
+.status.loading{background:rgba(91,140,255,.1);color:#93b2ff;border:1px solid rgba(91,140,255,.3)}
+.status.success{background:rgba(46,230,166,.1);color:#2ee6a6;border:1px solid rgba(46,230,166,.3)}
+.status.error{background:rgba(255,86,116,.1);color:#ff95a8;border:1px solid rgba(255,86,116,.3)}
+@keyframes statusIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+.spinner{width:16px;height:16px;border:2.5px solid rgba(91,140,255,.25);border-top-color:#93b2ff;border-radius:50%;animation:spin .7s linear infinite}
+.name-form{display:none;margin-top:24px;animation:fieldIn .5s ease}
+.name-form.show{display:block}
+@keyframes fieldIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.name-field{display:flex;flex-direction:column;gap:10px;text-align:right;margin-bottom:18px}
+.name-field label{font-size:13px;font-weight:700;color:#c7d3ea}
+.name-input-wrap{position:relative;display:flex;align-items:center}
+.name-input-wrap .ico{position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:16px;opacity:.55}
+input[type=text]{width:100%;background:rgba(255,255,255,.04);border:1.5px solid rgba(120,150,200,.2);color:#eef3ff;font:inherit;font-size:15px;padding:15px 46px;border-radius:14px;outline:none;transition:all .3s;font-family:inherit;text-align:right}
+input[type=text]:focus{border-color:rgba(46,230,166,.7);background:rgba(46,230,166,.06);box-shadow:0 0 0 4px rgba(46,230,166,.15),0 0 30px -5px rgba(46,230,166,.6)}
+input::placeholder{color:#6a7a95;opacity:.7}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:15px 28px;border-radius:14px;border:0;background:linear-gradient(135deg,#2ee6a6,#12b57f);color:#04170f;font:inherit;font-size:14.5px;font-weight:900;cursor:pointer;text-decoration:none;box-shadow:0 15px 40px -12px rgba(46,230,166,.7);transition:transform .2s,box-shadow .2s;width:100%}
+.btn:hover{transform:translateY(-2px);box-shadow:0 22px 50px -12px rgba(46,230,166,.9)}
+.btn:disabled{opacity:.7;cursor:not-allowed;transform:none}
+.btn .spinner{width:16px;height:16px;border:2.5px solid rgba(4,23,15,.25);border-top-color:#04170f;border-radius:50%;animation:spin .7s linear infinite;display:none}
+.btn.loading .spinner{display:block}
+.countdown{font-size:13px;color:#8697b8;margin-top:16px}
+.countdown strong{color:#2ee6a6;font-size:16px}
+.skip-link{display:inline-block;margin-top:14px;font-size:12px;color:#6a7a95;cursor:pointer;text-decoration:underline}
+.skip-link:hover{color:#eef3ff}
+</style>
+</head>
+<body>
+
+<div class="bg">
+  <div class="orb orb-a"></div>
+  <div class="orb orb-b"></div>
+  <div class="orb orb-c"></div>
+  <div class="grid-overlay"></div>
+</div>
+
+<div class="card">
+  <div class="icon-wrap"><div class="icon" id="icon">📧</div></div>
+  <h1 id="title">در حال تأیید ایمیل…</h1>
+  <p id="subtitle">لطفاً کمی صبر کن</p>
+  <div class="email-box" id="emailBox" style="display:none"></div>
+  <div class="status loading" id="status">
+    <span class="spinner"></span>
+    <span id="statusText">در حال بررسی لینک تأیید…</span>
+  </div>
+
+  <!-- فرم اسم -->
+  <form class="name-form" id="nameForm">
+    <div class="name-field">
+      <label>👋 اسمت چیه؟</label>
+      <div class="name-input-wrap">
+        <span class="ico">✏️</span>
+        <input type="text" id="nameInput" placeholder="مثلاً امیرحسین" required maxlength="40" autocomplete="name">
+      </div>
+      <p style="font-size:11.5px;color:#6a7a95;text-align:right;margin:0">این اسم توی پنل حساب کاربریت نشون داده می‌شه</p>
+    </div>
+    <button type="submit" class="btn" id="btnSave">
+      <span class="spinner"></span>
+      <span>💾 ذخیره و ورود به سایت</span>
+    </button>
+    <a class="skip-link" id="skipBtn">فعلاً رد کن ←</a>
+  </form>
+
+  <div class="countdown" id="countdown" style="display:none">
+    ورود خودکار در <strong id="sec">3</strong> ثانیه…
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = 'https://rodguhcuatixdbzwjfvy.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_2ET2dFjJNvBLWyfQXVZsag_7WcaHLLA';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const $ = id => document.getElementById(id);
+
+function setStatus(type, text, icon){
+  $('status').className = 'status ' + type;
+  $('statusText').textContent = text;
+  if (icon) $('icon').textContent = icon;
+}
+
+(async function init(){
+  try {
+    // چک کردن پارامترهای خطا در URL
+    const hash = window.location.hash.substring(1);
+    const params = new URLSearchParams(hash);
+    if (params.get('error_code') === 'otp_expired') {
+      setStatus('error', 'لینک تأیید منقضی شده. لطفاً دوباره ثبت‌نام کن.', '⏰');
+      $('title').textContent = 'لینک منقضی شده';
+      $('subtitle').textContent = 'این لینک قبلاً استفاده شده یا منقضی شده.';
+      window.history.replaceState(null, '', window.location.pathname);
+      setTimeout(() => window.location.href = 'auth.html', 4000);
+      return;
+    }
+
+    // چک کردن session فعلی
+    const { data: { session }, error } = await sb.auth.getSession();
+    if (error) throw error;
+
+    if (session && session.user) {
+      await handleConfirmed(session.user);
+    } else {
+      // چند بار چک کن — Supabase ممکنه دیر session بسازه
+      let attempts = 0;
+      const maxAttempts = 12;
+      const check = setInterval(async () => {
+        attempts++;
+        const { data } = await sb.auth.getSession();
+        if (data && data.session && data.session.user) {
+          clearInterval(check);
+          await handleConfirmed(data.session.user);
+        } else if (attempts >= maxAttempts) {
+          clearInterval(check);
+          setStatus('error', 'ایمیل تأیید نشد. لطفاً دوباره از صفحه ورود تلاش کن.', '❌');
+          $('title').textContent = 'تأیید ناموفق';
+          $('subtitle').innerHTML = 'اگه ایمیل تأیید دریافت نکردی، از صفحه ورود دکمه «فراموشی رمز» رو بزن یا دوباره ثبت‌نام کن.';
+          setTimeout(() => window.location.href = 'auth.html', 5000);
+        }
+      }, 500);
+    }
+  } catch (err) {
+    console.error(err);
+    setStatus('error', 'خطایی رخ داد: ' + err.message, '❌');
+    setTimeout(() => window.location.href = 'auth.html', 4000);
+  }
+})();
+
+async function handleConfirmed(user){
+  $('title').textContent = '🎉 خوش آمدی!';
+  $('subtitle').textContent = 'ایمیلت با موفقیت تأیید شد';
+  $('emailBox').style.display = 'inline-block';
+  $('emailBox').textContent = user.email;
+
+  // چک کن اگه اسم قبلاً ذخیره شده
+  const existingName = user.user_metadata && user.user_metadata.full_name;
+  if (existingName && existingName.trim()) {
+    // اسم قبلاً ذخیره شده — مستقیم برو
+    setStatus('success', 'خوش آمدی ' + existingName + '! در حال ورود…', '✅');
+    setTimeout(() => window.location.href = 'INDEX.html', 1200);
+    return;
+  }
+
+  // فرم اسم رو نشون بده
+  setStatus('success', 'برای ادامه اسمت رو وارد کن', '✨');
+  $('nameForm').classList.add('show');
+  setTimeout(() => $('nameInput').focus(), 300);
+}
+
+/* ============ SAVE NAME ============ */
+$('nameForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const name = $('nameInput').value.trim();
+  if (!name || name.length < 2) {
+    $('nameInput').focus();
+    $('nameInput').style.borderColor = 'rgba(255,86,116,.6)';
+    setTimeout(() => $('nameInput').style.borderColor = '', 600);
+    return;
+  }
+
+  const btn = $('btnSave');
+  btn.classList.add('loading'); btn.disabled = true;
+
+  try {
+    const { error } = await sb.auth.updateUser({
+      data: { full_name: name }
+    });
+    if (error) throw error;
+
+    setStatus('success', 'خوش آمدی ' + name + '! در حال ورود…', '✅');
+    $('nameForm').classList.remove('show');
+
+    let sec = 2;
+    $('countdown').style.display = 'block';
+    $('sec').textContent = sec;
+    const timer = setInterval(() => {
+      sec--;
+      $('sec').textContent = sec;
+      if (sec <= 0) {
+        clearInterval(timer);
+        window.location.href = 'INDEX.html';
+      }
+    }, 1000);
+  } catch (err) {
+    btn.classList.remove('loading'); btn.disabled = false;
+    setStatus('error', 'خطا در ذخیره اسم: ' + err.message, '❌');
+  }
+});
+
+/* ============ SKIP ============ */
+$('skipBtn').addEventListener('click', () => {
+  window.location.href = 'INDEX.html';
+});
+</script>
+</body>
+</html>
