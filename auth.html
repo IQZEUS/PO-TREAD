@@ -6,73 +6,686 @@
 <title>ورود | PO-TRADE</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800;900&display=swap');
-*{margin:0;padding:0;box-sizing:border-box}
-html,body{height:100%}
-body{background:#05070f;color:#eef3ff;font-family:'Vazirmatn',system-ui,Tahoma,sans-serif;min-height:100vh;display:grid;place-items:center;padding:20px}
-.bg{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
-.orb{position:absolute;border-radius:50%;filter:blur(100px);opacity:.45;animation:float 22s ease-in-out infinite}
-.orb-a{width:460px;height:460px;background:radial-gradient(circle,#2ee6a6 0%,transparent 70%);top:-160px;right:-140px}
-.orb-b{width:500px;height:500px;background:radial-gradient(circle,#5b8cff 0%,transparent 70%);bottom:-200px;left:-160px;animation-delay:-7s}
-.orb-c{width:380px;height:380px;background:radial-gradient(circle,#ff5fa2 0%,transparent 70%);top:30%;left:40%;opacity:.22;animation-delay:-13s}
-@keyframes float{0%,100%{transform:translate3d(0,0,0)}33%{transform:translate3d(30px,-20px,0)}66%{transform:translate3d(-20px,20px,0)}}
-.auth-wrap{position:relative;z-index:1;width:100%;max-width:440px}
-.auth-card{background:linear-gradient(160deg,rgba(20,29,51,.85),rgba(15,23,42,.95));border:1px solid rgba(120,150,200,.18);border-radius:26px;padding:36px 32px 30px;backdrop-filter:blur(26px);box-shadow:0 40px 90px -30px rgba(0,0,0,.9);position:relative;overflow:hidden}
-.auth-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#2ee6a6,#5b8cff,#ff5fa2);border-radius:26px 26px 0 0}
-.brand{display:flex;flex-direction:column;align-items:center;gap:12px;margin-bottom:24px}
-.brand-logo{width:68px;height:68px;display:grid;place-items:center;border-radius:20px;font-size:32px;background:linear-gradient(135deg,rgba(46,230,166,.2),rgba(91,140,255,.2));border:1.5px solid rgba(46,230,166,.4)}
-.brand-title{font-size:24px;font-weight:900;background:linear-gradient(90deg,#eef3ff,#2ee6a6 60%,#5b8cff);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;direction:ltr}
-.brand-sub{font-size:12px;color:#8697b8}
-.tabs{display:flex;gap:4px;padding:4px;background:rgba(255,255,255,.03);border:1px solid rgba(120,150,200,.14);border-radius:14px;margin-bottom:20px}
-.tab-btn{flex:1;padding:11px;border-radius:10px;border:0;background:transparent;color:#8697b8;font:inherit;font-size:13px;font-weight:800;cursor:pointer}
-.tab-btn.active{background:linear-gradient(135deg,rgba(46,230,166,.2),rgba(91,140,255,.15));color:#eef3ff}
-.form{display:flex;flex-direction:column;gap:14px}
-.field{display:flex;flex-direction:column;gap:7px}
-.field label{font-size:12.5px;font-weight:700;color:#c7d3ea}
-.input-wrap{position:relative;display:flex;align-items:center}
-.input-wrap .ico{position:absolute;right:15px;top:50%;transform:translateY(-50%);font-size:15px;opacity:.55}
-input[type=email],input[type=password]{width:100%;background:rgba(255,255,255,.04);border:1.5px solid rgba(120,150,200,.2);color:#eef3ff;font:inherit;font-size:14.5px;padding:14px 44px;border-radius:13px;outline:none;font-family:inherit}
+
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden}
+
+body{
+  background:#03040a;
+  color:#eef3ff;
+  font-family:'Vazirmatn',system-ui,Tahoma,sans-serif;
+  min-height:100vh;
+  display:grid;
+  place-items:center;
+  padding:20px;
+  position:relative;
+}
+
+/* =========================================================
+   ANIMATED BACKGROUND
+   ========================================================= */
+.bg{
+  position:fixed;inset:0;z-index:0;
+  overflow:hidden;pointer-events:none;
+}
+
+/* Orbs شناور */
+.orb{
+  position:absolute;
+  border-radius:50%;
+  filter:blur(90px);
+  opacity:.55;
+  animation:orbFloat 20s ease-in-out infinite;
+  will-change:transform;
+}
+.orb-a{
+  width:520px;height:520px;
+  background:radial-gradient(circle,#2ee6a6 0%,transparent 70%);
+  top:-200px;right:-160px;
+  animation-delay:0s;
+}
+.orb-b{
+  width:560px;height:560px;
+  background:radial-gradient(circle,#5b8cff 0%,transparent 70%);
+  bottom:-240px;left:-180px;
+  animation-delay:-7s;
+}
+.orb-c{
+  width:420px;height:420px;
+  background:radial-gradient(circle,#ff5fa2 0%,transparent 70%);
+  top:35%;left:45%;
+  opacity:.32;
+  animation-delay:-13s;
+}
+.orb-d{
+  width:340px;height:340px;
+  background:radial-gradient(circle,#c78aff 0%,transparent 70%);
+  top:10%;left:15%;
+  opacity:.28;
+  animation-delay:-4s;
+}
+@keyframes orbFloat{
+  0%,100%{transform:translate3d(0,0,0) scale(1)}
+  33%{transform:translate3d(40px,-30px,0) scale(1.08)}
+  66%{transform:translate3d(-30px,30px,0) scale(.94)}
+}
+
+/* Grid متحرک */
+.grid-overlay{
+  position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(120,150,200,.05) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(120,150,200,.05) 1px,transparent 1px);
+  background-size:48px 48px;
+  mask-image:radial-gradient(ellipse at center,#000 20%,transparent 75%);
+  -webkit-mask-image:radial-gradient(ellipse at center,#000 20%,transparent 75%);
+  animation:gridShift 30s linear infinite;
+}
+@keyframes gridShift{
+  0%{background-position:0 0,0 0}
+  100%{background-position:48px 48px,48px 48px}
+}
+
+/* خطوط نور متحرک */
+.beam{
+  position:absolute;
+  width:2px;height:200%;
+  background:linear-gradient(180deg,
+    transparent 0%,
+    rgba(46,230,166,.4) 50%,
+    transparent 100%);
+  filter:blur(2px);
+  opacity:.4;
+  animation:beamMove 8s linear infinite;
+}
+.beam-1{left:15%;animation-delay:0s}
+.beam-2{left:50%;animation-delay:2s;
+  background:linear-gradient(180deg,
+    transparent 0%,
+    rgba(91,140,255,.5) 50%,
+    transparent 100%);
+}
+.beam-3{left:85%;animation-delay:4s;
+  background:linear-gradient(180deg,
+    transparent 0%,
+    rgba(255,95,162,.4) 50%,
+    transparent 100%);
+}
+@keyframes beamMove{
+  0%{transform:translateY(-100%) rotate(15deg);opacity:0}
+  20%{opacity:.5}
+  80%{opacity:.5}
+  100%{transform:translateY(100%) rotate(15deg);opacity:0}
+}
+
+/* ذرات شناور */
+.particle{
+  position:absolute;
+  width:3px;height:3px;
+  background:#2ee6a6;
+  border-radius:50%;
+  box-shadow:0 0 8px currentColor;
+  opacity:0;
+  animation:particleFloat linear infinite;
+}
+@keyframes particleFloat{
+  0%{transform:translateY(100vh) scale(0);opacity:0}
+  10%{opacity:1}
+  90%{opacity:1}
+  100%{transform:translateY(-100px) scale(1);opacity:0}
+}
+
+/* =========================================================
+   LOGIN CARD
+   ========================================================= */
+.auth-wrap{
+  position:relative;
+  z-index:1;
+  width:100%;
+  max-width:460px;
+  animation:cardEntrance .9s cubic-bezier(.2,.9,.3,1.1) both;
+}
+@keyframes cardEntrance{
+  from{opacity:0;transform:translateY(40px) scale(.92);filter:blur(10px)}
+  to{opacity:1;transform:none;filter:blur(0)}
+}
+
+.auth-card{
+  position:relative;
+  background:
+    linear-gradient(160deg,
+      rgba(20,29,51,.75) 0%,
+      rgba(15,23,42,.9) 100%);
+  border:1px solid rgba(120,150,200,.2);
+  border-radius:28px;
+  padding:40px 34px 34px;
+  backdrop-filter:blur(30px) saturate(150%);
+  -webkit-backdrop-filter:blur(30px) saturate(150%);
+  box-shadow:
+    0 50px 100px -30px rgba(0,0,0,.95),
+    0 0 0 1px rgba(120,150,200,.08) inset,
+    0 1px 0 rgba(255,255,255,.06) inset;
+  overflow:hidden;
+}
+
+/* نوار گرادیانت بالای کارت */
+.auth-card::before{
+  content:'';
+  position:absolute;
+  top:0;left:0;right:0;height:5px;
+  background:linear-gradient(90deg,
+    #2ee6a6 0%,
+    #5b8cff 33%,
+    #c78aff 66%,
+    #ff5fa2 100%);
+  background-size:200% 100%;
+  animation:barShimmer 4s linear infinite;
+  border-radius:28px 28px 0 0;
+}
+@keyframes barShimmer{
+  0%{background-position:0% 0}
+  100%{background-position:200% 0}
+}
+
+/* نور داخل کارت */
+.auth-card::after{
+  content:'';
+  position:absolute;
+  top:-30%;right:-20%;
+  width:340px;height:340px;
+  background:radial-gradient(circle,
+    rgba(46,230,166,.22) 0%,
+    transparent 70%);
+  pointer-events:none;
+  animation:glowPulse 5s ease-in-out infinite;
+}
+@keyframes glowPulse{
+  0%,100%{opacity:.6;transform:scale(1)}
+  50%{opacity:1;transform:scale(1.15)}
+}
+
+/* =========================================================
+   BRAND
+   ========================================================= */
+.brand{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:16px;
+  margin-bottom:30px;
+  position:relative;
+  z-index:1;
+}
+
+.brand-logo-wrap{
+  position:relative;
+  display:inline-block;
+}
+
+/* هاله چرخان دور لوگو */
+.brand-logo-wrap::before{
+  content:'';
+  position:absolute;
+  inset:-12px;
+  border-radius:50%;
+  background:conic-gradient(from 0deg,
+    transparent 0deg,
+    #2ee6a6 90deg,
+    transparent 180deg,
+    #5b8cff 270deg,
+    transparent 360deg);
+  animation:haloSpin 6s linear infinite;
+  opacity:.8;
+  filter:blur(8px);
+}
+@keyframes haloSpin{
+  to{transform:rotate(360deg)}
+}
+
+.brand-logo{
+  position:relative;
+  width:80px;
+  height:80px;
+  display:grid;
+  place-items:center;
+  border-radius:24px;
+  font-size:38px;
+  background:
+    linear-gradient(135deg,
+      rgba(46,230,166,.25) 0%,
+      rgba(91,140,255,.25) 100%);
+  border:1.5px solid rgba(46,230,166,.5);
+  box-shadow:
+    0 20px 50px -15px rgba(46,230,166,.7),
+    0 0 0 8px rgba(46,230,166,.06),
+    0 0 0 16px rgba(46,230,166,.03);
+  animation:logoBounce 4s ease-in-out infinite;
+  backdrop-filter:blur(10px);
+  z-index:2;
+}
+@keyframes logoBounce{
+  0%,100%{transform:translateY(0) rotate(0deg)}
+  50%{transform:translateY(-6px) rotate(-2deg)}
+}
+
+.brand-title{
+  font-size:30px;
+  font-weight:900;
+  letter-spacing:1.5px;
+  background:linear-gradient(90deg,
+    #eef3ff 0%,
+    #2ee6a6 40%,
+    #5b8cff 80%,
+    #eef3ff 100%);
+  background-size:200% auto;
+  -webkit-background-clip:text;
+  background-clip:text;
+  -webkit-text-fill-color:transparent;
+  direction:ltr;
+  animation:titleShine 4s linear infinite;
+  text-align:center;
+}
+@keyframes titleShine{
+  to{background-position:200% center}
+}
+
+.brand-sub{
+  font-size:12.5px;
+  color:#8697b8;
+  text-align:center;
+  letter-spacing:.3px;
+}
+
+/* =========================================================
+   TABS
+   ========================================================= */
+.tabs{
+  position:relative;
+  display:flex;
+  gap:4px;
+  padding:5px;
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(120,150,200,.16);
+  border-radius:16px;
+  margin-bottom:24px;
+  z-index:1;
+  overflow:hidden;
+}
+.tabs::before{
+  content:'';
+  position:absolute;
+  top:5px;bottom:5px;
+  width:calc(50% - 7px);
+  background:linear-gradient(135deg,
+    rgba(46,230,166,.25) 0%,
+    rgba(91,140,255,.2) 100%);
+  border-radius:12px;
+  transition:transform .35s cubic-bezier(.2,.9,.3,1.1);
+  box-shadow:
+    0 6px 20px -8px rgba(46,230,166,.6),
+    inset 0 0 0 1px rgba(46,230,166,.3);
+  z-index:0;
+  right:5px;
+}
+.tabs.signup-mode::before{
+  transform:translateX(-100%);
+  margin-right:calc(100% - 10px);
+}
+.tab-btn{
+  position:relative;
+  flex:1;
+  padding:13px;
+  border-radius:12px;
+  border:0;
+  background:transparent;
+  color:#8697b8;
+  font:inherit;
+  font-size:13.5px;
+  font-weight:800;
+  cursor:pointer;
+  transition:color .25s;
+  z-index:1;
+}
+.tab-btn.active{color:#eef3ff}
+
+/* =========================================================
+   FORM
+   ========================================================= */
+.form{
+  position:relative;
+  z-index:1;
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+}
+
+.field{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  animation:fieldIn .5s ease backwards;
+}
+.field:nth-child(1){animation-delay:.1s}
+.field:nth-child(2){animation-delay:.15s}
+.field:nth-child(3){animation-delay:.2s}
+@keyframes fieldIn{
+  from{opacity:0;transform:translateX(20px)}
+  to{opacity:1;transform:none}
+}
+
+.field label{
+  font-size:12.5px;
+  font-weight:700;
+  color:#c7d3ea;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  letter-spacing:.2px;
+}
+
+.input-wrap{
+  position:relative;
+  display:flex;
+  align-items:center;
+}
+
+.input-wrap .ico{
+  position:absolute;
+  right:16px;
+  top:50%;
+  transform:translateY(-50%);
+  font-size:16px;
+  opacity:.55;
+  transition:opacity .25s, transform .25s;
+  pointer-events:none;
+}
+.input-wrap:focus-within .ico{
+  opacity:1;
+  transform:translateY(-50%) scale(1.15);
+}
+
+input[type=email],input[type=password]{
+  width:100%;
+  background:rgba(255,255,255,.04);
+  border:1.5px solid rgba(120,150,200,.2);
+  color:#eef3ff;
+  font:inherit;
+  font-size:14.5px;
+  padding:15px 46px;
+  border-radius:14px;
+  outline:none;
+  transition:all .3s cubic-bezier(.2,.9,.3,1.05);
+  font-family:inherit;
+}
 input[type=email]{direction:ltr}
-input:focus{border-color:rgba(46,230,166,.6);background:rgba(46,230,166,.06);box-shadow:0 0 0 4px rgba(46,230,166,.15)}
-.toggle-pass{position:absolute;left:7px;top:50%;transform:translateY(-50%);width:36px;height:36px;border:0;background:transparent;color:#8697b8;font-size:14px;cursor:pointer;border-radius:9px}
-.msg{font-size:12.5px;font-weight:700;border-radius:11px;padding:11px 14px;display:none;align-items:center;gap:9px}
+
+input[type=email]:focus,
+input[type=password]:focus{
+  border-color:rgba(46,230,166,.7);
+  background:rgba(46,230,166,.06);
+  box-shadow:
+    0 0 0 4px rgba(46,230,166,.15),
+    0 0 30px -5px rgba(46,230,166,.6);
+  transform:translateY(-1px);
+}
+input::placeholder{color:#6a7a95;opacity:.7}
+
+.toggle-pass{
+  position:absolute;
+  left:8px;
+  top:50%;
+  transform:translateY(-50%);
+  width:38px;height:38px;
+  border:0;
+  background:transparent;
+  color:#8697b8;
+  font-size:15px;
+  cursor:pointer;
+  border-radius:10px;
+  display:grid;place-items:center;
+  transition:all .2s;
+}
+.toggle-pass:hover{
+  background:rgba(255,255,255,.06);
+  color:#eef3ff;
+  transform:translateY(-50%) scale(1.05);
+}
+.toggle-pass:active{
+  transform:translateY(-50%) scale(.9);
+}
+
+/* =========================================================
+   MESSAGES
+   ========================================================= */
+.msg{
+  font-size:12.5px;
+  font-weight:700;
+  border-radius:13px;
+  padding:12px 15px;
+  display:none;
+  align-items:center;
+  gap:10px;
+  animation:msgIn .35s cubic-bezier(.2,.9,.3,1.1);
+}
 .msg.show{display:flex}
-.msg.err{color:#ff95a8;background:rgba(255,86,116,.1);border:1px solid rgba(255,86,116,.25)}
-.msg.ok{color:#a0e0b0;background:rgba(46,230,166,.1);border:1px solid rgba(46,230,166,.25)}
-.btn-submit{width:100%;padding:15px;border-radius:13px;border:0;background:linear-gradient(135deg,#2ee6a6,#12b57f);color:#04170f;font:inherit;font-size:14.5px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px}
+@keyframes msgIn{
+  from{opacity:0;transform:translateY(-10px) scale(.95)}
+  to{opacity:1;transform:none}
+}
+.msg.err{
+  color:#ff95a8;
+  background:rgba(255,86,116,.1);
+  border:1px solid rgba(255,86,116,.3);
+  box-shadow:0 8px 24px -10px rgba(255,86,116,.5);
+}
+.msg.ok{
+  color:#a0e0b0;
+  background:rgba(46,230,166,.1);
+  border:1px solid rgba(46,230,166,.3);
+  box-shadow:0 8px 24px -10px rgba(46,230,166,.5);
+}
+
+/* =========================================================
+   SUBMIT BUTTON
+   ========================================================= */
+.btn-submit{
+  position:relative;
+  width:100%;
+  padding:17px;
+  border-radius:15px;
+  border:0;
+  background:
+    linear-gradient(135deg,
+      #2ee6a6 0%,
+      #12b57f 100%);
+  color:#04170f;
+  font:inherit;
+  font-size:15px;
+  font-weight:900;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  overflow:hidden;
+  transition:transform .25s, box-shadow .25s;
+  box-shadow:
+    0 15px 40px -12px rgba(46,230,166,.8),
+    inset 0 1px 0 rgba(255,255,255,.25);
+  letter-spacing:.3px;
+  margin-top:4px;
+}
+.btn-submit:hover:not(:disabled){
+  transform:translateY(-2px);
+  box-shadow:
+    0 22px 50px -12px rgba(46,230,166,1),
+    inset 0 1px 0 rgba(255,255,255,.25);
+}
+.btn-submit:active:not(:disabled){transform:translateY(0) scale(.98)}
 .btn-submit:disabled{opacity:.75;cursor:not-allowed}
-.btn-submit .spinner{width:18px;height:18px;border:2.5px solid rgba(4,23,15,.25);border-top-color:#04170f;border-radius:50%;animation:spin .7s linear infinite;display:none}
+
+/* براق شدن دکمه */
+.btn-submit::before{
+  content:'';
+  position:absolute;
+  top:0;
+  left:-100%;
+  width:100%;
+  height:100%;
+  background:linear-gradient(90deg,
+    transparent,
+    rgba(255,255,255,.35),
+    transparent);
+  transition:left .6s;
+}
+.btn-submit:hover::before{left:100%}
+
+.btn-submit .spinner{
+  width:18px;height:18px;
+  border:2.5px solid rgba(4,23,15,.25);
+  border-top-color:#04170f;
+  border-radius:50%;
+  animation:spin .7s linear infinite;
+  display:none;
+}
 .btn-submit.loading .spinner{display:block}
+.btn-submit.loading span:last-child{opacity:.7}
 @keyframes spin{to{transform:rotate(360deg)}}
-.foot{text-align:center;margin-top:16px;font-size:11.5px;color:#6a7a95}
-.foot a{color:#2ee6a6;text-decoration:none;font-weight:700;cursor:pointer}
-.splash{position:fixed;inset:0;z-index:9999;background:#05070f;display:grid;place-items:center;opacity:0;pointer-events:none;transition:opacity .35s}
+
+/* =========================================================
+   FOOT
+   ========================================================= */
+.foot{
+  text-align:center;
+  margin-top:18px;
+  font-size:12px;
+  color:#6a7a95;
+  position:relative;
+  z-index:1;
+}
+.foot a{
+  color:#2ee6a6;
+  text-decoration:none;
+  font-weight:700;
+  cursor:pointer;
+  position:relative;
+  transition:color .2s;
+}
+.foot a::after{
+  content:'';
+  position:absolute;
+  bottom:-2px;
+  right:0;
+  width:0;
+  height:1.5px;
+  background:#2ee6a6;
+  transition:width .3s;
+}
+.foot a:hover{color:#5bffc7}
+.foot a:hover::after{width:100%}
+
+/* =========================================================
+   SPLASH
+   ========================================================= */
+.splash{
+  position:fixed;
+  inset:0;
+  z-index:9999;
+  background:
+    radial-gradient(circle at center,#0a1226 0%,#03040a 70%);
+  display:grid;
+  place-items:center;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .4s ease;
+}
 .splash.show{opacity:1;pointer-events:auto}
-.splash-inner{display:flex;flex-direction:column;align-items:center;gap:18px}
-.splash-logo{width:60px;height:60px;border-radius:18px;display:grid;place-items:center;font-size:28px;background:linear-gradient(135deg,rgba(46,230,166,.2),rgba(91,140,255,.2));border:1.5px solid rgba(46,230,166,.4)}
-.splash-text{font-size:13px;color:#8697b8}
+.splash-inner{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:22px;
+}
+.splash-logo{
+  width:70px;height:70px;
+  border-radius:22px;
+  display:grid;place-items:center;
+  font-size:32px;
+  background:linear-gradient(135deg,
+    rgba(46,230,166,.25),
+    rgba(91,140,255,.25));
+  border:1.5px solid rgba(46,230,166,.5);
+  animation:logoBounce 1.5s ease-in-out infinite;
+  box-shadow:0 20px 50px -15px rgba(46,230,166,.7);
+}
+.splash-text{
+  font-size:14px;
+  color:#8697b8;
+  letter-spacing:2px;
+  animation:pulseText 1.5s ease-in-out infinite;
+}
+@keyframes pulseText{
+  0%,100%{opacity:.5}
+  50%{opacity:1}
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+@media (max-width:480px){
+  body{padding:14px}
+  .auth-card{padding:32px 22px 26px;border-radius:24px}
+  .brand-logo{width:68px;height:68px;font-size:32px;border-radius:20px}
+  .brand-logo-wrap::before{inset:-10px}
+  .brand-title{font-size:25px}
+  input[type=email],input[type=password]{font-size:16px;padding:14px 44px}
+  .btn-submit{padding:16px;font-size:14px}
+}
+
+/* کاهش انیمیشن برای کاربران با prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce){
+  *,
+  *::before,
+  *::after{
+    animation-duration:.01ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:.01ms !important;
+  }
+}
 </style>
 </head>
 <body>
 
-<div class="bg">
-  <span class="orb orb-a"></span>
-  <span class="orb orb-b"></span>
-  <span class="orb orb-c"></span>
+<!-- ========== BACKGROUND ========== -->
+<div class="bg" aria-hidden="true">
+  <div class="orb orb-a"></div>
+  <div class="orb orb-b"></div>
+  <div class="orb orb-c"></div>
+  <div class="orb orb-d"></div>
+  <div class="grid-overlay"></div>
+  <div class="beam beam-1"></div>
+  <div class="beam beam-2"></div>
+  <div class="beam beam-3"></div>
+  <div id="particles"></div>
 </div>
 
+<!-- ========== LOGIN CARD ========== -->
 <div class="auth-wrap">
   <div class="auth-card">
     <div class="brand">
-      <div class="brand-logo">📈</div>
+      <div class="brand-logo-wrap">
+        <div class="brand-logo">📈</div>
+      </div>
       <div class="brand-title">PO-TRADE</div>
       <div class="brand-sub">ژورنال معاملات — ثبت‌نام کن یا وارد شو</div>
     </div>
 
-    <div class="tabs">
+    <div class="tabs" id="tabs">
       <button class="tab-btn active" id="tabLogin" type="button">ورود</button>
       <button class="tab-btn" id="tabSignup" type="button">ثبت‌نام</button>
     </div>
 
+    <!-- LOGIN FORM -->
     <form class="form" id="loginForm">
       <div class="field">
         <label>📧 ایمیل</label>
@@ -91,10 +704,14 @@ input:focus{border-color:rgba(46,230,166,.6);background:rgba(46,230,166,.06);box
       </div>
       <div class="msg err" id="loginMsg"><span>⚠️</span><span id="loginMsgText"></span></div>
       <div class="msg ok" id="loginOk"><span>✅</span><span id="loginOkText"></span></div>
-      <button type="submit" class="btn-submit" id="btnLogin"><span class="spinner"></span><span>🚀 ورود</span></button>
+      <button type="submit" class="btn-submit" id="btnLogin">
+        <span class="spinner"></span>
+        <span>🚀 ورود</span>
+      </button>
       <div class="foot"><a id="forgotPass">رمزت رو فراموش کردی؟</a></div>
     </form>
 
+    <!-- SIGNUP FORM -->
     <form class="form" id="signupForm" style="display:none">
       <div class="field">
         <label>📧 ایمیل</label>
@@ -120,11 +737,15 @@ input:focus{border-color:rgba(46,230,166,.6);background:rgba(46,230,166,.06);box
       </div>
       <div class="msg err" id="signupMsg"><span>⚠️</span><span id="signupMsgText"></span></div>
       <div class="msg ok" id="signupOk"><span>✅</span><span id="signupOkText"></span></div>
-      <button type="submit" class="btn-submit" id="btnSignup"><span class="spinner"></span><span>✨ ساخت حساب</span></button>
+      <button type="submit" class="btn-submit" id="btnSignup">
+        <span class="spinner"></span>
+        <span>✨ ساخت حساب</span>
+      </button>
     </form>
   </div>
 </div>
 
+<!-- ========== SPLASH ========== -->
 <div class="splash" id="splash">
   <div class="splash-inner">
     <div class="splash-logo">📈</div>
@@ -132,37 +753,66 @@ input:focus{border-color:rgba(46,230,166,.6);background:rgba(46,230,166,.06);box
   </div>
 </div>
 
+<!-- ========== SUPABASE ========== -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+/* ============================================================
+   PO-TRADE Auth (Supabase)
+   ============================================================ */
 const SUPABASE_URL = 'https://rodguhcuatixdbzwjfvy.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_2ET2dFjJNvBLWyfQXVZsag_7WcaHLLA';
 
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const $ = id => document.getElementById(id);
 
+/* ============ ذرات شناور ============ */
+(function createParticles(){
+  const wrap = $('particles');
+  if (!wrap) return;
+  const colors = ['#2ee6a6', '#5b8cff', '#ff5fa2', '#c78aff'];
+  for (let i = 0; i < 25; i++) {
+    const p = document.createElement('span');
+    p.className = 'particle';
+    p.style.left = Math.random() * 100 + '%';
+    p.style.color = colors[Math.floor(Math.random() * colors.length)];
+    p.style.background = 'currentColor';
+    p.style.animationDuration = (8 + Math.random() * 12) + 's';
+    p.style.animationDelay = (-Math.random() * 20) + 's';
+    p.style.width = p.style.height = (2 + Math.random() * 3) + 'px';
+    wrap.appendChild(p);
+  }
+})();
+
+/* ============ پیام‌ها ============ */
 function showErr(f, m){
   $(f+'MsgText').textContent = m;
   $(f+'Msg').classList.add('show');
+  $(f+'Ok').classList.remove('show');
   setTimeout(() => $(f+'Msg').classList.remove('show'), 5000);
 }
 function showOk(f, m){
   $(f+'OkText').textContent = m;
   $(f+'Ok').classList.add('show');
+  $(f+'Msg').classList.remove('show');
 }
 
+/* ============ Tab Switch ============ */
 $('tabLogin').addEventListener('click', () => {
   $('tabLogin').classList.add('active');
   $('tabSignup').classList.remove('active');
+  $('tabs').classList.remove('signup-mode');
   $('loginForm').style.display = '';
   $('signupForm').style.display = 'none';
 });
 $('tabSignup').addEventListener('click', () => {
   $('tabSignup').classList.add('active');
   $('tabLogin').classList.remove('active');
+  $('tabs').classList.add('signup-mode');
   $('signupForm').style.display = '';
   $('loginForm').style.display = 'none';
 });
 
+/* ============ Toggle Password ============ */
 document.querySelectorAll('.toggle-pass').forEach(btn => {
   btn.addEventListener('click', () => {
     const inp = $(btn.dataset.target);
@@ -171,6 +821,7 @@ document.querySelectorAll('.toggle-pass').forEach(btn => {
   });
 });
 
+/* ============ LOGIN ============ */
 $('loginForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const email = $('loginEmail').value.trim();
@@ -187,10 +838,11 @@ $('loginForm').addEventListener('submit', async (e) => {
     showErr('login', mapError(error.message));
   } else {
     $('splash').classList.add('show');
-    setTimeout(() => window.location.href = 'INDEX.html', 500);
+    setTimeout(() => window.location.href = 'INDEX.html', 600);
   }
 });
 
+/* ============ SIGNUP ============ */
 $('signupForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const email = $('signupEmail').value.trim();
@@ -213,11 +865,12 @@ $('signupForm').addEventListener('submit', async (e) => {
     showOk('signup', 'حساب ساخته شد! در حال ورود…');
     setTimeout(() => {
       $('splash').classList.add('show');
-      setTimeout(() => window.location.href = 'INDEX.html', 500);
+      setTimeout(() => window.location.href = 'INDEX.html', 600);
     }, 800);
   }
 });
 
+/* ============ Forgot Password ============ */
 $('forgotPass').addEventListener('click', async () => {
   const email = $('loginEmail').value.trim();
   if (!email) return showErr('login', 'اول ایمیلت رو وارد کن');
@@ -228,13 +881,15 @@ $('forgotPass').addEventListener('click', async () => {
   else showOk('login', 'ایمیل بازیابی ارسال شد ✅');
 });
 
+/* ============ Auto Login ============ */
 sb.auth.getSession().then(({ data }) => {
   if (data && data.session) {
     $('splash').classList.add('show');
-    setTimeout(() => window.location.href = 'INDEX.html', 300);
+    setTimeout(() => window.location.href = 'INDEX.html', 400);
   }
 });
 
+/* ============ Error Map ============ */
 function mapError(msg){
   const m = {
     'Invalid login credentials': 'ایمیل یا رمز عبور اشتباهه',
