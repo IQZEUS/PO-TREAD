@@ -16,30 +16,13 @@ body{background:#03040a;color:#eef3ff;font-family:'Vazirmatn',system-ui,Tahoma,s
 .orb-c{width:420px;height:420px;background:radial-gradient(circle,#ff5fa2 0%,transparent 70%);top:35%;left:45%;opacity:.25;animation-delay:-13s}
 @keyframes orbFloat{0%,100%{transform:translate3d(0,0,0) scale(1)}33%{transform:translate3d(40px,-30px,0) scale(1.08)}66%{transform:translate3d(-30px,30px,0) scale(.94)}}
 .grid-overlay{position:absolute;inset:0;background-image:linear-gradient(rgba(120,150,200,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(120,150,200,.05) 1px,transparent 1px);background-size:48px 48px;mask-image:radial-gradient(ellipse at center,#000 20%,transparent 75%);-webkit-mask-image:radial-gradient(ellipse at center,#000 20%,transparent 75%)}
-.card{
-  position:relative;z-index:1;width:100%;max-width:480px;
-  background:linear-gradient(160deg,rgba(20,29,51,.85),rgba(15,23,42,.95));
-  border:1px solid rgba(120,150,200,.2);border-radius:28px;
-  padding:44px 34px 34px;backdrop-filter:blur(30px) saturate(150%);
-  box-shadow:0 50px 100px -30px rgba(0,0,0,.95);
-  text-align:center;animation:cardIn .8s cubic-bezier(.2,.9,.3,1.1) both;
-}
+.card{position:relative;z-index:1;width:100%;max-width:480px;background:linear-gradient(160deg,rgba(20,29,51,.85),rgba(15,23,42,.95));border:1px solid rgba(120,150,200,.2);border-radius:28px;padding:44px 34px 34px;backdrop-filter:blur(30px) saturate(150%);box-shadow:0 50px 100px -30px rgba(0,0,0,.95);text-align:center;animation:cardIn .8s cubic-bezier(.2,.9,.3,1.1) both}
 @keyframes cardIn{from{opacity:0;transform:translateY(30px) scale(.94)}to{opacity:1;transform:none}}
 .card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#2ee6a6,#5b8cff,#ff5fa2);border-radius:28px 28px 0 0}
 .icon-wrap{position:relative;display:inline-block;margin-bottom:24px}
-.icon{
-  position:relative;z-index:2;width:90px;height:90px;border-radius:26px;
-  display:grid;place-items:center;font-size:44px;
-  background:linear-gradient(135deg,rgba(46,230,166,.2),rgba(91,140,255,.2));
-  border:1.5px solid rgba(46,230,166,.4);
-  animation:iconBounce 3s ease-in-out infinite;
-}
+.icon{position:relative;z-index:2;width:90px;height:90px;border-radius:26px;display:grid;place-items:center;font-size:44px;background:linear-gradient(135deg,rgba(46,230,166,.2),rgba(91,140,255,.2));border:1.5px solid rgba(46,230,166,.4);animation:iconBounce 3s ease-in-out infinite}
 @keyframes iconBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
-.icon-wrap::before{
-  content:'';position:absolute;inset:-14px;border-radius:50%;
-  background:conic-gradient(from 0deg,transparent 0deg,#2ee6a6 90deg,transparent 180deg,#5b8cff 270deg,transparent 360deg);
-  animation:spin 4s linear infinite;filter:blur(10px);opacity:.7;
-}
+.icon-wrap::before{content:'';position:absolute;inset:-14px;border-radius:50%;background:conic-gradient(from 0deg,transparent 0deg,#2ee6a6 90deg,transparent 180deg,#5b8cff 270deg,transparent 360deg);animation:spin 4s linear infinite;filter:blur(10px);opacity:.7}
 @keyframes spin{to{transform:rotate(360deg)}}
 h1{font-size:24px;font-weight:900;margin-bottom:12px;background:linear-gradient(90deg,#eef3ff,#2ee6a6 60%,#5b8cff);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
 p{font-size:14px;color:#8697b8;line-height:1.8;margin-bottom:10px}
@@ -90,7 +73,6 @@ input::placeholder{color:#6a7a95;opacity:.7}
     <span id="statusText">در حال بررسی لینک تأیید…</span>
   </div>
 
-  <!-- فرم اسم -->
   <form class="name-form" id="nameForm">
     <div class="name-field">
       <label>👋 اسمت چیه؟</label>
@@ -115,7 +97,7 @@ input::placeholder{color:#6a7a95;opacity:.7}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SUPABASE_URL = 'https://rodguhcuatixdbzwjfvy.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_2ET2dFjJNvBLWyfQXVZsag_7WcaHLLA';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJvZGd1aGN1YXRpeGRiendqZnZ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk5MTgyMTMsImV4cCI6MjEwNTQ5NDIxM30.oXGyCA3jOcsS5inqsXuSOhELZLoUG7pYagZox1SEmhY';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const $ = id => document.getElementById(id);
 
@@ -127,7 +109,6 @@ function setStatus(type, text, icon){
 
 (async function init(){
   try {
-    // چک کردن پارامترهای خطا در URL
     const hash = window.location.hash.substring(1);
     const params = new URLSearchParams(hash);
     if (params.get('error_code') === 'otp_expired') {
@@ -139,14 +120,12 @@ function setStatus(type, text, icon){
       return;
     }
 
-    // چک کردن session فعلی
     const { data: { session }, error } = await sb.auth.getSession();
     if (error) throw error;
 
     if (session && session.user) {
       await handleConfirmed(session.user);
     } else {
-      // چند بار چک کن — Supabase ممکنه دیر session بسازه
       let attempts = 0;
       const maxAttempts = 12;
       const check = setInterval(async () => {
@@ -177,22 +156,18 @@ async function handleConfirmed(user){
   $('emailBox').style.display = 'inline-block';
   $('emailBox').textContent = user.email;
 
-  // چک کن اگه اسم قبلاً ذخیره شده
   const existingName = user.user_metadata && user.user_metadata.full_name;
   if (existingName && existingName.trim()) {
-    // اسم قبلاً ذخیره شده — مستقیم برو
     setStatus('success', 'خوش آمدی ' + existingName + '! در حال ورود…', '✅');
     setTimeout(() => window.location.href = 'INDEX.html', 1200);
     return;
   }
 
-  // فرم اسم رو نشون بده
   setStatus('success', 'برای ادامه اسمت رو وارد کن', '✨');
   $('nameForm').classList.add('show');
   setTimeout(() => $('nameInput').focus(), 300);
 }
 
-/* ============ SAVE NAME ============ */
 $('nameForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const name = $('nameInput').value.trim();
@@ -232,7 +207,6 @@ $('nameForm').addEventListener('submit', async (e) => {
   }
 });
 
-/* ============ SKIP ============ */
 $('skipBtn').addEventListener('click', () => {
   window.location.href = 'INDEX.html';
 });
