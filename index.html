@@ -125,9 +125,8 @@
   }
 
   /* ============================================================
-     USER ACCOUNT PANEL — ULTRA PREMIUM v4
+     USER ACCOUNT PANEL — ULTRA PREMIUM v5
      ============================================================ */
-
   @property --angle {
     syntax: '<angle>';
     initial-value: 0deg;
@@ -221,7 +220,7 @@
     padding: 0;
     opacity: 0;
     visibility: hidden;
-    transform: translateY(-14px) scale(.94) translateZ(0);
+    transform: translateY(-14px) scale(.94);
     transition: opacity .35s cubic-bezier(.2,.9,.3,1.2),
                 visibility .35s,
                 transform .35s cubic-bezier(.2,.9,.3,1.2);
@@ -238,7 +237,7 @@
   .user-dropdown.open {
     opacity: 1;
     visibility: visible;
-    transform: translateY(0) scale(1) translateZ(0);
+    transform: translateY(0) scale(1);
   }
 
   .user-dropdown::before {
@@ -250,7 +249,6 @@
     animation: auroraFloat 8s ease-in-out infinite;
     pointer-events: none;
     z-index: 0;
-    transform: translateZ(0);
     will-change: transform;
   }
   .user-dropdown::after {
@@ -262,13 +260,12 @@
     animation: auroraFloat 10s ease-in-out infinite reverse;
     pointer-events: none;
     z-index: 0;
-    transform: translateZ(0);
     will-change: transform;
   }
   @keyframes auroraFloat {
-    0%, 100% { transform: translate(0,0) scale(1) translateZ(0); }
-    33% { transform: translate(-30px,20px) scale(1.1) translateZ(0); }
-    66% { transform: translate(20px,-30px) scale(.95) translateZ(0); }
+    0%, 100% { transform: translate(0,0) scale(1); }
+    33% { transform: translate(-30px,20px) scale(1.1); }
+    66% { transform: translate(20px,-30px) scale(.95); }
   }
 
   .user-header {
@@ -302,8 +299,6 @@
     margin: 0 auto 20px;
     text-transform: uppercase;
     z-index: 2;
-    transform: translateZ(0);
-    backface-visibility: hidden;
     will-change: background-position;
   }
 
@@ -323,11 +318,10 @@
     animation: haloSpinBig 4s linear infinite;
     opacity: .8;
     z-index: -1;
-    transform: translateZ(0);
     will-change: transform;
   }
   @keyframes haloSpinBig {
-    to { transform: rotate(360deg) translateZ(0); }
+    to { transform: rotate(360deg); }
   }
 
   .user-display-name {
@@ -384,12 +378,10 @@
     transition: transform .3s cubic-bezier(.2,.9,.3,1.15),
                 border-color .3s, box-shadow .3s;
     cursor: default;
-    transform: translateZ(0);
-    backface-visibility: hidden;
     will-change: transform;
   }
   .user-stat-card:hover {
-    transform: translateY(-3px) translateZ(0);
+    transform: translateY(-3px);
     border-color: rgba(46,230,166,.55);
     box-shadow: 0 18px 36px -14px rgba(46,230,166,.5);
   }
@@ -399,15 +391,14 @@
     display: block;
     animation: statIconFloat 3s ease-in-out infinite;
     position: relative; z-index: 1;
-    transform: translateZ(0);
     will-change: transform;
   }
   .user-stat-card:nth-child(2) .user-stat-icon {
     animation-delay: 1.5s;
   }
   @keyframes statIconFloat {
-    0%, 100% { transform: translateY(0) rotate(0deg) translateZ(0); }
-    50% { transform: translateY(-4px) rotate(-5deg) translateZ(0); }
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-4px) rotate(-5deg); }
   }
   .user-stat-label {
     font-size: 10.5px;
@@ -460,8 +451,6 @@
     position: relative;
     overflow: hidden;
     isolation: isolate;
-    transform: translateZ(0);
-    backface-visibility: hidden;
     will-change: transform;
   }
   .user-action-btn::before {
@@ -482,7 +471,6 @@
     flex: 0 0 26px;
     position: relative; z-index: 1;
     transition: transform .35s cubic-bezier(.2,.9,.3,1.3);
-    transform: translateZ(0);
   }
   .user-action-btn .lbl {
     position: relative; z-index: 1;
@@ -497,12 +485,12 @@
   .user-action-btn:hover {
     border-color: rgba(91,140,255,.55);
     color: var(--blue);
-    transform: translateY(-2px) translateZ(0);
+    transform: translateY(-2px);
     box-shadow: 0 14px 28px -10px rgba(91,140,255,.55);
     background: rgba(91,140,255,.08);
   }
   .user-action-btn:hover .ico {
-    transform: scale(1.15) rotate(-8deg) translateZ(0);
+    transform: scale(1.15) rotate(-8deg);
   }
   .user-action-btn:hover .arrow {
     transform: translateX(-6px);
@@ -510,7 +498,7 @@
     color: var(--blue);
   }
   .user-action-btn:active {
-    transform: translateY(0) scale(.98) translateZ(0);
+    transform: translateY(0) scale(.98);
   }
 
   .user-action-btn.danger {
@@ -529,12 +517,11 @@
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,.65);
+    background: rgba(0, 0, 0, .55);
     z-index: 199;
     opacity: 0;
     visibility: hidden;
     transition: opacity .3s ease, visibility .3s;
-    transform: translateZ(0);
   }
 
   @media (max-width: 640px) {
@@ -561,35 +548,36 @@
     .user-dropdown {
       position: fixed;
       top: auto; bottom: 0; left: 0; right: 0;
-      width: 100vw;
-      max-width: 100vw;
+      width: 100%;
+      max-width: 100%;
       margin: 0;
-      border-radius: 30px 30px 0 0;
+      border-radius: 28px 28px 0 0;
       padding: 0;
-      transform: translateY(100%) translateZ(0);
+      transform: translateY(100%);
       transform-origin: bottom center;
-      max-height: 90vh;
+      max-height: 88vh;
       overflow-y: auto;
+      overflow-x: hidden;
       -webkit-overflow-scrolling: touch;
       box-shadow:
         0 -30px 60px -20px rgba(0,0,0,.9),
         inset 0 1px 0 rgba(255,255,255,.08);
-      border: 1px solid rgba(46,230,166,.25);
+      border: 1px solid rgba(46,230,166,.3);
       border-bottom: none;
       will-change: transform;
     }
     .user-dropdown.open {
-      transform: translateY(0) translateZ(0);
+      transform: translateY(0);
     }
 
     .user-dropdown::before {
       content: '';
       position: absolute;
       top: 12px; left: 50%;
-      transform: translateX(-50%) translateZ(0);
+      transform: translateX(-50%);
       width: 50px; height: 5px;
       border-radius: 3px;
-      background: rgba(120,150,200,.6);
+      background: rgba(120,150,200,.55);
       z-index: 30;
       animation: none;
       pointer-events: none;
@@ -599,57 +587,57 @@
     }
 
     .user-header {
-      padding: 50px 22px 26px;
+      padding: 48px 22px 24px;
     }
     .user-avatar-big {
-      width: 100px; height: 100px;
-      font-size: 42px;
-      border-radius: 32px;
-      margin-bottom: 20px;
+      width: 96px; height: 96px;
+      font-size: 40px;
+      border-radius: 30px;
+      margin-bottom: 18px;
       animation: avatarGradient 6s ease infinite;
     }
     .user-avatar-big::before {
       inset: -12px;
       animation-duration: 6s;
-      opacity: .6;
+      opacity: .55;
     }
 
-    .user-display-name { font-size: 24px; }
-    .user-display-email { font-size: 12px; padding: 8px 16px; }
+    .user-display-name { font-size: 22px; }
+    .user-display-email { font-size: 11.5px; padding: 6px 14px; }
 
     .user-stats {
       padding: 0 22px 18px;
       gap: 12px;
     }
-    .user-stat-card { padding: 18px 16px 16px; }
-    .user-stat-icon { font-size: 24px; margin-bottom: 10px; }
-    .user-stat-label { font-size: 11px; }
-    .user-stat-value { font-size: 18px; }
+    .user-stat-card { padding: 16px 14px 14px; }
+    .user-stat-icon { font-size: 22px; margin-bottom: 8px; }
+    .user-stat-label { font-size: 10.5px; }
+    .user-stat-value { font-size: 17px; }
 
     .user-actions {
       padding: 0 22px calc(28px + env(safe-area-inset-bottom, 0px));
       gap: 12px;
     }
     .user-action-btn {
-      padding: 17px 20px;
-      font-size: 14.5px;
-      border-radius: 18px;
+      padding: 16px 18px;
+      font-size: 14px;
+      border-radius: 16px;
     }
     .user-action-btn .ico { font-size: 22px; flex: 0 0 28px; }
     .user-action-btn .arrow { font-size: 18px; }
   }
 
   @media (max-width: 380px) {
-    .user-avatar-big { width: 88px; height: 88px; font-size: 36px; border-radius: 28px; }
-    .user-display-name { font-size: 21px; }
+    .user-avatar-big { width: 84px; height: 84px; font-size: 34px; border-radius: 26px; }
+    .user-display-name { font-size: 20px; }
     .user-display-email { font-size: 11px; padding: 6px 12px; }
     .user-stats { padding: 0 18px 16px; gap: 10px; }
-    .user-stat-card { padding: 16px 14px 14px; }
-    .user-stat-icon { font-size: 22px; margin-bottom: 8px; }
+    .user-stat-card { padding: 14px 12px 12px; }
+    .user-stat-icon { font-size: 20px; margin-bottom: 6px; }
     .user-stat-label { font-size: 10px; }
     .user-stat-value { font-size: 16px; }
     .user-actions { padding: 0 18px calc(24px + env(safe-area-inset-bottom, 0px)); gap: 10px; }
-    .user-action-btn { padding: 15px 16px; font-size: 13.5px; }
+    .user-action-btn { padding: 14px 16px; font-size: 13px; }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -663,6 +651,317 @@
       animation-iteration-count: 1 !important;
       transition-duration: .01ms !important;
     }
+  }
+
+  /* ============================================================
+     CHANGE PASSWORD MODAL
+     ============================================================ */
+  .cp-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.7);
+    z-index:9999;
+    display:grid;
+    place-items:center;
+    padding:20px;
+    opacity:0;
+    visibility:hidden;
+    transition:opacity .3s ease, visibility .3s;
+  }
+  .cp-overlay.show{
+    opacity:1;
+    visibility:visible;
+  }
+  .cp-card{
+    width:100%;
+    max-width:440px;
+    background:#0d1424;
+    border:1.5px solid rgba(46,230,166,.25);
+    border-radius:24px;
+    padding:32px 28px 26px;
+    box-shadow:
+      0 60px 120px -30px rgba(0,0,0,.98),
+      0 0 60px -30px rgba(46,230,166,.35);
+    position:relative;
+    overflow:hidden;
+    transform:translateY(20px) scale(.95);
+    transition:transform .35s cubic-bezier(.2,.9,.3,1.2);
+    text-align:right;
+  }
+  .cp-overlay.show .cp-card{
+    transform:translateY(0) scale(1);
+  }
+  .cp-card::before{
+    content:'';
+    position:absolute;
+    top:0;left:0;right:0;height:4px;
+    background:linear-gradient(90deg,#2ee6a6,#5b8cff,#c78aff,#ff5fa2);
+    border-radius:24px 24px 0 0;
+  }
+  .cp-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:22px;
+    padding-bottom:16px;
+    border-bottom:1px solid rgba(120,150,200,.15);
+  }
+  .cp-title{
+    font-size:17px;
+    font-weight:900;
+    color:var(--text);
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .cp-icon{
+    width:38px;height:38px;
+    border-radius:12px;
+    display:grid;place-items:center;
+    font-size:18px;
+    background:linear-gradient(135deg,rgba(46,230,166,.15),rgba(91,140,255,.15));
+    border:1px solid rgba(46,230,166,.3);
+    flex:0 0 38px;
+  }
+  .cp-close{
+    width:34px;height:34px;
+    border-radius:10px;
+    border:1px solid rgba(120,150,200,.2);
+    background:rgba(120,150,200,.05);
+    color:var(--muted);
+    font-size:15px;
+    cursor:pointer;
+    display:grid;place-items:center;
+    transition:all .2s;
+    font-family:inherit;
+  }
+  .cp-close:hover{
+    background:rgba(255,86,116,.12);
+    border-color:rgba(255,86,116,.4);
+    color:var(--red);
+  }
+  .cp-field{
+    display:flex;
+    flex-direction:column;
+    gap:7px;
+    margin-bottom:14px;
+  }
+  .cp-field label{
+    font-size:12.5px;
+    font-weight:700;
+    color:var(--text-2);
+  }
+  .cp-input-wrap{
+    position:relative;
+    display:flex;
+    align-items:center;
+  }
+  .cp-input-wrap .cp-ico{
+    position:absolute;
+    right:15px;
+    top:50%;
+    transform:translateY(-50%);
+    font-size:15px;
+    opacity:.55;
+    pointer-events:none;
+  }
+  .cp-input{
+    width:100%;
+    background:rgba(255,255,255,.04);
+    border:1.5px solid rgba(120,150,200,.2);
+    color:var(--text);
+    font:inherit;
+    font-size:14.5px;
+    padding:14px 44px;
+    border-radius:13px;
+    outline:none;
+    transition:all .25s;
+    font-family:inherit;
+  }
+  .cp-input:focus{
+    border-color:rgba(46,230,166,.7);
+    background:rgba(46,230,166,.06);
+    box-shadow:0 0 0 4px rgba(46,230,166,.12);
+  }
+  .cp-input::placeholder{color:var(--muted);opacity:.6}
+  .cp-toggle{
+    position:absolute;
+    left:7px;
+    top:50%;
+    transform:translateY(-50%);
+    width:34px;height:34px;
+    border:0;
+    background:transparent;
+    color:var(--muted);
+    font-size:14px;
+    cursor:pointer;
+    border-radius:9px;
+    display:grid;place-items:center;
+    transition:all .2s;
+  }
+  .cp-toggle:hover{
+    background:rgba(120,150,200,.1);
+    color:var(--text);
+  }
+
+  .cp-meter{margin-top:9px}
+  .cp-meter-bar{
+    height:5px;
+    background:rgba(120,150,200,.12);
+    border-radius:5px;
+    overflow:hidden;
+    display:flex;
+    gap:3px;
+  }
+  .cp-meter-bar span{
+    flex:1;
+    height:100%;
+    background:rgba(120,150,200,.15);
+    border-radius:3px;
+    transition:all .3s;
+  }
+  .cp-meter-bar span.on-weak{background:linear-gradient(90deg,#ff5674,#ff8fa3)}
+  .cp-meter-bar span.on-medium{background:linear-gradient(90deg,#ffb020,#ffd97a)}
+  .cp-meter-bar span.on-strong{background:linear-gradient(90deg,#2ee6a6,#7bffd0)}
+  .cp-meter-label{
+    margin-top:6px;
+    font-size:11px;
+    font-weight:700;
+    color:var(--muted);
+    direction:ltr;
+    text-align:left;
+  }
+  .cp-meter-label.weak{color:#ff95a8}
+  .cp-meter-label.medium{color:#ffd97a}
+  .cp-meter-label.strong{color:#2ee6a6}
+  .cp-rules{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:5px;
+    margin-top:9px;
+  }
+  .cp-rule{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    font-size:10.5px;
+    color:var(--muted);
+    font-weight:600;
+  }
+  .cp-rule .dot{
+    width:13px;height:13px;
+    border-radius:50%;
+    border:1.5px solid rgba(120,150,200,.3);
+    display:grid;place-items:center;
+    font-size:9px;
+    color:transparent;
+    transition:all .2s;
+    flex:0 0 13px;
+  }
+  .cp-rule.ok{color:#2ee6a6}
+  .cp-rule.ok .dot{
+    background:rgba(46,230,166,.15);
+    border-color:#2ee6a6;
+    color:#2ee6a6;
+  }
+  .cp-rule.bad{color:#ff95a8}
+  .cp-rule.bad .dot{
+    background:rgba(255,86,116,.15);
+    border-color:#ff5674;
+    color:#ff5674;
+  }
+
+  .cp-msg{
+    font-size:12.5px;
+    font-weight:700;
+    border-radius:12px;
+    padding:11px 14px;
+    display:none;
+    align-items:center;
+    gap:9px;
+    margin-bottom:14px;
+    text-align:right;
+  }
+  .cp-msg.show{display:flex}
+  .cp-msg.err{
+    color:#ff95a8;
+    background:rgba(255,86,116,.1);
+    border:1px solid rgba(255,86,116,.3);
+  }
+  .cp-msg.ok{
+    color:#a0e0b0;
+    background:rgba(46,230,166,.1);
+    border:1px solid rgba(46,230,166,.3);
+  }
+
+  .cp-actions{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    margin-top:20px;
+  }
+  .cp-btn{
+    padding:14px 18px;
+    border-radius:13px;
+    font:inherit;
+    font-size:13.5px;
+    font-weight:900;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    transition:all .22s;
+    border:1.5px solid;
+  }
+  .cp-btn-cancel{
+    background:rgba(120,150,200,.06);
+    border-color:rgba(120,150,200,.2);
+    color:var(--text-2);
+  }
+  .cp-btn-cancel:hover{
+    background:rgba(120,150,200,.12);
+    border-color:rgba(120,150,200,.35);
+    color:var(--text);
+  }
+  .cp-btn-save{
+    background:linear-gradient(135deg,#2ee6a6,#12b57f);
+    border-color:transparent;
+    color:#04170f;
+    box-shadow:0 12px 28px -10px rgba(46,230,166,.7);
+  }
+  .cp-btn-save:hover:not(:disabled){
+    transform:translateY(-2px);
+    box-shadow:0 18px 36px -10px rgba(46,230,166,.9);
+  }
+  .cp-btn-save:disabled{
+    opacity:.6;
+    cursor:not-allowed;
+    transform:none;
+  }
+  .cp-btn:active:not(:disabled){transform:scale(.97)}
+  .cp-btn .cp-spinner{
+    width:16px;height:16px;
+    border:2.5px solid rgba(4,23,15,.25);
+    border-top-color:#04170f;
+    border-radius:50%;
+    animation:cpSpin .7s linear infinite;
+    display:none;
+  }
+  .cp-btn.loading .cp-spinner{display:block}
+  .cp-btn.loading .cp-lbl{opacity:.6}
+  @keyframes cpSpin{to{transform:rotate(360deg)}}
+
+  @media (max-width:640px){
+    .cp-card{
+      padding:26px 20px 22px;
+      border-radius:20px;
+    }
+    .cp-title{font-size:15.5px}
+    .cp-icon{width:34px;height:34px;font-size:16px;flex:0 0 34px}
+    .cp-input{font-size:16px;padding:13px 42px}
+    .cp-actions{grid-template-columns:1fr}
+    .cp-btn{padding:15px 16px}
   }
 </style>
 </head>
@@ -751,6 +1050,11 @@
             </div>
           </div>
           <div class="user-actions">
+            <button class="user-action-btn" onclick="openChangePassword()">
+              <span class="ico">🔑</span>
+              <span class="lbl">تغییر رمز عبور</span>
+              <span class="arrow">←</span>
+            </button>
             <button class="user-action-btn danger" onclick="poLogout()">
               <span class="ico">🚪</span>
               <span class="lbl">خروج از حساب</span>
@@ -764,6 +1068,8 @@
         <span id="lang-label">EN</span>
       </button>
       <button class="theme-btn" id="theme-btn"><span class="theme-icon">🌙</span></button>
+
+      <div class="user-backdrop" id="userBackdrop"></div>
     </div>
   </header>
 
@@ -1119,7 +1425,68 @@
 
 </div>
 
-<div class="user-backdrop" id="userBackdrop"></div>
+<!-- ========== CHANGE PASSWORD MODAL ========== -->
+<div class="cp-overlay" id="cpOverlay">
+  <div class="cp-card">
+    <div class="cp-head">
+      <div class="cp-title">
+        <span class="cp-icon">🔑</span>
+        <span>تغییر رمز عبور</span>
+      </div>
+      <button class="cp-close" onclick="closeChangePassword()" type="button" aria-label="بستن">✕</button>
+    </div>
+
+    <div class="cp-field">
+      <label>🔓 رمز عبور فعلی</label>
+      <div class="cp-input-wrap">
+        <span class="cp-ico">🔒</span>
+        <input type="password" class="cp-input" id="cpCurrent" placeholder="رمز فعلی‌ت رو وارد کن" autocomplete="current-password">
+        <button type="button" class="cp-toggle" data-target="cpCurrent">👁️</button>
+      </div>
+    </div>
+
+    <div class="cp-field">
+      <label>🔐 رمز عبور جدید</label>
+      <div class="cp-input-wrap">
+        <span class="cp-ico">🔒</span>
+        <input type="password" class="cp-input" id="cpNew" placeholder="حداقل ۸ کاراکتر" autocomplete="new-password">
+        <button type="button" class="cp-toggle" data-target="cpNew">👁️</button>
+      </div>
+      <div class="cp-meter" id="cpMeter" style="display:none">
+        <div class="cp-meter-bar">
+          <span id="cp1"></span><span id="cp2"></span><span id="cp3"></span><span id="cp4"></span><span id="cp5"></span>
+        </div>
+        <div class="cp-meter-label" id="cpLabel">—</div>
+      </div>
+      <div class="cp-rules" id="cpRules" style="display:none">
+        <div class="cp-rule" data-rule="length"><span class="dot">✓</span><span>حداقل ۸ کاراکتر</span></div>
+        <div class="cp-rule" data-rule="lower"><span class="dot">✓</span><span>حرف کوچک</span></div>
+        <div class="cp-rule" data-rule="upper"><span class="dot">✓</span><span>حرف بزرگ</span></div>
+        <div class="cp-rule" data-rule="number"><span class="dot">✓</span><span>عدد</span></div>
+        <div class="cp-rule" data-rule="special"><span class="dot">✓</span><span>علامت خاص</span></div>
+      </div>
+    </div>
+
+    <div class="cp-field">
+      <label>🔁 تکرار رمز جدید</label>
+      <div class="cp-input-wrap">
+        <span class="cp-ico">🔒</span>
+        <input type="password" class="cp-input" id="cpNew2" placeholder="دوباره وارد کن" autocomplete="new-password">
+      </div>
+    </div>
+
+    <div class="cp-msg err" id="cpErrMsg"><span>⚠️</span><span id="cpErrText"></span></div>
+    <div class="cp-msg ok" id="cpOkMsg"><span>✅</span><span id="cpOkText"></span></div>
+
+    <div class="cp-actions">
+      <button type="button" class="cp-btn cp-btn-cancel" onclick="closeChangePassword()">انصراف</button>
+      <button type="button" class="cp-btn cp-btn-save" id="cpSaveBtn">
+        <span class="cp-spinner"></span>
+        <span class="cp-lbl">💾 ذخیره رمز جدید</span>
+      </button>
+    </div>
+  </div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -1129,6 +1496,7 @@
   const SUPABASE_URL = 'https://rodguhcuatixdbzwjfvy.supabase.co';
   const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJvZGd1aGN1YXRpeGRiendqZnZ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk5MTgyMTMsImV4cCI6MjEwNTQ5NDIxM30.oXGyCA3jOcsS5inqsXuSOhELZLoUG7pYagZox1SEmhY';
   const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  window.__PT_SB = sb;
 
   window.poLogout = async function () {
     if (!confirm('از حساب کاربری خارج می‌شوی؟')) return;
@@ -1208,7 +1576,7 @@
     touchCurrentY = e.touches[0].clientY;
     const diff = touchCurrentY - touchStartY;
     if (diff > 0) {
-      userDropdown.style.transform = 'translateY(' + diff + 'px) translateZ(0)';
+      userDropdown.style.transform = 'translateY(' + diff + 'px)';
       userDropdown.style.transition = 'none';
     }
   }, { passive: true });
@@ -1317,6 +1685,194 @@
       updateAccountUI(session.user);
     }
   });
+})();
+</script>
+
+<script>
+/* ============================================================
+   CHANGE PASSWORD LOGIC
+   ============================================================ */
+(function(){
+  'use strict';
+
+  const sb = window.__PT_SB;
+  if (!sb) {
+    console.error('[ChangePass] Supabase client not found');
+    return;
+  }
+
+  const $ = id => document.getElementById(id);
+  const overlay = $('cpOverlay');
+  if (!overlay) return;
+
+  window.openChangePassword = function() {
+    $('cpCurrent').value = '';
+    $('cpNew').value = '';
+    $('cpNew2').value = '';
+    $('cpErrMsg').classList.remove('show');
+    $('cpOkMsg').classList.remove('show');
+    $('cpMeter').style.display = 'none';
+    $('cpRules').style.display = 'none';
+    document.querySelectorAll('.cp-rule').forEach(el => el.classList.remove('ok','bad'));
+    ['cp1','cp2','cp3','cp4','cp5'].forEach(id => $(id).className = '');
+
+    const dd = document.getElementById('userDropdown');
+    if (dd) dd.classList.remove('open');
+    const bd = document.getElementById('userBackdrop');
+    if (bd) bd.classList.remove('show');
+
+    overlay.classList.add('show');
+    setTimeout(() => $('cpCurrent').focus(), 300);
+  };
+
+  window.closeChangePassword = function() {
+    overlay.classList.remove('show');
+  };
+
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) closeChangePassword();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && overlay.classList.contains('show')) {
+      closeChangePassword();
+    }
+  });
+
+  document.querySelectorAll('.cp-toggle').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const inp = $(btn.dataset.target);
+      inp.type = inp.type === 'password' ? 'text' : 'password';
+      btn.textContent = inp.type === 'password' ? '👁️' : '🙈';
+    });
+  });
+
+  function checkPassword(pass) {
+    return {
+      length:  pass.length >= 8,
+      lower:   /[a-z]/.test(pass),
+      upper:   /[A-Z]/.test(pass),
+      number:  /[0-9]/.test(pass),
+      special: /[^A-Za-z0-9]/.test(pass)
+    };
+  }
+
+  function renderStrength(pass) {
+    const meter = $('cpMeter');
+    const rules = $('cpRules');
+    const label = $('cpLabel');
+    if (!pass) {
+      meter.style.display = 'none';
+      rules.style.display = 'none';
+      return;
+    }
+    meter.style.display = '';
+    rules.style.display = '';
+    const c = checkPassword(pass);
+    const score = Object.values(c).filter(Boolean).length;
+    const segs = [$('cp1'), $('cp2'), $('cp3'), $('cp4'), $('cp5')];
+    segs.forEach(s => s.className = '');
+    let level = 'weak';
+    let onCls = 'on-weak';
+    if (score >= 5 && pass.length >= 10) { level = 'strong'; onCls = 'on-strong'; }
+    else if (score >= 3) { level = 'medium'; onCls = 'on-medium'; }
+    const fillCount = level === 'strong' ? 5 : level === 'medium' ? 3 : Math.max(1, score);
+    for (let i = 0; i < fillCount; i++) segs[i].className = onCls;
+    label.className = 'cp-meter-label ' + level;
+    label.textContent = level === 'strong' ? '💪 قوی' : level === 'medium' ? '⚠️ متوسط' : '🔴 ضعیف';
+    document.querySelectorAll('.cp-rule').forEach(el => {
+      const k = el.dataset.rule;
+      const ok = c[k];
+      el.classList.toggle('ok', ok);
+      el.classList.toggle('bad', pass.length > 0 && !ok);
+    });
+  }
+
+  $('cpNew').addEventListener('input', e => renderStrength(e.target.value));
+
+  function showErr(m) {
+    $('cpErrText').textContent = m;
+    $('cpErrMsg').classList.add('show');
+    $('cpOkMsg').classList.remove('show');
+  }
+  function showOk(m) {
+    $('cpOkText').textContent = m;
+    $('cpOkMsg').classList.add('show');
+    $('cpErrMsg').classList.remove('show');
+  }
+
+  $('cpSaveBtn').addEventListener('click', async () => {
+    const currentPass = $('cpCurrent').value;
+    const newPass = $('cpNew').value;
+    const newPass2 = $('cpNew2').value;
+
+    if (!currentPass) return showErr('رمز فعلی رو وارد کن');
+    if (!newPass) return showErr('رمز جدید رو وارد کن');
+
+    const c = checkPassword(newPass);
+    const missing = [];
+    if (!c.length)  missing.push('۸ کاراکتر');
+    if (!c.lower)   missing.push('حرف کوچک');
+    if (!c.upper)   missing.push('حرف بزرگ');
+    if (!c.number)  missing.push('عدد');
+    if (!c.special) missing.push('علامت خاص');
+    if (missing.length) return showErr('رمز ضعیفه — این‌ها لازمه: ' + missing.join('، '));
+
+    if (newPass !== newPass2) return showErr('رمزهای جدید یکسان نیستند');
+    if (currentPass === newPass) return showErr('رمز جدید باید با رمز فعلی فرق داشته باشه');
+
+    const btn = $('cpSaveBtn');
+    btn.classList.add('loading');
+    btn.disabled = true;
+
+    try {
+      const { data: { session } } = await sb.auth.getSession();
+      if (!session || !session.user) {
+        throw new Error('نشست منقضی شده. دوباره وارد شو.');
+      }
+      const email = session.user.email;
+
+      const { error: signInErr } = await sb.auth.signInWithPassword({
+        email: email,
+        password: currentPass
+      });
+
+      if (signInErr) {
+        btn.classList.remove('loading');
+        btn.disabled = false;
+        if (signInErr.message.includes('Invalid login credentials')) {
+          return showErr('رمز فعلی اشتباهه');
+        }
+        return showErr(mapError(signInErr.message));
+      }
+
+      const { error: updateErr } = await sb.auth.updateUser({ password: newPass });
+      if (updateErr) throw updateErr;
+
+      showOk('✅ رمز عبور با موفقیت تغییر کرد!');
+      setTimeout(() => {
+        closeChangePassword();
+        btn.classList.remove('loading');
+        btn.disabled = false;
+      }, 1800);
+
+    } catch (err) {
+      btn.classList.remove('loading');
+      btn.disabled = false;
+      showErr(mapError(err.message));
+    }
+  });
+
+  function mapError(msg) {
+    const m = {
+      'New password should be different from the old password': 'رمز جدید باید متفاوت از قبلی باشه',
+      'Password should be at least 6 characters': 'رمز باید حداقل ۶ کاراکتر باشه',
+      'Auth session missing': 'نشست منقضی شده. دوباره وارد شو',
+      'User not found': 'کاربر پیدا نشد',
+      'Invalid login credentials': 'رمز فعلی اشتباهه'
+    };
+    for (const k in m) if (msg && msg.includes(k)) return m[k];
+    return msg || 'خطا رخ داد';
+  }
 })();
 </script>
 
@@ -1546,7 +2102,6 @@
     return 3;
   }
   function renderConfig(config) {
-    // 🔥 حذف skeleton به‌محض رسیدن کانفیگ
     var skel = host.querySelector('.pt-banner-skeleton');
     if (skel) {
       skel.style.transition = 'opacity .3s ease';
@@ -1658,8 +2213,6 @@
       }
       if (!alreadyRendered) {
         host.innerHTML = '<div class="pt-banner-skeleton"></div>';
-
-        // 🔥 حداکثر ۵ ثانیه اسکلتون بمونه، بعدش خودکار حذف بشه
         setTimeout(function(){
           var skel = host.querySelector('.pt-banner-skeleton');
           if (skel) {
