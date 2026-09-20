@@ -229,6 +229,9 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const $ = id => document.getElementById(id);
 
+/* ============ مهم: نام فایل اصلی = index.html (حروف کوچک) ============ */
+const MAIN_PAGE = 'index.html';
+
 (function createParticles(){
   const wrap = $('particles');
   if (!wrap) return;
@@ -336,7 +339,7 @@ $('loginForm').addEventListener('submit', async (e) => {
     showErr('login', mapError(error.message));
   } else {
     $('splash').classList.add('show');
-    setTimeout(() => window.location.href = 'INDEX.html', 600);
+    setTimeout(() => window.location.href = MAIN_PAGE, 600);
   }
 });
 
@@ -396,7 +399,7 @@ $('forgotPass').addEventListener('click', async () => {
 sb.auth.getSession().then(({ data }) => {
   if (data && data.session) {
     $('splash').classList.add('show');
-    setTimeout(() => window.location.href = 'INDEX.html', 400);
+    setTimeout(() => window.location.href = MAIN_PAGE, 400);
   }
 });
 
