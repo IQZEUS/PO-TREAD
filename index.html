@@ -133,104 +133,145 @@
   }
 
   /* ============================================================
-     USER ACCOUNT PANEL — Premium Design
+     USER ACCOUNT PANEL — Premium Aurora Design v3
      ============================================================ */
   .user-wrap{position:relative}
 
-  /* ---- دکمه کاربر در هدر ---- */
   .user-btn{
     position:relative;
     display:flex;align-items:center;gap:10px;
-    padding:4px 16px 4px 4px;
+    padding:5px 16px 5px 5px;
     border:1.5px solid transparent;
     background:
       linear-gradient(var(--card), var(--card)) padding-box,
-      linear-gradient(135deg, rgba(46,230,166,.5), rgba(91,140,255,.5), rgba(255,95,162,.5)) border-box;
+      linear-gradient(135deg, #2ee6a6, #5b8cff, #ff5fa2) border-box;
+    background-size: 100% 100%, 300% 300%;
+    animation:userBtnBorder 5s linear infinite;
     border-radius:999px;
     cursor:pointer;font:inherit;color:var(--text);
     transition:all .3s cubic-bezier(.2,.9,.3,1.1);
-    height:44px;max-width:220px;
+    height:46px;max-width:230px;
     overflow:hidden;
+    isolation:isolate;
+  }
+  @keyframes userBtnBorder{
+    0%{background-position:0 0, 0% 50%}
+    100%{background-position:0 0, 300% 50%}
   }
   .user-btn::before{
     content:'';position:absolute;inset:0;
-    background:radial-gradient(circle at 30% 50%, rgba(46,230,166,.15), transparent 60%);
-    opacity:0;transition:opacity .3s;pointer-events:none;
+    background:radial-gradient(circle at 30% 50%, rgba(46,230,166,.2), transparent 60%);
+    opacity:0;transition:opacity .3s;pointer-events:none;z-index:0;
   }
   .user-btn:hover{
     transform:translateY(-2px);
     box-shadow:
-      0 12px 28px -10px rgba(46,230,166,.4),
-      0 0 0 3px rgba(46,230,166,.08);
+      0 14px 30px -10px rgba(46,230,166,.5),
+      0 0 0 3px rgba(46,230,166,.1);
   }
   .user-btn:hover::before{opacity:1}
   .user-btn:active{transform:translateY(0) scale(.97)}
 
   .user-avatar{
     position:relative;
-    width:36px;height:36px;border-radius:50%;
+    width:38px;height:38px;border-radius:50%;
     display:grid;place-items:center;
-    font-size:14px;font-weight:900;color:#04170f;
-    background:linear-gradient(135deg,#2ee6a6 0%,#5b8cff 100%);
+    font-size:15px;font-weight:900;color:#04170f;
+    background:linear-gradient(135deg,#2ee6a6 0%,#5b8cff 50%,#c78aff 100%);
+    background-size:200% 200%;
+    animation:avatarGradient 4s ease infinite;
     box-shadow:
-      0 4px 12px -3px rgba(46,230,166,.7),
-      inset 0 -2px 4px rgba(0,0,0,.15),
-      inset 0 2px 2px rgba(255,255,255,.3);
-    flex:0 0 36px;text-transform:uppercase;
-    z-index:1;
+      0 4px 12px -3px rgba(46,230,166,.8),
+      inset 0 -2px 4px rgba(0,0,0,.2),
+      inset 0 2px 2px rgba(255,255,255,.4);
+    flex:0 0 38px;text-transform:uppercase;
+    z-index:2;
   }
-  .user-avatar::after{
-    content:'';position:absolute;inset:-3px;border-radius:50%;
-    border:1.5px solid rgba(46,230,166,.4);
-    animation:avatarPulse 3s ease-in-out infinite;
+  @keyframes avatarGradient{
+    0%,100%{background-position:0% 50%}
+    50%{background-position:100% 50%}
   }
-  @keyframes avatarPulse{
-    0%,100%{transform:scale(1);opacity:.6}
-    50%{transform:scale(1.08);opacity:.3}
+  .user-avatar::before{
+    content:'';position:absolute;inset:-4px;border-radius:50%;
+    border:1.5px solid rgba(46,230,166,.5);
+    animation:avatarRing 2.5s ease-out infinite;
+  }
+  @keyframes avatarRing{
+    0%{transform:scale(1);opacity:.8}
+    100%{transform:scale(1.6);opacity:0}
   }
 
   .user-name-mini{
     font-size:13px;font-weight:800;
     max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-    position:relative;z-index:1;
-    background:linear-gradient(90deg,var(--text),var(--text-2));
+    position:relative;z-index:2;
+    background:linear-gradient(90deg,#eef3ff,#2ee6a6,#5b8cff);
+    background-size:200% auto;
     -webkit-background-clip:text;background-clip:text;
     -webkit-text-fill-color:transparent;
+    animation:userNameShine 4s linear infinite;
   }
+  @keyframes userNameShine{to{background-position:200% center}}
 
   /* ---- Dropdown ---- */
   .user-dropdown{
-    position:absolute;top:calc(100% + 12px);left:0;
-    width:340px;
-    background:
-      linear-gradient(160deg, rgba(20,29,51,.98) 0%, rgba(15,23,42,.99) 100%);
-    border:1px solid rgba(120,150,200,.25);
-    border-radius:24px;
+    position:absolute;top:calc(100% + 14px);left:0;
+    width:360px;
+    background:linear-gradient(160deg, rgba(20,29,51,.98) 0%, rgba(15,23,42,.99) 100%);
+    border:1px solid rgba(120,150,200,.28);
+    border-radius:26px;
     box-shadow:
-      0 50px 100px -30px rgba(0,0,0,.98),
+      0 60px 120px -30px rgba(0,0,0,.98),
       0 0 0 1px rgba(120,150,200,.06) inset,
-      0 1px 0 rgba(255,255,255,.05) inset;
+      0 1px 0 rgba(255,255,255,.06) inset;
     padding:0;
-    opacity:0;visibility:hidden;transform:translateY(-12px) scale(.94);
-    transition:all .35s cubic-bezier(.2,.9,.3,1.15);
+    opacity:0;visibility:hidden;
+    transform:translateY(-16px) scale(.92);
+    transition:all .4s cubic-bezier(.2,.9,.3,1.2);
     z-index:200;
     backdrop-filter:blur(40px) saturate(180%);
     -webkit-backdrop-filter:blur(40px) saturate(180%);
     overflow:hidden;
     transform-origin:top right;
+    isolation:isolate;
   }
   [data-theme="light"] .user-dropdown{
     background:linear-gradient(160deg,#ffffff 0%,#f6f9ff 100%);
     border-color:rgba(80,110,170,.15);
   }
 
-  /* نوار گرادیانت بالای dropdown */
   .user-dropdown::before{
-    content:'';position:absolute;top:0;left:0;right:0;height:4px;
+    content:'';position:absolute;
+    top:-50%;right:-30%;
+    width:400px;height:400px;
+    background:radial-gradient(circle, rgba(46,230,166,.25), transparent 60%);
+    animation:auroraFloat 8s ease-in-out infinite;
+    pointer-events:none;
+    z-index:0;
+  }
+  .user-dropdown::after{
+    content:'';position:absolute;
+    bottom:-50%;left:-30%;
+    width:380px;height:380px;
+    background:radial-gradient(circle, rgba(91,140,255,.2), transparent 60%);
+    animation:auroraFloat 10s ease-in-out infinite reverse;
+    pointer-events:none;
+    z-index:0;
+  }
+  @keyframes auroraFloat{
+    0%,100%{transform:translate(0,0) scale(1)}
+    33%{transform:translate(-30px,20px) scale(1.1)}
+    66%{transform:translate(20px,-30px) scale(.95)}
+  }
+
+  .user-bar{
+    position:absolute;
+    top:0;left:0;right:0;height:4px;
     background:linear-gradient(90deg,#2ee6a6 0%,#5b8cff 33%,#c78aff 66%,#ff5fa2 100%);
     background-size:200% 100%;
     animation:userBarShimmer 4s linear infinite;
-    border-radius:24px 24px 0 0;
+    border-radius:26px 26px 0 0;
+    z-index:10;
   }
   @keyframes userBarShimmer{
     0%{background-position:0% 0}
@@ -242,118 +283,147 @@
     transform:translateY(0) scale(1);
   }
 
-  /* ---- هدر پروفایل با banner ---- */
   .user-header{
     position:relative;
-    padding:26px 22px 20px;
-    background:
-      radial-gradient(circle at 80% 20%, rgba(46,230,166,.15), transparent 50%),
-      radial-gradient(circle at 20% 80%, rgba(91,140,255,.12), transparent 50%);
-    overflow:hidden;
+    padding:32px 26px 24px;
+    text-align:center;
+    z-index:2;
   }
   .user-header::after{
     content:'';position:absolute;
-    bottom:0;left:22px;right:22px;height:1px;
-    background:linear-gradient(90deg,transparent,rgba(120,150,200,.25),transparent);
+    bottom:0;left:26px;right:26px;height:1px;
+    background:linear-gradient(90deg,transparent,rgba(120,150,200,.3),transparent);
   }
 
   .user-avatar-big{
     position:relative;
-    width:72px;height:72px;
-    border-radius:24px;
+    width:88px;height:88px;
+    border-radius:28px;
     display:grid;place-items:center;
-    font-size:30px;font-weight:900;color:#04170f;
+    font-size:36px;font-weight:900;color:#04170f;
     background:linear-gradient(135deg,#2ee6a6 0%,#5b8cff 50%,#c78aff 100%);
-    background-size:200% 200%;
-    animation:avatarGradient 6s ease infinite;
+    background-size:300% 300%;
+    animation:avatarGradientBig 6s ease infinite;
     box-shadow:
-      0 20px 40px -12px rgba(46,230,166,.6),
-      0 0 0 5px rgba(46,230,166,.1),
-      0 0 0 10px rgba(91,140,255,.05),
+      0 24px 48px -12px rgba(46,230,166,.6),
+      0 0 0 6px rgba(46,230,166,.08),
+      0 0 0 12px rgba(91,140,255,.04),
       inset 0 -4px 8px rgba(0,0,0,.2),
-      inset 0 4px 6px rgba(255,255,255,.35);
-    flex:0 0 72px;
+      inset 0 4px 6px rgba(255,255,255,.4);
+    margin:0 auto 18px;
     text-transform:uppercase;
-    margin-bottom:16px;
+    z-index:2;
   }
-  @keyframes avatarGradient{
+  @keyframes avatarGradientBig{
     0%,100%{background-position:0% 50%}
     50%{background-position:100% 50%}
   }
+  .user-avatar-big::before{
+    content:'';position:absolute;inset:-12px;border-radius:34px;
+    border:2px solid rgba(46,230,166,.4);
+    animation:avatarRingBig 3s ease-out infinite;
+  }
+  @keyframes avatarRingBig{
+    0%{transform:scale(1);opacity:.8}
+    100%{transform:scale(1.35);opacity:0}
+  }
 
-  .user-info-main{
-    position:relative;z-index:1;
-  }
   .user-display-name{
-    font-size:20px;font-weight:900;
+    font-size:22px;font-weight:900;
     color:var(--text);
-    margin-bottom:6px;
+    margin-bottom:8px;
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-    letter-spacing:-.3px;
+    letter-spacing:-.4px;
     line-height:1.3;
+    background:linear-gradient(90deg,var(--text),#2ee6a6);
+    background-size:200% auto;
+    -webkit-background-clip:text;background-clip:text;
+    -webkit-text-fill-color:transparent;
+    animation:userNameShine 5s linear infinite;
   }
+
   .user-display-email{
     font-size:12px;color:var(--muted);
-    direction:ltr;text-align:left;
-    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-    display:inline-flex;align-items:center;gap:6px;
-    padding:5px 12px;
-    background:rgba(120,150,200,.08);
-    border:1px solid rgba(120,150,200,.15);
+    direction:ltr;
+    display:inline-flex;align-items:center;gap:7px;
+    padding:6px 14px;
+    background:linear-gradient(135deg, rgba(120,150,200,.12), rgba(91,140,255,.08));
+    border:1px solid rgba(120,150,200,.2);
     border-radius:999px;
     font-family:'Menlo','Consolas',monospace;
+    max-width:100%;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
   }
   .user-display-email::before{
-    content:'✉️';font-size:11px;
+    content:'✉️';font-size:11px;flex-shrink:0;
   }
 
-  /* ---- آمار ---- */
   .user-stats{
     display:grid;
     grid-template-columns:1fr 1fr;
-    gap:10px;
-    padding:18px 22px 14px;
+    gap:12px;
+    padding:22px 26px 18px;
+    position:relative;
+    z-index:2;
   }
   .user-stat-card{
-    padding:14px 14px 12px;
-    background:linear-gradient(135deg, rgba(46,230,166,.06), rgba(91,140,255,.06));
-    border:1px solid rgba(120,150,200,.15);
-    border-radius:16px;
+    padding:16px 14px 14px;
+    background:linear-gradient(135deg, rgba(46,230,166,.1), rgba(91,140,255,.06));
+    border:1px solid rgba(120,150,200,.2);
+    border-radius:18px;
     position:relative;
     overflow:hidden;
-    transition:all .25s ease;
-  }
-  .user-stat-card:hover{
-    transform:translateY(-2px);
-    border-color:rgba(46,230,166,.3);
-    box-shadow:0 12px 28px -12px rgba(46,230,166,.35);
+    transition:all .3s cubic-bezier(.2,.9,.3,1.1);
+    cursor:default;
   }
   .user-stat-card::before{
     content:'';position:absolute;
-    top:-20px;right:-20px;width:60px;height:60px;
+    top:-30px;right:-30px;width:100px;height:100px;
     border-radius:50%;
-    background:radial-gradient(circle, rgba(46,230,166,.2), transparent 70%);
+    background:radial-gradient(circle, rgba(46,230,166,.25), transparent 70%);
     pointer-events:none;
+    transition:all .3s;
+  }
+  .user-stat-card:hover{
+    transform:translateY(-3px);
+    border-color:rgba(46,230,166,.5);
+    box-shadow:
+      0 16px 32px -12px rgba(46,230,166,.4),
+      0 0 0 1px rgba(46,230,166,.2) inset;
+  }
+  .user-stat-card:hover::before{
+    transform:scale(1.3);
   }
   .user-stat-icon{
-    font-size:18px;
-    margin-bottom:6px;
+    font-size:22px;
+    margin-bottom:8px;
     display:block;
+    animation:statIconFloat 3s ease-in-out infinite;
+  }
+  .user-stat-card:nth-child(2) .user-stat-icon{
+    animation-delay:1.5s;
+  }
+  @keyframes statIconFloat{
+    0%,100%{transform:translateY(0) rotate(0deg)}
+    50%{transform:translateY(-4px) rotate(-5deg)}
   }
   .user-stat-label{
     font-size:10.5px;
     color:var(--muted);
-    font-weight:600;
-    margin-bottom:4px;
+    font-weight:700;
+    margin-bottom:5px;
     display:block;
-    letter-spacing:.2px;
+    letter-spacing:.3px;
+    text-transform:uppercase;
   }
   .user-stat-value{
-    font-size:16px;
+    font-size:17px;
     font-weight:900;
     color:var(--text);
     direction:ltr;
-    text-align:left;
+    text-align:right;
     font-variant-numeric:tabular-nums;
     display:block;
     line-height:1.2;
@@ -364,21 +434,22 @@
     -webkit-text-fill-color:transparent;
   }
 
-  /* ---- عملیات ---- */
   .user-actions{
-    display:flex;flex-direction:column;gap:8px;
-    padding:0 22px 22px;
+    display:flex;flex-direction:column;gap:10px;
+    padding:0 26px 26px;
+    position:relative;
+    z-index:2;
   }
   .user-action-btn{
-    display:flex;align-items:center;gap:12px;
-    padding:14px 16px;
-    border-radius:14px;
-    border:1px solid rgba(120,150,200,.15);
+    display:flex;align-items:center;gap:14px;
+    padding:15px 18px;
+    border-radius:16px;
+    border:1px solid rgba(120,150,200,.2);
     background:rgba(120,150,200,.04);
     color:var(--text);
-    font:inherit;font-size:13px;font-weight:700;
+    font:inherit;font-size:13.5px;font-weight:700;
     cursor:pointer;text-align:right;
-    transition:all .25s cubic-bezier(.2,.9,.3,1.1);
+    transition:all .28s cubic-bezier(.2,.9,.3,1.1);
     width:100%;
     position:relative;
     overflow:hidden;
@@ -386,20 +457,14 @@
   .user-action-btn::before{
     content:'';position:absolute;
     inset:0;
-    background:linear-gradient(135deg, rgba(91,140,255,.12), rgba(46,230,166,.06));
-    opacity:0;transition:opacity .25s;
+    background:linear-gradient(135deg, rgba(91,140,255,.18), rgba(46,230,166,.08));
+    opacity:0;transition:opacity .28s;
+    pointer-events:none;
   }
-  .user-action-btn:hover{
-    border-color:rgba(91,140,255,.4);
-    color:var(--blue);
-    transform:translateY(-1px);
-    box-shadow:0 10px 22px -10px rgba(91,140,255,.5);
-  }
-  .user-action-btn:hover::before{opacity:1}
-  .user-action-btn:active{transform:translateY(0) scale(.98)}
   .user-action-btn .ico{
-    font-size:18px;flex:0 0 24px;
+    font-size:20px;flex:0 0 26px;
     position:relative;z-index:1;
+    transition:transform .28s;
   }
   .user-action-btn .lbl{
     position:relative;z-index:1;
@@ -408,38 +473,66 @@
   .user-action-btn .arrow{
     position:relative;z-index:1;
     opacity:.4;font-size:16px;
-    transition:transform .25s;
+    transition:all .28s;
   }
+  .user-action-btn:hover{
+    border-color:rgba(91,140,255,.5);
+    color:var(--blue);
+    transform:translateY(-2px);
+    box-shadow:0 12px 26px -10px rgba(91,140,255,.5);
+  }
+  .user-action-btn:hover::before{opacity:1}
+  .user-action-btn:hover .ico{transform:scale(1.15) rotate(-5deg)}
   .user-action-btn:hover .arrow{
-    transform:translateX(-4px);
+    transform:translateX(-6px);
     opacity:1;
   }
+  .user-action-btn:active{transform:translateY(0) scale(.98)}
 
   .user-action-btn.danger{
     color:var(--red);
-    border-color:rgba(255,86,116,.25);
-    background:rgba(255,86,116,.05);
+    border-color:rgba(255,86,116,.3);
+    background:rgba(255,86,116,.06);
   }
   .user-action-btn.danger::before{
-    background:linear-gradient(135deg, rgba(255,86,116,.15), rgba(255,95,162,.08));
+    background:linear-gradient(135deg, rgba(255,86,116,.2), rgba(255,95,162,.1));
   }
   .user-action-btn.danger:hover{
-    border-color:rgba(255,86,116,.6);
+    border-color:rgba(255,86,116,.7);
     color:var(--red);
-    box-shadow:0 10px 22px -10px rgba(255,86,116,.5);
+    box-shadow:0 12px 26px -10px rgba(255,86,116,.6);
   }
 
-  /* ========== موبایل ========== */
+  .user-backdrop{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(3,4,10,.75);
+    backdrop-filter:blur(8px);
+    -webkit-backdrop-filter:blur(8px);
+    z-index:199;
+    opacity:0;
+    visibility:hidden;
+    transition:all .35s ease;
+  }
+
   @media (max-width: 640px) {
+    .user-backdrop{display:block}
+    .user-backdrop.show{
+      opacity:1;visibility:visible;
+    }
+
     .user-btn{
       padding:4px;gap:0;
-      width:44px;height:44px;
+      width:46px;height:46px;
       justify-content:center;
       max-width:none;
       overflow:visible;
+      background:linear-gradient(var(--card), var(--card)) padding-box,
+        linear-gradient(135deg, #2ee6a6, #5b8cff) border-box;
     }
     .user-name-mini{display:none}
-    .user-avatar{width:36px;height:36px;flex:0 0 36px}
+    .user-avatar{width:38px;height:38px;flex:0 0 38px}
 
     .user-dropdown{
       position:fixed;
@@ -450,7 +543,7 @@
       width:100vw;
       max-width:100vw;
       margin:0;
-      border-radius:28px 28px 0 0;
+      border-radius:30px 30px 0 0;
       padding:0;
       transform:translateY(100%);
       transform-origin:bottom center;
@@ -458,105 +551,73 @@
       overflow-y:auto;
       -webkit-overflow-scrolling:touch;
       box-shadow:
-        0 -30px 60px -20px rgba(0,0,0,.8),
-        0 -1px 0 rgba(255,255,255,.08) inset;
+        0 -30px 60px -20px rgba(0,0,0,.9),
+        0 -1px 0 rgba(255,255,255,.1) inset;
     }
 
-    /* هندر (دستگیره) بالای bottom sheet */
-    .user-dropdown::before{
-      content:'';
-      position:absolute;
+    .user-dropdown .user-bar{
       top:10px;
       left:50%;
+      right:auto;
       transform:translateX(-50%);
-      width:44px;
+      width:48px;
       height:5px;
       border-radius:3px;
-      background:rgba(120,150,200,.35);
-      border-radius:24px 24px 0 0;
-      z-index:10;
-      animation:none;
+      background:rgba(120,150,200,.4);
       background-image:none;
-    }
-
-    /* نوار رنگی زیر handlbar */
-    .user-dropdown::after{
-      content:'';
-      position:absolute;
-      top:0;left:0;right:0;height:4px;
-      background:linear-gradient(90deg,#2ee6a6 0%,#5b8cff 33%,#c78aff 66%,#ff5fa2 100%);
-      background-size:200% 100%;
-      animation:userBarShimmer 4s linear infinite;
-      border-radius:28px 28px 0 0;
-      z-index:9;
+      animation:none;
+      box-shadow:0 0 0 1px rgba(255,255,255,.05);
+      z-index:20;
     }
 
     .user-dropdown.open{transform:translateY(0)}
 
-    /* Backdrop تاریک پشت پنل */
-    .user-backdrop{
-      position:fixed;
-      inset:0;
-      background:rgba(3,4,10,.7);
-      backdrop-filter:blur(8px);
-      -webkit-backdrop-filter:blur(8px);
-      z-index:199;
-      opacity:0;
-      visibility:hidden;
-      transition:all .35s ease;
-    }
-    .user-backdrop.show{
-      opacity:1;visibility:visible;
-    }
-
     .user-header{
-      padding:36px 22px 22px;
-      text-align:center;
+      padding:44px 22px 24px;
     }
     .user-avatar-big{
-      width:80px;height:80px;
-      font-size:34px;
-      border-radius:26px;
-      flex:0 0 80px;
-      margin:0 auto 16px;
+      width:96px;height:96px;
+      font-size:40px;
+      border-radius:30px;
+      margin-bottom:20px;
     }
     .user-display-name{
-      font-size:22px;
-      text-align:center;
+      font-size:24px;
     }
     .user-display-email{
-      font-size:11.5px;
-      justify-content:center;
-      max-width:100%;
+      font-size:12px;
+      padding:7px 16px;
     }
 
     .user-stats{
-      padding:0 22px 16px;
-      gap:10px;
+      padding:0 22px 18px;
+      gap:12px;
     }
-    .user-stat-card{padding:14px 12px 12px}
-    .user-stat-value{font-size:15px}
+    .user-stat-card{padding:16px 14px 14px}
+    .user-stat-icon{font-size:24px;margin-bottom:10px}
+    .user-stat-label{font-size:11px}
+    .user-stat-value{font-size:18px}
 
     .user-actions{
-      padding:0 22px calc(28px + env(safe-area-inset-bottom, 0px));
-      gap:10px;
+      padding:0 22px calc(30px + env(safe-area-inset-bottom, 0px));
+      gap:12px;
     }
-    .user-action-btn{padding:16px 18px;font-size:14px;border-radius:16px}
-    .user-action-btn .ico{font-size:20px;flex:0 0 26px}
+    .user-action-btn{padding:17px 20px;font-size:14.5px;border-radius:18px}
+    .user-action-btn .ico{font-size:22px;flex:0 0 28px}
     .user-action-btn .arrow{font-size:18px}
   }
 
-  /* ========== موبایل خیلی کوچک ========== */
   @media (max-width: 380px) {
-    .user-avatar-big{width:68px;height:68px;font-size:28px;flex:0 0 68px;border-radius:22px}
-    .user-display-name{font-size:19px}
-    .user-display-email{font-size:10.5px;padding:4px 10px}
-    .user-stats{padding:0 16px 14px}
-    .user-stat-card{padding:12px 10px 10px}
+    .user-avatar-big{width:84px;height:84px;font-size:34px;border-radius:26px}
+    .user-display-name{font-size:21px}
+    .user-display-email{font-size:11px;padding:6px 12px}
+    .user-stats{padding:0 18px 16px}
+    .user-stat-card{padding:14px 12px 12px}
+    .user-stat-icon{font-size:22px}
     .user-stat-label{font-size:10px}
-    .user-stat-value{font-size:14px}
-    .user-actions{padding:0 16px calc(24px + env(safe-area-inset-bottom, 0px))}
-    .user-action-btn{padding:14px 16px;font-size:13px}
+    .user-stat-value{font-size:16px}
+    .user-actions{padding:0 18px calc(26px + env(safe-area-inset-bottom, 0px))}
+    .user-action-btn{padding:15px 16px;font-size:13.5px}
   }
 </style>
 </head>
@@ -627,17 +688,16 @@
           <span class="user-name-mini" id="userNameMini">...</span>
         </button>
         <div class="user-dropdown" id="userDropdown" role="dialog" aria-modal="true">
+          <div class="user-bar"></div>
           <div class="user-header">
             <div class="user-avatar-big" id="userAvatarBig">?</div>
-            <div class="user-info-main">
-              <div class="user-display-name" id="userDisplayName">—</div>
-              <div class="user-display-email" id="userDisplayEmail">—</div>
-            </div>
+            <div class="user-display-name" id="userDisplayName">—</div>
+            <div class="user-display-email" id="userDisplayEmail">—</div>
           </div>
           <div class="user-stats">
             <div class="user-stat-card">
               <span class="user-stat-icon">📅</span>
-              <span class="user-stat-label">عضویت از</span>
+              <span class="user-stat-label">عضویت</span>
               <span class="user-stat-value" id="userJoined">—</span>
             </div>
             <div class="user-stat-card">
@@ -1015,10 +1075,8 @@
 
 </div>
 
-<!-- Backdrop برای موبایل -->
 <div class="user-backdrop" id="userBackdrop"></div>
 
-<!-- ========== AUTH GUARD + ACCOUNT PANEL (Supabase) ========== -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 (function(){
@@ -1039,10 +1097,16 @@
   const userWrap = document.getElementById('userWrap');
   const userBackdrop = document.getElementById('userBackdrop');
 
+  function isMobile(){
+    return window.matchMedia('(max-width: 640px)').matches;
+  }
+
   function openDropdown(){
     userDropdown.classList.add('open');
-    userBackdrop.classList.add('show');
-    document.body.style.overflow = 'hidden';
+    if (isMobile()) {
+      userBackdrop.classList.add('show');
+      document.body.style.overflow = 'hidden';
+    }
   }
   function closeDropdown(){
     userDropdown.classList.remove('open');
@@ -1062,7 +1126,8 @@
   userBackdrop.addEventListener('click', closeDropdown);
 
   document.addEventListener('click', (e) => {
-    if (!userWrap.contains(e.target) && !userDropdown.contains(e.target)) {
+    if (isMobile()) return;
+    if (!userWrap.contains(e.target)) {
       closeDropdown();
     }
   });
@@ -1071,9 +1136,17 @@
     if (e.key === 'Escape') closeDropdown();
   });
 
-  // جلوگیری از بسته شدن وقتی روی dropdown کلیک می‌شه
   userDropdown.addEventListener('click', (e) => {
     e.stopPropagation();
+  });
+
+  let lastMobileState = isMobile();
+  window.addEventListener('resize', () => {
+    const nowMobile = isMobile();
+    if (nowMobile !== lastMobileState) {
+      closeDropdown();
+      lastMobileState = nowMobile;
+    }
   });
 
   function getInitial(name, email){
@@ -1162,7 +1235,6 @@
 
 <script src="app.js"></script>
 
-<!-- ========== BANNER SCRIPT v22 ========== -->
 <script>
 (function () {
   'use strict';
