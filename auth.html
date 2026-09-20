@@ -61,6 +61,8 @@ input::placeholder{color:#6a7a95;opacity:.7}
 .toggle-pass{position:absolute;left:8px;top:50%;transform:translateY(-50%);width:38px;height:38px;border:0;background:transparent;color:#8697b8;font-size:15px;cursor:pointer;border-radius:10px;display:grid;place-items:center;transition:all .2s}
 .toggle-pass:hover{background:rgba(255,255,255,.06);color:#eef3ff;transform:translateY(-50%) scale(1.05)}
 .toggle-pass:active{transform:translateY(-50%) scale(.9)}
+
+/* Password Strength */
 .pass-meter{margin-top:10px;animation:fieldIn .3s ease}
 .pass-meter-bar{height:5px;background:rgba(120,150,200,.12);border-radius:5px;overflow:hidden;display:flex;gap:3px}
 .pass-meter-bar span{flex:1;height:100%;background:rgba(120,150,200,.15);border-radius:3px;transition:all .3s ease}
@@ -78,11 +80,15 @@ input::placeholder{color:#6a7a95;opacity:.7}
 .pass-rule.ok .dot{background:rgba(46,230,166,.15);border-color:#2ee6a6;color:#2ee6a6}
 .pass-rule.bad{color:#ff95a8}
 .pass-rule.bad .dot{background:rgba(255,86,116,.15);border-color:#ff5674;color:#ff5674}
+
+/* Messages */
 .msg{font-size:12.5px;font-weight:700;border-radius:13px;padding:12px 15px;display:none;align-items:center;gap:10px;animation:msgIn .35s cubic-bezier(.2,.9,.3,1.1)}
 .msg.show{display:flex}
 @keyframes msgIn{from{opacity:0;transform:translateY(-10px) scale(.95)}to{opacity:1;transform:none}}
 .msg.err{color:#ff95a8;background:rgba(255,86,116,.1);border:1px solid rgba(255,86,116,.3);box-shadow:0 8px 24px -10px rgba(255,86,116,.5)}
 .msg.ok{color:#a0e0b0;background:rgba(46,230,166,.1);border:1px solid rgba(46,230,166,.3);box-shadow:0 8px 24px -10px rgba(46,230,166,.5)}
+
+/* Submit */
 .btn-submit{position:relative;width:100%;padding:17px;border-radius:15px;border:0;background:linear-gradient(135deg,#2ee6a6 0%,#12b57f 100%);color:#04170f;font:inherit;font-size:15px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;overflow:hidden;transition:transform .25s, box-shadow .25s;box-shadow:0 15px 40px -12px rgba(46,230,166,.8),inset 0 1px 0 rgba(255,255,255,.25);letter-spacing:.3px;margin-top:4px}
 .btn-submit:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 22px 50px -12px rgba(46,230,166,1),inset 0 1px 0 rgba(255,255,255,.25)}
 .btn-submit:active:not(:disabled){transform:translateY(0) scale(.98)}
@@ -93,17 +99,21 @@ input::placeholder{color:#6a7a95;opacity:.7}
 .btn-submit.loading .spinner{display:block}
 .btn-submit.loading span:last-child{opacity:.7}
 @keyframes spin{to{transform:rotate(360deg)}}
+
 .foot{text-align:center;margin-top:18px;font-size:12px;color:#6a7a95;position:relative;z-index:1}
 .foot a{color:#2ee6a6;text-decoration:none;font-weight:700;cursor:pointer;position:relative;transition:color .2s}
 .foot a::after{content:'';position:absolute;bottom:-2px;right:0;width:0;height:1.5px;background:#2ee6a6;transition:width .3s}
 .foot a:hover{color:#5bffc7}
 .foot a:hover::after{width:100%}
+
+/* Splash */
 .splash{position:fixed;inset:0;z-index:9999;background:radial-gradient(circle at center,#0a1226 0%,#03040a 70%);display:grid;place-items:center;opacity:0;pointer-events:none;transition:opacity .4s ease}
 .splash.show{opacity:1;pointer-events:auto}
 .splash-inner{display:flex;flex-direction:column;align-items:center;gap:22px}
 .splash-logo{width:70px;height:70px;border-radius:22px;display:grid;place-items:center;font-size:32px;background:linear-gradient(135deg,rgba(46,230,166,.25),rgba(91,140,255,.25));border:1.5px solid rgba(46,230,166,.5);animation:logoBounce 1.5s ease-in-out infinite;box-shadow:0 20px 50px -15px rgba(46,230,166,.7)}
 .splash-text{font-size:14px;color:#8697b8;letter-spacing:2px;animation:pulseText 1.5s ease-in-out infinite}
 @keyframes pulseText{0%,100%{opacity:.5}50%{opacity:1}}
+
 @media (max-width:480px){
   body{padding:14px}
   .auth-card{padding:32px 22px 26px;border-radius:24px}
@@ -144,20 +154,21 @@ input::placeholder{color:#6a7a95;opacity:.7}
       <button class="tab-btn" id="tabSignup" type="button">ثبت‌نام</button>
     </div>
 
+    <!-- ============ LOGIN FORM ============ -->
     <form class="form" id="loginForm">
       <div class="field">
         <label>📧 ایمیل</label>
         <div class="input-wrap">
           <span class="ico">✉️</span>
-          <input type="email" id="loginEmail" placeholder="you@example.com" required>
+          <input type="email" id="loginEmail" placeholder="you@example.com" required autocomplete="email">
         </div>
       </div>
       <div class="field">
         <label>🔐 رمز عبور</label>
         <div class="input-wrap">
           <span class="ico">🔒</span>
-          <input type="password" id="loginPassword" placeholder="••••••••" required>
-          <button type="button" class="toggle-pass" data-target="loginPassword">👁️</button>
+          <input type="password" id="loginPassword" placeholder="••••••••" required autocomplete="current-password">
+          <button type="button" class="toggle-pass" data-target="loginPassword" tabindex="-1">👁️</button>
         </div>
       </div>
       <div class="msg err" id="loginMsg"><span>⚠️</span><span id="loginMsgText"></span></div>
@@ -169,12 +180,13 @@ input::placeholder{color:#6a7a95;opacity:.7}
       <div class="foot"><a id="forgotPass">رمزت رو فراموش کردی؟</a></div>
     </form>
 
+    <!-- ============ SIGNUP FORM ============ -->
     <form class="form" id="signupForm" style="display:none">
       <div class="field">
         <label>📧 ایمیل</label>
         <div class="input-wrap">
           <span class="ico">✉️</span>
-          <input type="email" id="signupEmail" placeholder="you@example.com" required>
+          <input type="email" id="signupEmail" placeholder="you@example.com" required autocomplete="email">
         </div>
       </div>
       <div class="field">
@@ -182,7 +194,7 @@ input::placeholder{color:#6a7a95;opacity:.7}
         <div class="input-wrap">
           <span class="ico">🔒</span>
           <input type="password" id="signupPassword" placeholder="حداقل ۸ کاراکتر" required autocomplete="new-password">
-          <button type="button" class="toggle-pass" data-target="signupPassword">👁️</button>
+          <button type="button" class="toggle-pass" data-target="signupPassword" tabindex="-1">👁️</button>
         </div>
         <div class="pass-meter" id="passMeter" style="display:none">
           <div class="pass-meter-bar">
@@ -224,197 +236,295 @@ input::placeholder{color:#6a7a95;opacity:.7}
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const SUPABASE_URL = 'https://rodguhcuatixdbzwjfvy.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJvZGd1aGN1YXRpeGRiendqZnZ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk5MTgyMTMsImV4cCI6MjEwNTQ5NDIxM30.oXGyCA3jOcsS5inqsXuSOhELZLoUG7pYagZox1SEmhY';
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-const $ = id => document.getElementById(id);
+(function(){
+  'use strict';
 
-/* ============ مهم: نام فایل اصلی = index.html (حروف کوچک) ============ */
-const MAIN_PAGE = 'index.html';
+  /* ============ CONFIG ============ */
+  var SUPABASE_URL = 'https://rodguhcuatixdbzwjfvy.supabase.co';
+  var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJvZGd1aGN1YXRpeGRiendqZnZ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk5MTgyMTMsImV4cCI6MjEwNTQ5NDIxM30.oXGyCA3jOcsS5inqsXuSOhELZLoUG7pYagZox1SEmhY';
 
-(function createParticles(){
-  const wrap = $('particles');
-  if (!wrap) return;
-  const colors = ['#2ee6a6', '#5b8cff', '#ff5fa2', '#c78aff'];
-  for (let i = 0; i < 25; i++) {
-    const p = document.createElement('span');
-    p.className = 'particle';
-    p.style.left = Math.random() * 100 + '%';
-    p.style.color = colors[Math.floor(Math.random() * colors.length)];
-    p.style.background = 'currentColor';
-    p.style.animationDuration = (8 + Math.random() * 12) + 's';
-    p.style.animationDelay = (-Math.random() * 20) + 's';
-    p.style.width = p.style.height = (2 + Math.random() * 3) + 'px';
-    wrap.appendChild(p);
+  /* ============ URLs ============ */
+  var MAIN_PAGE = 'index.html';
+  var CONFIRM_PAGE = 'https://iqzeus.github.io/PO-TREAD/confirm.html';
+  var RESET_PAGE = 'https://iqzeus.github.io/PO-TREAD/reset-password.html';
+
+  var sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  var $ = function(id){ return document.getElementById(id); };
+
+  /* ============ PARTICLES ============ */
+  (function createParticles(){
+    var wrap = $('particles');
+    if (!wrap) return;
+    var colors = ['#2ee6a6', '#5b8cff', '#ff5fa2', '#c78aff'];
+    for (var i = 0; i < 25; i++) {
+      var p = document.createElement('span');
+      p.className = 'particle';
+      p.style.left = (Math.random() * 100) + '%';
+      p.style.color = colors[Math.floor(Math.random() * colors.length)];
+      p.style.background = 'currentColor';
+      p.style.animationDuration = (8 + Math.random() * 12) + 's';
+      p.style.animationDelay = (-Math.random() * 20) + 's';
+      p.style.width = p.style.height = (2 + Math.random() * 3) + 'px';
+      wrap.appendChild(p);
+    }
+  })();
+
+  /* ============ MESSAGES ============ */
+  function showErr(f, m){
+    var msgEl = $(f + 'Msg');
+    var txtEl = $(f + 'MsgText');
+    var okEl = $(f + 'Ok');
+    if (!msgEl || !txtEl) return;
+    txtEl.textContent = m;
+    msgEl.classList.add('show');
+    if (okEl) okEl.classList.remove('show');
+    setTimeout(function(){ msgEl.classList.remove('show'); }, 6000);
   }
-})();
+  function showOk(f, m){
+    var msgEl = $(f + 'Msg');
+    var okEl = $(f + 'Ok');
+    var txtEl = $(f + 'OkText');
+    if (!okEl || !txtEl) return;
+    txtEl.textContent = m;
+    okEl.classList.add('show');
+    if (msgEl) msgEl.classList.remove('show');
+  }
 
-function showErr(f, m){
-  $(f+'MsgText').textContent = m;
-  $(f+'Msg').classList.add('show');
-  $(f+'Ok').classList.remove('show');
-  setTimeout(() => $(f+'Msg').classList.remove('show'), 6000);
-}
-function showOk(f, m){
-  $(f+'OkText').textContent = m;
-  $(f+'Ok').classList.add('show');
-  $(f+'Msg').classList.remove('show');
-}
-
-$('tabLogin').addEventListener('click', () => {
-  $('tabLogin').classList.add('active');
-  $('tabSignup').classList.remove('active');
-  $('tabs').classList.remove('signup-mode');
-  $('loginForm').style.display = '';
-  $('signupForm').style.display = 'none';
-});
-$('tabSignup').addEventListener('click', () => {
-  $('tabSignup').classList.add('active');
-  $('tabLogin').classList.remove('active');
-  $('tabs').classList.add('signup-mode');
-  $('signupForm').style.display = '';
-  $('loginForm').style.display = 'none';
-  setTimeout(() => $('signupEmail').focus(), 100);
-});
-
-document.querySelectorAll('.toggle-pass').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const inp = $(btn.dataset.target);
-    inp.type = inp.type === 'password' ? 'text' : 'password';
-    btn.textContent = inp.type === 'password' ? '👁️' : '🙈';
+  /* ============ TABS ============ */
+  $('tabLogin').addEventListener('click', function(){
+    $('tabLogin').classList.add('active');
+    $('tabSignup').classList.remove('active');
+    $('tabs').classList.remove('signup-mode');
+    $('loginForm').style.display = '';
+    $('signupForm').style.display = 'none';
   });
-});
-
-function checkPassword(pass) {
-  return {
-    length:  pass.length >= 8,
-    lower:   /[a-z]/.test(pass),
-    upper:   /[A-Z]/.test(pass),
-    number:  /[0-9]/.test(pass),
-    special: /[^A-Za-z0-9]/.test(pass)
-  };
-}
-function renderStrength(pass) {
-  const meter = $('passMeter');
-  const rules = $('passRules');
-  const label = $('passLabel');
-  if (!pass) {
-    meter.style.display = 'none';
-    rules.style.display = 'none';
-    return;
-  }
-  meter.style.display = '';
-  rules.style.display = '';
-  const c = checkPassword(pass);
-  const score = Object.values(c).filter(Boolean).length;
-  const segs = [$('pm1'),$('pm2'),$('pm3'),$('pm4'),$('pm5')];
-  segs.forEach(s => s.className = '');
-  let level = 'weak';
-  let onCls = 'on-weak';
-  if (score >= 5 && pass.length >= 10) { level = 'strong'; onCls = 'on-strong'; }
-  else if (score >= 3) { level = 'medium'; onCls = 'on-medium'; }
-  const fillCount = level === 'strong' ? 5 : level === 'medium' ? 3 : Math.max(1, score);
-  for (let i = 0; i < fillCount; i++) segs[i].className = onCls;
-  label.className = 'pass-meter-label ' + level;
-  label.textContent = level === 'strong' ? '💪 قوی' : level === 'medium' ? '⚠️ متوسط' : '🔴 ضعیف';
-  document.querySelectorAll('.pass-rule').forEach(el => {
-    const k = el.dataset.rule;
-    const ok = c[k];
-    el.classList.toggle('ok', ok);
-    el.classList.toggle('bad', pass.length > 0 && !ok);
+  $('tabSignup').addEventListener('click', function(){
+    $('tabSignup').classList.add('active');
+    $('tabLogin').classList.remove('active');
+    $('tabs').classList.add('signup-mode');
+    $('signupForm').style.display = '';
+    $('loginForm').style.display = 'none';
+    setTimeout(function(){ $('signupEmail').focus(); }, 100);
   });
-}
-$('signupPassword').addEventListener('input', e => renderStrength(e.target.value));
 
-$('loginForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const email = $('loginEmail').value.trim();
-  const pass  = $('loginPassword').value;
-  if (!email || !pass) return showErr('login', 'ایمیل و رمز عبور را وارد کن');
-  const btn = $('btnLogin');
-  btn.classList.add('loading'); btn.disabled = true;
-  const { error } = await sb.auth.signInWithPassword({ email, password: pass });
-  if (error) {
-    btn.classList.remove('loading'); btn.disabled = false;
-    showErr('login', mapError(error.message));
-  } else {
-    $('splash').classList.add('show');
-    setTimeout(() => window.location.href = MAIN_PAGE, 600);
+  /* ============ TOGGLE PASSWORD ============ */
+  document.querySelectorAll('.toggle-pass').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var inp = $(btn.dataset.target);
+      if (!inp) return;
+      inp.type = inp.type === 'password' ? 'text' : 'password';
+      btn.textContent = inp.type === 'password' ? '👁️' : '🙈';
+    });
+  });
+
+  /* ============ PASSWORD CHECK ============ */
+  function checkPassword(pass){
+    return {
+      length:  pass.length >= 8,
+      lower:   /[a-z]/.test(pass),
+      upper:   /[A-Z]/.test(pass),
+      number:  /[0-9]/.test(pass),
+      special: /[^A-Za-z0-9]/.test(pass)
+    };
   }
-});
 
-$('signupForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const email = $('signupEmail').value.trim();
-  const pass  = $('signupPassword').value;
-  const pass2 = $('signupPassword2').value;
+  function renderStrength(pass){
+    var meter = $('passMeter');
+    var rules = $('passRules');
+    var label = $('passLabel');
+    if (!meter || !rules || !label) return;
 
-  const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!email || !emailRe.test(email)) return showErr('signup', 'ایمیل نامعتبره');
-  if (!pass) return showErr('signup', 'رمز عبور را وارد کن');
+    if (!pass) {
+      meter.style.display = 'none';
+      rules.style.display = 'none';
+      return;
+    }
+    meter.style.display = '';
+    rules.style.display = '';
 
-  const c = checkPassword(pass);
-  const missing = [];
-  if (!c.length)  missing.push('۸ کاراکتر');
-  if (!c.lower)   missing.push('حرف کوچک');
-  if (!c.upper)   missing.push('حرف بزرگ');
-  if (!c.number)  missing.push('عدد');
-  if (!c.special) missing.push('علامت خاص');
+    var c = checkPassword(pass);
+    var score = 0;
+    for (var k in c) if (c[k]) score++;
 
-  if (missing.length) {
-    return showErr('signup', 'رمز ضعیفه — این‌ها لازمه: ' + missing.join('، '));
+    var segs = [$('pm1'), $('pm2'), $('pm3'), $('pm4'), $('pm5')];
+    segs.forEach(function(s){ if (s) s.className = ''; });
+
+    var level = 'weak';
+    var onCls = 'on-weak';
+    if (score >= 5 && pass.length >= 10) { level = 'strong'; onCls = 'on-strong'; }
+    else if (score >= 3) { level = 'medium'; onCls = 'on-medium'; }
+
+    var fillCount = level === 'strong' ? 5 : level === 'medium' ? 3 : Math.max(1, score);
+    for (var i = 0; i < fillCount; i++) if (segs[i]) segs[i].className = onCls;
+
+    label.className = 'pass-meter-label ' + level;
+    label.textContent = level === 'strong' ? '💪 قوی' : level === 'medium' ? '⚠️ متوسط' : '🔴 ضعیف';
+
+    document.querySelectorAll('.pass-rule').forEach(function(el){
+      var k = el.dataset.rule;
+      var ok = c[k];
+      el.classList.toggle('ok', ok);
+      el.classList.toggle('bad', pass.length > 0 && !ok);
+    });
   }
-  if (pass !== pass2) return showErr('signup', 'رمزها یکسان نیستند');
 
-  const btn = $('btnSignup');
-  btn.classList.add('loading'); btn.disabled = true;
+  $('signupPassword').addEventListener('input', function(e){
+    renderStrength(e.target.value);
+  });
 
-  const { error } = await sb.auth.signUp({
-    email,
-    password: pass,
-    options: {
-      emailRedirectTo: 'https://iqzeus.github.io/PO-TREAD/confirm.html'
+  /* ============ LOGIN ============ */
+  $('loginForm').addEventListener('submit', async function(e){
+    e.preventDefault();
+    var email = $('loginEmail').value.trim();
+    var pass  = $('loginPassword').value;
+
+    if (!email || !pass) {
+      showErr('login', 'ایمیل و رمز عبور را وارد کن');
+      return;
+    }
+
+    var btn = $('btnLogin');
+    btn.classList.add('loading');
+    btn.disabled = true;
+
+    try {
+      var result = await sb.auth.signInWithPassword({ email: email, password: pass });
+
+      if (result.error) {
+        btn.classList.remove('loading');
+        btn.disabled = false;
+        showErr('login', mapError(result.error.message));
+        return;
+      }
+
+      $('splash').classList.add('show');
+      setTimeout(function(){ window.location.href = MAIN_PAGE; }, 600);
+
+    } catch (err) {
+      btn.classList.remove('loading');
+      btn.disabled = false;
+      showErr('login', 'خطای شبکه. اتصالت رو بررسی کن.');
     }
   });
 
-  if (error) {
-    btn.classList.remove('loading'); btn.disabled = false;
-    showErr('signup', mapError(error.message));
-  } else {
-    showOk('signup', '✅ حساب ساخته شد! یه ایمیل برات فرستادیم، تأییدش کن.');
-    btn.classList.remove('loading'); btn.disabled = false;
-  }
-});
+  /* ============ SIGNUP ============ */
+  $('signupForm').addEventListener('submit', async function(e){
+    e.preventDefault();
+    var email = $('signupEmail').value.trim();
+    var pass  = $('signupPassword').value;
+    var pass2 = $('signupPassword2').value;
 
-$('forgotPass').addEventListener('click', async () => {
-  const email = $('loginEmail').value.trim();
-  if (!email) return showErr('login', 'اول ایمیلت رو وارد کن');
-  const { error } = await sb.auth.resetPasswordForEmail(email, {
-    redirectTo: 'https://iqzeus.github.io/PO-TREAD/auth.html'
+    var emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email || !emailRe.test(email)) {
+      showErr('signup', 'ایمیل نامعتبره');
+      return;
+    }
+    if (!pass) {
+      showErr('signup', 'رمز عبور را وارد کن');
+      return;
+    }
+
+    var c = checkPassword(pass);
+    var missing = [];
+    if (!c.length)  missing.push('۸ کاراکتر');
+    if (!c.lower)   missing.push('حرف کوچک');
+    if (!c.upper)   missing.push('حرف بزرگ');
+    if (!c.number)  missing.push('عدد');
+    if (!c.special) missing.push('علامت خاص');
+
+    if (missing.length) {
+      showErr('signup', 'رمز ضعیفه — این‌ها لازمه: ' + missing.join('، '));
+      return;
+    }
+    if (pass !== pass2) {
+      showErr('signup', 'رمزها یکسان نیستند');
+      return;
+    }
+
+    var btn = $('btnSignup');
+    btn.classList.add('loading');
+    btn.disabled = true;
+
+    try {
+      var result = await sb.auth.signUp({
+        email: email,
+        password: pass,
+        options: {
+          emailRedirectTo: CONFIRM_PAGE
+        }
+      });
+
+      if (result.error) {
+        btn.classList.remove('loading');
+        btn.disabled = false;
+        showErr('signup', mapError(result.error.message));
+        return;
+      }
+
+      showOk('signup', '✅ حساب ساخته شد! یه ایمیل برات فرستادیم، تأییدش کن.');
+      btn.classList.remove('loading');
+      btn.disabled = false;
+
+    } catch (err) {
+      btn.classList.remove('loading');
+      btn.disabled = false;
+      showErr('signup', 'خطای شبکه. اتصالت رو بررسی کن.');
+    }
   });
-  if (error) showErr('login', mapError(error.message));
-  else showOk('login', 'ایمیل بازیابی ارسال شد ✅');
-});
 
-sb.auth.getSession().then(({ data }) => {
-  if (data && data.session) {
-    $('splash').classList.add('show');
-    setTimeout(() => window.location.href = MAIN_PAGE, 400);
+  /* ============ FORGOT PASSWORD ============ */
+  $('forgotPass').addEventListener('click', async function(){
+    var email = $('loginEmail').value.trim();
+    if (!email) {
+      showErr('login', 'اول ایمیلت رو وارد کن بعد روی «فراموشی رمز» بزن');
+      return;
+    }
+
+    try {
+      var result = await sb.auth.resetPasswordForEmail(email, {
+        redirectTo: RESET_PAGE
+      });
+
+      if (result.error) {
+        showErr('login', mapError(result.error.message));
+        return;
+      }
+
+      showOk('login', 'ایمیل بازیابی ارسال شد ✅ صندوقت رو چک کن');
+    } catch (err) {
+      showErr('login', 'خطای شبکه. اتصالت رو بررسی کن.');
+    }
+  });
+
+  /* ============ AUTO LOGIN ============ */
+  sb.auth.getSession().then(function(result){
+    if (result && result.data && result.data.session) {
+      $('splash').classList.add('show');
+      setTimeout(function(){ window.location.href = MAIN_PAGE; }, 400);
+    }
+  }).catch(function(e){
+    console.warn('Session check error:', e);
+  });
+
+  /* ============ ERROR MAP ============ */
+  function mapError(msg){
+    var m = {
+      'Invalid login credentials': 'ایمیل یا رمز عبور اشتباهه',
+      'User already registered': 'این ایمیل قبلاً ثبت شده',
+      'Email not confirmed': 'ایمیلت تأیید نشده — صندوق ایمیلت رو چک کن',
+      'Password should be at least 6 characters': 'رمز باید حداقل ۶ کاراکتر باشه',
+      'Unable to validate email address: invalid format': 'ایمیل نامعتبره',
+      'For security purposes, you can only request this after': 'کمی صبر کن و دوباره امتحان کن',
+      'Email rate limit exceeded': 'تعداد ایمیل‌ها زیاد شده. کمی بعد امتحان کن',
+      'Signups not allowed for this instance': 'ثبت‌نام جدید در این لحظه ممکن نیست'
+    };
+    for (var k in m) {
+      if (msg && msg.indexOf(k) !== -1) return m[k];
+    }
+    return msg || 'خطا رخ داد';
   }
-});
 
-function mapError(msg){
-  const m = {
-    'Invalid login credentials': 'ایمیل یا رمز عبور اشتباهه',
-    'User already registered': 'این ایمیل قبلاً ثبت شده',
-    'Email not confirmed': 'ایمیلت تأیید نشده — صندوق ایمیلت رو چک کن',
-    'Password should be at least 6 characters': 'رمز باید حداقل ۶ کاراکتر باشه',
-    'Unable to validate email address: invalid format': 'ایمیل نامعتبره',
-    'For security purposes, you can only request this after': 'کمی صبر کن و دوباره امتحان کن'
-  };
-  for (const k in m) if (msg && msg.includes(k)) return m[k];
-  return msg || 'خطا رخ داد';
-}
+})();
 </script>
 </body>
 </html>
