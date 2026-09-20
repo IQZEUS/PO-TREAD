@@ -1,6 +1,5 @@
 /* ============================================================
-   PO-TRADE Sync — Supabase Trades Sync
-   بین همه دستگاه‌ها معاملات رو همگام می‌کنه
+   PO-TRADE Sync — SAFE VERSION (No Auto-Delete)
    ============================================================ */
 (function() {
   'use strict';
@@ -10,146 +9,178 @@
   const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   const TRADES_KEY = 'po.v4.trades';
+  const DELETED_KEY = 'po.v4.deleted';
   const origSetItem = localStorage.setItem.bind(localStorage);
   let currentUserId = null;
   let skipNext = false;
   let pushTimer = null;
+  let bootCompleted = false;
 
-  // ============ Override localStorage.setItem ============
+  function getDeletedIds() {
+    try { return new Set(JSON.parse(localStorage.getItem(DELETED_KEY) || '[]')); }
+    catch(e) { return new Set(); }
+  }
+  function addDeletedId(id) {
+    var s = getDeletedIds();
+    s.add(id);
+    try { origSetItem(DELETED_KEY, JSON.stringify([...s])); } catch(e){}
+  }
+  function clearDeletedIds() {
+    try { origSetItem(DELETED_KEY, '[]'); } catch(e){}
+  }
+
   localStorage.setItem = function(key, value) {
     origSetItem(key, value);
-    if (key === TRADES_KEY && !skipNext && currentUserId) {
+    if (key === TRADES_KEY && !skipNext && currentUserId && bootCompleted) {
       clearTimeout(pushTimer);
-      pushTimer = setTimeout(() => {
+      pushTimer = setTimeout(function() {
         pushTrades(value, currentUserId);
-      }, 800);
+      }, 1200);
     }
     skipNext = false;
   };
 
-  // ============ Push به Supabase ============
   async function pushTrades(jsonStr, userId) {
     try {
-      const trades = JSON.parse(jsonStr);
+      var trades = JSON.parse(jsonStr);
       if (!Array.isArray(trades)) return;
 
-      const { data: existing, error: fetchErr } = await sb
+      if (trades.length === 0) {
+        console.log('[Sync] ⚠️ local خالیه — push لغو شد');
+        return;
+      }
+
+      var { data: existing, error: fetchErr } = await sb
         .from('trades')
         .select('trade_id')
         .eq('user_id', userId);
       if (fetchErr) throw fetchErr;
 
-      const existingIds = new Set((existing || []).map(r => r.trade_id));
-      const localIds = new Set(trades.map(t => t.id));
+      var existingIds = new Set((existing || []).map(function(r){ return r.trade_id; }));
+      var localIds = new Set(trades.map(function(t){ return t.id; }));
 
-      // درج جدیدها
-      const toInsert = trades
-        .filter(t => !existingIds.has(t.id))
-        .map(t => ({ user_id: userId, trade_id: t.id, data: t }));
+      var toInsert = trades
+        .filter(function(t){ return !existingIds.has(t.id); })
+        .map(function(t){ return { user_id: userId, trade_id: t.id, data: t }; });
 
       if (toInsert.length > 0) {
-        const { error } = await sb.from('trades').insert(toInsert);
+        var { error } = await sb.from('trades').insert(toInsert);
         if (error) throw error;
+        console.log('[Sync] ➕ ' + toInsert.length + ' معامله اضافه شد');
       }
 
-      // حذف‌شده‌ها
-      const toDelete = [...existingIds].filter(id => !localIds.has(id));
-      if (toDelete.length > 0) {
-        const { error } = await sb
-          .from('trades')
-          .delete()
-          .eq('user_id', userId)
-          .in('trade_id', toDelete);
-        if (error) throw error;
-      }
-
-      // آپدیت موجودها
-      const toUpdate = trades.filter(t => existingIds.has(t.id));
-      for (const t of toUpdate) {
+      var toUpdate = trades.filter(function(t){ return existingIds.has(t.id); });
+      for (var i = 0; i < toUpdate.length; i++) {
+        var t = toUpdate[i];
         await sb
           .from('trades')
           .update({ data: t, updated_at: new Date().toISOString() })
           .eq('user_id', userId)
           .eq('trade_id', t.id);
       }
+      if (toUpdate.length > 0) {
+        console.log('[Sync] 🔄 ' + toUpdate.length + ' معامله آپدیت شد');
+      }
 
-      console.log('[Sync] ✅ پوش شد:', trades.length, 'معامله');
+      var deletedIds = getDeletedIds();
+      var toDelete = [...deletedIds].filter(function(id){ return existingIds.has(id); });
+      if (toDelete.length > 0) {
+        var { error: delErr } = await sb
+          .from('trades')
+          .delete()
+          .eq('user_id', userId)
+          .in('trade_id', toDelete);
+        if (delErr) throw delErr;
+        console.log('[Sync] 🗑️ ' + toDelete.length + ' معامله حذف شد (به‌درخواست کاربر)');
+        clearDeletedIds();
+      }
+
+      console.log('[Sync] ✅ پوش کامل — مجموع: ' + trades.length);
     } catch (e) {
       console.error('[Sync] ❌ خطای پوش:', e);
     }
   }
 
-  // ============ بارگذاری و merge ============
+  function detectDeletions(newTrades, oldTrades) {
+    var newIds = new Set(newTrades.map(function(t){ return t.id; }));
+    oldTrades.forEach(function(t) {
+      if (!newIds.has(t.id)) {
+        addDeletedId(t.id);
+        console.log('[Sync] 📌 معامله حذف‌شده ثبت شد:', t.id);
+      }
+    });
+  }
+
   async function boot() {
     try {
-      const { data: { session } } = await sb.auth.getSession();
+      var { data: { session } } = await sb.auth.getSession();
 
       if (session) {
         currentUserId = session.user.id;
 
-        // از Supabase بخون
-        const { data: remoteData, error } = await sb
+        var { data: remoteData, error } = await sb
           .from('trades')
           .select('data')
           .eq('user_id', currentUserId);
 
         if (error) console.error('[Sync] خطای لود:', error);
 
-        const remoteTrades = (remoteData || []).map(r => r.data);
+        var remoteTrades = (remoteData || []).map(function(r){ return r.data; });
 
-        // از localStorage بخون
-        const localRaw = localStorage.getItem(TRADES_KEY);
-        let localTrades = [];
+        var localRaw = localStorage.getItem(TRADES_KEY);
+        var localTrades = [];
         try { localTrades = JSON.parse(localRaw || '[]'); } catch(e){}
 
-        // Merge بر اساس id (local اولویت داره)
-        const map = new Map();
-        remoteTrades.forEach(t => { if (t && t.id) map.set(t.id, t); });
-        localTrades.forEach(t => { if (t && t.id) map.set(t.id, t); });
+        if (remoteTrades.length > 0 && localTrades.length > 0) {
+          detectDeletions(localTrades, remoteTrades);
+        }
 
-        const merged = Array.from(map.values());
-        merged.sort((a,b) => (a.createdAt||0) - (b.createdAt||0));
+        var map = new Map();
+        remoteTrades.forEach(function(t){ if (t && t.id) map.set(t.id, t); });
+        localTrades.forEach(function(t){ if (t && t.id) map.set(t.id, t); });
 
-        // ذخیره در localStorage بدون trigger
+        var merged = Array.from(map.values());
+        merged.sort(function(a,b){ return (a.createdAt||0) - (b.createdAt||0); });
+
         skipNext = true;
         origSetItem(TRADES_KEY, JSON.stringify(merged));
 
-        // اگه تفاوت داره → پوش کن
-        if (merged.length > 0 && 
-            (merged.length !== remoteTrades.length || localTrades.length > 0)) {
-          setTimeout(() => {
-            pushTrades(JSON.stringify(merged), currentUserId);
-          }, 1200);
-        }
+        console.log('[Sync] 📦 لود شد — ابری:', remoteTrades.length, '| محلی:', localTrades.length, '| مجموع:', merged.length);
 
-        console.log('[Sync] 📦 لود شد:', remoteTrades.length, '| محلی:', localTrades.length, '| مجموع:', merged.length);
+        bootCompleted = true;
+
+        if (localTrades.length > 0 && merged.length !== remoteTrades.length) {
+          setTimeout(function() {
+            pushTrades(JSON.stringify(merged), currentUserId);
+          }, 1500);
+        }
+      } else {
+        console.log('[Sync] ⚠️ کاربر لاگین نیست');
       }
     } catch (e) {
       console.error('[Sync] خطای boot:', e);
     }
 
-    // حالا app.js رو لود کن
-    const script = document.createElement('script');
+    var script = document.createElement('script');
     script.src = 'app.js';
     document.body.appendChild(script);
   }
 
-  // ============ Auth Change ============
-  sb.auth.onAuthStateChange((event, session) => {
+  sb.auth.onAuthStateChange(function(event, session) {
     if (session) {
       currentUserId = session.user.id;
     } else {
       currentUserId = null;
+      bootCompleted = false;
     }
   });
 
-  // ============ API عمومی ============
   window.PT_Sync = {
     pull: async function() {
       if (!currentUserId) return;
-      const { data } = await sb.from('trades').select('data').eq('user_id', currentUserId);
+      var { data } = await sb.from('trades').select('data').eq('user_id', currentUserId);
       if (data) {
-        const trades = data.map(r => r.data);
+        var trades = data.map(function(r){ return r.data; });
         skipNext = true;
         origSetItem(TRADES_KEY, JSON.stringify(trades));
         location.reload();
@@ -157,7 +188,7 @@
     },
     push: async function() {
       if (!currentUserId) return;
-      const raw = localStorage.getItem(TRADES_KEY);
+      var raw = localStorage.getItem(TRADES_KEY);
       if (raw) await pushTrades(raw, currentUserId);
     }
   };
