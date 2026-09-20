@@ -593,47 +593,42 @@
 
 </div>
 
-<!-- ========== AUTH GUARD (Firebase) ========== -->
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+<!-- ========== AUTH GUARD (Supabase) ========== -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(function(){
+  'use strict';
 
-const firebaseConfig = {
-  apiKey: "AIzaSyCRZyYSsvy4gw4fYAkP0Moj0OoPpexOYlY",
-  authDomain: "po-trad.firebaseapp.com",
-  projectId: "po-trad",
-  storageBucket: "po-trad.firebasestorage.app",
-  messagingSenderId: "843892172342",
-  appId: "1:843892172342:web:1c550ac62cfa1570161a97"
-};
+  const SUPABASE_URL = 'https://rodguhcuatixdbzwjfvy.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_2ET2dFjJNvBLWyfQXVZsag_7WcaHLLA';
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-onAuthStateChanged(auth, (user) => {
-  if (!user) {
-    // کاربر لاگین نیست → برو به صفحه ورود
+  // دکمه خروج
+  window.poLogout = async function () {
+    if (!confirm('از حساب کاربری خارج می‌شوی؟')) return;
+    try { await sb.auth.signOut(); } catch(e){}
     location.replace('auth.html');
-  } else {
-    window.PT_USER = {
-      email: user.email,
-      name: user.displayName || user.email.split('@')[0],
-      uid: user.uid
-    };
-    console.log('✅ Logged in:', user.email);
-  }
-});
+  };
 
-window.poLogout = async function () {
-  if (!confirm('از حساب کاربری خارج می‌شوی؟')) return;
-  try {
-    await signOut(auth);
-    location.replace('auth.html');
-  } catch (e) {
-    console.error(e);
-    location.replace('auth.html');
-  }
-};
+  // بررسی نشست
+  sb.auth.getSession().then(({ data }) => {
+    if (!data || !data.session) {
+      location.replace('auth.html');
+    } else {
+      window.PT_USER = {
+        email: data.session.user.email,
+        uid: data.session.user.id
+      };
+      console.log('✅ Logged in:', data.session.user.email);
+    }
+  });
+
+  // گوش دادن به تغییرات auth
+  sb.auth.onAuthStateChange((event, session) => {
+    if (!session) location.replace('auth.html');
+  });
+})();
 </script>
 
 <script src="app.js"></script>
