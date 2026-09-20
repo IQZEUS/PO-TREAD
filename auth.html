@@ -61,8 +61,6 @@ input::placeholder{color:#6a7a95;opacity:.7}
 .toggle-pass{position:absolute;left:8px;top:50%;transform:translateY(-50%);width:38px;height:38px;border:0;background:transparent;color:#8697b8;font-size:15px;cursor:pointer;border-radius:10px;display:grid;place-items:center;transition:all .2s}
 .toggle-pass:hover{background:rgba(255,255,255,.06);color:#eef3ff;transform:translateY(-50%) scale(1.05)}
 .toggle-pass:active{transform:translateY(-50%) scale(.9)}
-
-/* ============ PASSWORD STRENGTH ============ */
 .pass-meter{margin-top:10px;animation:fieldIn .3s ease}
 .pass-meter-bar{height:5px;background:rgba(120,150,200,.12);border-radius:5px;overflow:hidden;display:flex;gap:3px}
 .pass-meter-bar span{flex:1;height:100%;background:rgba(120,150,200,.15);border-radius:3px;transition:all .3s ease}
@@ -80,7 +78,6 @@ input::placeholder{color:#6a7a95;opacity:.7}
 .pass-rule.ok .dot{background:rgba(46,230,166,.15);border-color:#2ee6a6;color:#2ee6a6}
 .pass-rule.bad{color:#ff95a8}
 .pass-rule.bad .dot{background:rgba(255,86,116,.15);border-color:#ff5674;color:#ff5674}
-
 .msg{font-size:12.5px;font-weight:700;border-radius:13px;padding:12px 15px;display:none;align-items:center;gap:10px;animation:msgIn .35s cubic-bezier(.2,.9,.3,1.1)}
 .msg.show{display:flex}
 @keyframes msgIn{from{opacity:0;transform:translateY(-10px) scale(.95)}to{opacity:1;transform:none}}
@@ -147,7 +144,6 @@ input::placeholder{color:#6a7a95;opacity:.7}
       <button class="tab-btn" id="tabSignup" type="button">ثبت‌نام</button>
     </div>
 
-    <!-- LOGIN -->
     <form class="form" id="loginForm">
       <div class="field">
         <label>📧 ایمیل</label>
@@ -173,7 +169,6 @@ input::placeholder{color:#6a7a95;opacity:.7}
       <div class="foot"><a id="forgotPass">رمزت رو فراموش کردی؟</a></div>
     </form>
 
-    <!-- SIGNUP -->
     <form class="form" id="signupForm" style="display:none">
       <div class="field">
         <label>📧 ایمیل</label>
@@ -230,11 +225,10 @@ input::placeholder{color:#6a7a95;opacity:.7}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SUPABASE_URL = 'https://rodguhcuatixdbzwjfvy.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_2ETD2dFjJNvBLWyfQXVZsag_7WcaHLLA'.replace('2ETD','2ET2');
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJvZGd1aGN1YXRpeGRiendqZnZ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk5MTgyMTMsImV4cCI6MjEwNTQ5NDIxM30.oXGyCA3jOcsS5inqsXuSOhELZLoUG7pYagZox1SEmhY';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const $ = id => document.getElementById(id);
 
-/* ============ PARTICLES ============ */
 (function createParticles(){
   const wrap = $('particles');
   if (!wrap) return;
@@ -252,7 +246,6 @@ const $ = id => document.getElementById(id);
   }
 })();
 
-/* ============ MESSAGES ============ */
 function showErr(f, m){
   $(f+'MsgText').textContent = m;
   $(f+'Msg').classList.add('show');
@@ -265,7 +258,6 @@ function showOk(f, m){
   $(f+'Msg').classList.remove('show');
 }
 
-/* ============ TABS ============ */
 $('tabLogin').addEventListener('click', () => {
   $('tabLogin').classList.add('active');
   $('tabSignup').classList.remove('active');
@@ -282,7 +274,6 @@ $('tabSignup').addEventListener('click', () => {
   setTimeout(() => $('signupEmail').focus(), 100);
 });
 
-/* ============ TOGGLE PASSWORD ============ */
 document.querySelectorAll('.toggle-pass').forEach(btn => {
   btn.addEventListener('click', () => {
     const inp = $(btn.dataset.target);
@@ -291,7 +282,6 @@ document.querySelectorAll('.toggle-pass').forEach(btn => {
   });
 });
 
-/* ============ PASSWORD STRENGTH ============ */
 function checkPassword(pass) {
   return {
     length:  pass.length >= 8,
@@ -333,7 +323,6 @@ function renderStrength(pass) {
 }
 $('signupPassword').addEventListener('input', e => renderStrength(e.target.value));
 
-/* ============ LOGIN ============ */
 $('loginForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const email = $('loginEmail').value.trim();
@@ -351,19 +340,16 @@ $('loginForm').addEventListener('submit', async (e) => {
   }
 });
 
-/* ============ SIGNUP ============ */
 $('signupForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const email = $('signupEmail').value.trim();
   const pass  = $('signupPassword').value;
   const pass2 = $('signupPassword2').value;
 
-  // اعتبارسنجی ایمیل
   const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!email || !emailRe.test(email)) return showErr('signup', 'ایمیل نامعتبره');
   if (!pass) return showErr('signup', 'رمز عبور را وارد کن');
 
-  // اعتبارسنجی قوی پسورد
   const c = checkPassword(pass);
   const missing = [];
   if (!c.length)  missing.push('۸ کاراکتر');
@@ -397,7 +383,6 @@ $('signupForm').addEventListener('submit', async (e) => {
   }
 });
 
-/* ============ FORGOT PASSWORD ============ */
 $('forgotPass').addEventListener('click', async () => {
   const email = $('loginEmail').value.trim();
   if (!email) return showErr('login', 'اول ایمیلت رو وارد کن');
@@ -408,7 +393,6 @@ $('forgotPass').addEventListener('click', async () => {
   else showOk('login', 'ایمیل بازیابی ارسال شد ✅');
 });
 
-/* ============ AUTO LOGIN ============ */
 sb.auth.getSession().then(({ data }) => {
   if (data && data.session) {
     $('splash').classList.add('show');
@@ -416,7 +400,6 @@ sb.auth.getSession().then(({ data }) => {
   }
 });
 
-/* ============ ERROR MAP ============ */
 function mapError(msg){
   const m = {
     'Invalid login credentials': 'ایمیل یا رمز عبور اشتباهه',
