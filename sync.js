@@ -1,9 +1,10 @@
 /* ============================================================
-   PO-TRADE Sync — v7 SIMPLE & BULLETPROOF
-   ✅ Watchdog: لودر همیشه می‌ره (حتی اگه app.js گیر کرد)
-   ✅ Polling: هر 400ms تغییرات رو تشخیص می‌ده
-   ✅ Push: cloud رو دقیقاً mirror localStorage می‌کنه
-   ✅ Delete: هر معامله‌ای که در local نیست، از cloud پاک می‌شه
+   PO-TRADE Sync — v8 FINAL
+   ✅ Watchdog: لودر بعد 4s حذف می‌شه
+   ✅ Deleted list: حذف تکی همیشه کار می‌کنه
+   ✅ Polling: تغییرات سریع شناسایی می‌شن
+   ✅ Push: local دقیقاً با cloud mirror می‌شه
+   ✅ Onboarding: کاربر جدید → welcome.html
    ============================================================ */
 (function() {
   'use strict';
@@ -13,10 +14,11 @@
   var sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   var TRADES_KEY     = 'po.v4.trades';
+  var DELETED_KEY    = 'po.v4.deleted';
   var ONBOARDING_KEY = 'po.onboarding.v1';
 
   /* ============================================================
-     🔥 KILL LOADER — قوی و بی‌رحم
+     🔥 KILL LOADER
      ============================================================ */
   function killLoader() {
     try {
@@ -34,12 +36,10 @@
     } catch(e) {}
   }
 
-  // 🔥 چند لایه safety
   setTimeout(killLoader, 4000);
   setTimeout(killLoader, 6000);
   setTimeout(killLoader, 9000);
 
-  // Watchdog هر 1.5 ثانیه
   var wd = setInterval(function() {
     var l = document.getElementById('loader');
     if (!l || l.getAttribute('data-killed') === '1') {
@@ -57,6 +57,25 @@
   var pushing = false;
   var pendingPush = false;
   var lastSnap = '';
+  var bootDone = false;
+
+  /* ============================================================
+     Deleted list
+     ============================================================ */
+  function getDeleted() {
+    try {
+      return new Set(JSON.parse(localStorage.getItem(DELETED_KEY) || '[]'));
+    } catch(e) { return new Set(); }
+  }
+  function addDeleted(ids) {
+    if (!ids || !ids.length) return;
+    var s = getDeleted();
+    ids.forEach(function(id) { if (id) s.add(id); });
+    localStorage.setItem(DELETED_KEY, JSON.stringify(Array.from(s)));
+  }
+  function clearDeleted() {
+    localStorage.setItem(DELETED_KEY, '[]');
+  }
 
   /* ============================================================
      Read local
@@ -80,7 +99,9 @@
 
     try {
       var local = getLocal();
-      console.log('[Sync] 🚀 Push — local:', local.length);
+      var deletedSet = getDeleted();
+
+      console.log('[Sync] 🚀 Push — local:', local.length, '| deleted:', deletedSet.size);
 
       // ابری رو بگیر
       var rRes = await sb.from('trades').select('trade_id').eq('user_id', uid);
@@ -89,10 +110,12 @@
       var remoteIds = new Set((rRes.data || []).map(function(r) { return r.trade_id; }));
       var localIds = new Set(local.map(function(t) { return t.id; }));
 
-      // 1️⃣ حذف: هرچی تو ابره ولی تو لوکال نیست
+      // 1️⃣ حذف: remote_ids که در local نیستن یا در deleted list هستن
       var toDelete = [];
       remoteIds.forEach(function(id) {
-        if (!localIds.has(id)) toDelete.push(id);
+        if (!localIds.has(id) || deletedSet.has(id)) {
+          toDelete.push(id);
+        }
       });
 
       if (toDelete.length > 0) {
@@ -104,8 +127,11 @@
         if (delRes.error) console.error('[Sync] Delete error:', delRes.error.message);
       }
 
-      // 2️⃣ اضافه: هرچی تو لوکاله ولی تو ابر نیست
-      var toInsert = local.filter(function(t) { return !remoteIds.has(t.id); });
+      // 2️⃣ اضافه: local_ids که در remote نیستن و در deleted نیستن
+      var toInsert = local.filter(function(t) {
+        return !remoteIds.has(t.id) && !deletedSet.has(t.id);
+      });
+
       if (toInsert.length > 0) {
         console.log('[Sync] ➕ اضافه:', toInsert.length);
         var insRes = await sb.from('trades').insert(toInsert.map(function(t) {
@@ -114,8 +140,11 @@
         if (insRes.error) console.error('[Sync] Insert error:', insRes.error.message);
       }
 
-      // 3️⃣ آپدیت: هرچی تو هردو هست
-      var toUpdate = local.filter(function(t) { return remoteIds.has(t.id); });
+      // 3️⃣ آپدیت: هرچی تو هردو هست (و حذف نشده)
+      var toUpdate = local.filter(function(t) {
+        return remoteIds.has(t.id) && !deletedSet.has(t.id);
+      });
+
       for (var i = 0; i < toUpdate.length; i++) {
         var t = toUpdate[i];
         await sb.from('trades')
@@ -124,6 +153,9 @@
           .eq('trade_id', t.id);
       }
       if (toUpdate.length > 0) console.log('[Sync] 🔄 آپدیت:', toUpdate.length);
+
+      // 4️⃣ حالا که همه چیز push شد → deleted list رو پاک کن
+      clearDeleted();
 
       lastSnap = JSON.stringify(local);
       console.log('[Sync] ✅ Push کامل');
@@ -148,11 +180,25 @@
     var cur = localStorage.getItem(TRADES_KEY) || '[]';
     if (cur === lastSnap) return;
 
-    console.log('[Sync] 📢 تغییر لوکال تشخیص داده شد');
+    // 🔥 اول حذف‌ها رو ثبت کن
+    try {
+      var oldArr = JSON.parse(lastSnap || '[]');
+      var newArr = JSON.parse(cur || '[]');
+      var newIds = new Set(newArr.map(function(t) { return t.id; }));
+      var removed = oldArr
+        .filter(function(t) { return t && t.id && !newIds.has(t.id); })
+        .map(function(t) { return t.id; });
+      if (removed.length > 0) {
+        addDeleted(removed);
+        console.log('[Sync] 📌 حذف تکی ثبت شد:', removed);
+      }
+    } catch(e) {}
+
+    console.log('[Sync] 📢 تغییر لوکال');
     lastSnap = cur;
 
     clearTimeout(window.__pt);
-    window.__pt = setTimeout(pushToCloud, 400);
+    window.__pt = setTimeout(pushToCloud, 500);
   }, 400);
 
   /* ============================================================
@@ -172,27 +218,34 @@
 
       // 2️⃣ Onboarding
       if (localStorage.getItem(ONBOARDING_KEY) !== 'seen') {
-        console.log('[Sync] 🎉 کاربر جدید — welcome.html');
+        console.log('[Sync] 🎉 کاربر جدید → welcome.html');
         window.location.replace('welcome.html');
         return;
       }
 
       // 3️⃣ ابری رو بگیر
       var rRes = await sb.from('trades').select('data').eq('user_id', uid);
+      if (rRes.error) console.error('[Sync] Remote error:', rRes.error.message);
+
+      var deletedSet = getDeleted();
+      console.log('[Sync] 📌 deleted list:', deletedSet.size);
+
       var remote = (rRes.data || [])
         .map(function(r) { return r.data; })
-        .filter(function(t) { return t && t.id; });
+        .filter(function(t) {
+          return t && t.id && !deletedSet.has(t.id);
+        });
 
-      var local = getLocal();
+      // 4️⃣ لوکال
+      var local = getLocal().filter(function(t) {
+        return t && t.id && !deletedSet.has(t.id);
+      });
+
       console.log('[Sync] 📦 ابری:', remote.length, '| لوکال:', local.length);
 
-      // 4️⃣ Merge — LOCAL اولویت داره (کاربر اخیراً چیزی عوض کرده)
+      // 5️⃣ Merge — local اولویت داره
       var map = new Map();
-
-      // اول ابری
       remote.forEach(function(t) { map.set(t.id, t); });
-
-      // بعد لوکال (اگه بود override می‌کنه)
       local.forEach(function(t) { map.set(t.id, t); });
 
       var merged = Array.from(map.values());
@@ -201,38 +254,59 @@
       localStorage.setItem(TRADES_KEY, JSON.stringify(merged));
       lastSnap = JSON.stringify(merged);
       ready = true;
+      bootDone = true;
 
-      console.log('[Sync] ✅ Merge کامل — مجموع:', merged.length);
+      console.log('[Sync] ✅ Merge — مجموع:', merged.length);
 
-      // 5️⃣ اگه تفاوت داره، push کن
-      if (remote.length !== merged.length ||
+      // 6️⃣ اگه حذف pending یا تفاوت هست → push
+      if (deletedSet.size > 0 ||
+          remote.length !== merged.length ||
           local.length !== merged.length) {
         setTimeout(pushToCloud, 800);
       }
 
     } catch(e) {
       console.error('[Sync] ❌ Boot error:', e);
+      bootDone = true;
     }
   }
 
   /* ============================================================
      اجرا
      ============================================================ */
-  boot().catch(function(e) {
-    console.error('[Sync] boot().catch:', e);
-  }).finally(function() {
-    // app.js رو لود کن
-    var script = document.createElement('script');
-    script.src = 'app.js';
-    script.onerror = function() {
-      console.error('[Sync] ❌ app.js لود نشد');
-      killLoader();
-    };
-    document.body.appendChild(script);
+  boot()
+    .catch(function(e) {
+      console.error('[Sync] boot catch:', e);
+      bootDone = true;
+    })
+    .finally(function() {
+      // app.js رو لود کن
+      var script = document.createElement('script');
+      script.src = 'app.js';
+      script.onerror = function() {
+        console.error('[Sync] ❌ app.js لود نشد');
+        killLoader();
+      };
+      document.body.appendChild(script);
 
-    // چند ثانیه بعد دوباره loader رو بکش
-    setTimeout(killLoader, 2500);
-    setTimeout(killLoader, 5000);
-  });
+      setTimeout(killLoader, 2500);
+      setTimeout(killLoader, 5000);
+    });
+
+  /* ============ API عمومی ============ */
+  window.PT_Sync = {
+    status: function() {
+      return {
+        uid: uid,
+        ready: ready,
+        pushing: pushing,
+        deleted: getDeleted().size,
+        localCount: getLocal().length
+      };
+    },
+    forcePush: pushToCloud,
+    clearDeleted: clearDeleted,
+    killLoader: killLoader
+  };
 
 })();
