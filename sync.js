@@ -1,9 +1,9 @@
 /* ============================================================
-   PO-TRADE Sync — v5 FINAL
-   ✅ حذف تکی + دسته‌جمعی
-   ✅ Safety: لودر بعد از ۴ ثانیه خودکار مخفی می‌شه
-   ✅ Timeout روی همه عملیات
-   ✅ راهنمای اجباری برای کاربر جدید
+   PO-TRADE Sync — v7 SIMPLE & BULLETPROOF
+   ✅ Watchdog: لودر همیشه می‌ره (حتی اگه app.js گیر کرد)
+   ✅ Polling: هر 400ms تغییرات رو تشخیص می‌ده
+   ✅ Push: cloud رو دقیقاً mirror localStorage می‌کنه
+   ✅ Delete: هر معامله‌ای که در local نیست، از cloud پاک می‌شه
    ============================================================ */
 (function() {
   'use strict';
@@ -13,430 +13,226 @@
   var sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   var TRADES_KEY     = 'po.v4.trades';
-  var DELETED_KEY    = 'po.v4.deleted';
   var ONBOARDING_KEY = 'po.onboarding.v1';
 
-  /* ============ توابع اصلی localStorage ============ */
-  var origSetItem    = localStorage.setItem.bind(localStorage);
-  var origGetItem    = localStorage.getItem.bind(localStorage);
-  var origRemoveItem = localStorage.removeItem.bind(localStorage);
-
-  /* ============ State ============ */
-  var currentUserId  = null;
-  var skipNext       = false;
-  var pushTimer      = null;
-  var bootCompleted  = false;
-  var isPushing      = false;
-  var needsAnother   = false;
-  var appLoaded      = false;
-  var redirected     = false;
-
   /* ============================================================
-     🔥 SAFETY: لودر رو زورکی مخفی کن
+     🔥 KILL LOADER — قوی و بی‌رحم
      ============================================================ */
-  function forceHideLoader() {
-    var loader = document.getElementById('loader');
-    if (!loader) return;
-    if (loader.style.display === 'none') return;
-
-    console.log('[Sync] 🚨 Force hide loader');
-    loader.style.transition = 'opacity .4s ease';
-    loader.style.opacity = '0';
-    setTimeout(function() {
-      loader.style.display = 'none';
-      loader.classList.add('hide');
-    }, 450);
-  }
-
-  // اجرای safety بعد از 4 ثانیه — هرچی شد
-  setTimeout(forceHideLoader, 4000);
-
-  // و بعد از 7 ثانیه هم دوباره — برای اطمینان
-  setTimeout(forceHideLoader, 7000);
-
-  /* ============ Timeout wrapper ============ */
-  function withTimeout(promise, ms, label) {
-    return Promise.race([
-      promise,
-      new Promise(function(_, reject) {
-        setTimeout(function() {
-          reject(new Error('Timeout: ' + (label || 'op') + ' (' + ms + 'ms)'));
-        }, ms);
-      })
-    ]);
-  }
-
-  /* ============ لیست حذف‌شده‌ها ============ */
-  function getDeletedIds() {
+  function killLoader() {
     try {
-      return new Set(JSON.parse(origGetItem(DELETED_KEY) || '[]'));
-    } catch(e) { return new Set(); }
+      var l = document.getElementById('loader');
+      if (!l) return;
+      if (l.getAttribute('data-killed') === '1') return;
+      l.setAttribute('data-killed', '1');
+      l.style.transition = 'opacity .3s ease';
+      l.style.opacity = '0';
+      l.style.pointerEvents = 'none';
+      setTimeout(function() {
+        l.style.display = 'none';
+        l.style.visibility = 'hidden';
+      }, 350);
+    } catch(e) {}
   }
-  function addDeletedId(id) {
-    if (!id) return;
-    var s = getDeletedIds();
-    s.add(id);
-    try { origSetItem(DELETED_KEY, JSON.stringify(Array.from(s))); } catch(e){}
-  }
-  function addDeletedIds(ids) {
-    if (!ids || !ids.length) return;
-    var s = getDeletedIds();
-    ids.forEach(function(id) { if (id) s.add(id); });
-    try { origSetItem(DELETED_KEY, JSON.stringify(Array.from(s))); } catch(e){}
-  }
-  function clearDeletedIds() {
-    try { origSetItem(DELETED_KEY, '[]'); } catch(e){}
+
+  // 🔥 چند لایه safety
+  setTimeout(killLoader, 4000);
+  setTimeout(killLoader, 6000);
+  setTimeout(killLoader, 9000);
+
+  // Watchdog هر 1.5 ثانیه
+  var wd = setInterval(function() {
+    var l = document.getElementById('loader');
+    if (!l || l.getAttribute('data-killed') === '1') {
+      if (!l) clearInterval(wd);
+      return;
+    }
+    killLoader();
+  }, 1500);
+
+  /* ============================================================
+     State
+     ============================================================ */
+  var uid = null;
+  var ready = false;
+  var pushing = false;
+  var pendingPush = false;
+  var lastSnap = '';
+
+  /* ============================================================
+     Read local
+     ============================================================ */
+  function getLocal() {
+    try {
+      var v = JSON.parse(localStorage.getItem(TRADES_KEY) || '[]');
+      return Array.isArray(v) ? v : [];
+    } catch(e) { return []; }
   }
 
   /* ============================================================
-     Override: setItem
+     PUSH — Cloud = mirror of local
      ============================================================ */
-  localStorage.setItem = function(key, value) {
-    if (key === TRADES_KEY && !skipNext && currentUserId && bootCompleted) {
-      var oldValue = origGetItem(key);
-      origSetItem(key, value);
+  async function pushToCloud() {
+    if (!uid || !ready) return;
+    if (pushing) { pendingPush = true; return; }
 
-      try {
-        var oldTrades = JSON.parse(oldValue || '[]');
-        var newTrades = JSON.parse(value || '[]');
-        if (Array.isArray(oldTrades) && Array.isArray(newTrades)) {
-          var newIds = new Set(newTrades.map(function(t){ return t.id; }));
-          oldTrades.forEach(function(t) {
-            if (t && t.id && !newIds.has(t.id)) {
-              addDeletedId(t.id);
-              console.log('[Sync] 📌 حذف تکی ثبت شد:', t.id);
-            }
-          });
-        }
-      } catch(e) {}
-
-      clearTimeout(pushTimer);
-      pushTimer = setTimeout(function() {
-        pushTrades(value, currentUserId);
-      }, 600);
-
-      skipNext = false;
-      return;
-    }
-    origSetItem(key, value);
-    skipNext = false;
-  };
-
-  /* ============================================================
-     Override: removeItem
-     ============================================================ */
-  localStorage.removeItem = function(key) {
-    if (key === TRADES_KEY && currentUserId && bootCompleted) {
-      var oldValue = origGetItem(key);
-      try {
-        var oldTrades = JSON.parse(oldValue || '[]');
-        if (Array.isArray(oldTrades) && oldTrades.length > 0) {
-          var ids = oldTrades.map(function(t){ return t.id; }).filter(Boolean);
-          addDeletedIds(ids);
-          console.log('[Sync] 📌 حذف دسته‌جمعی ثبت شد:', ids.length);
-        }
-      } catch(e) {}
-
-      origRemoveItem(key);
-
-      clearTimeout(pushTimer);
-      pushTimer = setTimeout(function() {
-        pushTrades('[]', currentUserId);
-      }, 400);
-
-      return;
-    }
-    origRemoveItem(key);
-  };
-
-  /* ============================================================
-     Push
-     ============================================================ */
-  async function pushTrades(jsonStr, userId) {
-    if (isPushing) {
-      needsAnother = true;
-      console.log('[Sync] ⏳ push در حال اجرا، به صف اضافه شد');
-      return;
-    }
-    isPushing = true;
-    needsAnother = false;
+    pushing = true;
+    pendingPush = false;
 
     try {
-      var trades = [];
-      try { trades = JSON.parse(jsonStr || '[]'); } catch(e) {}
-      if (!Array.isArray(trades)) trades = [];
+      var local = getLocal();
+      console.log('[Sync] 🚀 Push — local:', local.length);
 
-      console.log('[Sync] 🚀 Push شروع — محلی:', trades.length);
+      // ابری رو بگیر
+      var rRes = await sb.from('trades').select('trade_id').eq('user_id', uid);
+      if (rRes.error) throw new Error(rRes.error.message);
 
-      var fetchRes;
-      try {
-        fetchRes = await withTimeout(
-          sb.from('trades').select('trade_id').eq('user_id', userId),
-          6000, 'fetch'
-        );
-      } catch(e) {
-        console.error('[Sync] ❌ Fetch timeout');
-        return;
-      }
+      var remoteIds = new Set((rRes.data || []).map(function(r) { return r.trade_id; }));
+      var localIds = new Set(local.map(function(t) { return t.id; }));
 
-      if (fetchRes.error) {
-        console.error('[Sync] ❌ Fetch error:', fetchRes.error.message);
-        return;
-      }
-
-      var existingIds = new Set((fetchRes.data || []).map(function(r){ return r.trade_id; }));
-
-      var deletedIds = getDeletedIds();
-      var toDelete = Array.from(deletedIds).filter(function(id) {
-        return existingIds.has(id);
+      // 1️⃣ حذف: هرچی تو ابره ولی تو لوکال نیست
+      var toDelete = [];
+      remoteIds.forEach(function(id) {
+        if (!localIds.has(id)) toDelete.push(id);
       });
 
-      if (trades.length === 0 && existingIds.size > 0) {
-        toDelete = Array.from(existingIds);
-        console.log('[Sync] 🗑️ local خالیه → حذف همه از ابری');
-      }
-
       if (toDelete.length > 0) {
-        try {
-          await withTimeout(
-            sb.from('trades').delete().eq('user_id', userId).in('trade_id', toDelete),
-            6000, 'delete'
-          );
-          console.log('[Sync] 🗑️ حذف از ابری:', toDelete.length);
-        } catch(e) {
-          console.error('[Sync] ❌ Delete timeout');
-        }
+        console.log('[Sync] 🗑️ حذف از ابری:', toDelete.length);
+        var delRes = await sb.from('trades')
+          .delete()
+          .eq('user_id', uid)
+          .in('trade_id', toDelete);
+        if (delRes.error) console.error('[Sync] Delete error:', delRes.error.message);
       }
 
-      var toInsert = trades
-        .filter(function(t){ return !existingIds.has(t.id); })
-        .map(function(t){ return { user_id: userId, trade_id: t.id, data: t }; });
-
+      // 2️⃣ اضافه: هرچی تو لوکاله ولی تو ابر نیست
+      var toInsert = local.filter(function(t) { return !remoteIds.has(t.id); });
       if (toInsert.length > 0) {
-        try {
-          await withTimeout(sb.from('trades').insert(toInsert), 6000, 'insert');
-          console.log('[Sync] ➕ اضافه:', toInsert.length);
-        } catch(e) {
-          console.error('[Sync] ❌ Insert timeout');
-        }
+        console.log('[Sync] ➕ اضافه:', toInsert.length);
+        var insRes = await sb.from('trades').insert(toInsert.map(function(t) {
+          return { user_id: uid, trade_id: t.id, data: t };
+        }));
+        if (insRes.error) console.error('[Sync] Insert error:', insRes.error.message);
       }
 
-      var toUpdate = trades.filter(function(t){ return existingIds.has(t.id); });
+      // 3️⃣ آپدیت: هرچی تو هردو هست
+      var toUpdate = local.filter(function(t) { return remoteIds.has(t.id); });
       for (var i = 0; i < toUpdate.length; i++) {
-        try {
-          await withTimeout(
-            sb.from('trades')
-              .update({ data: toUpdate[i], updated_at: new Date().toISOString() })
-              .eq('user_id', userId)
-              .eq('trade_id', toUpdate[i].id),
-            4000, 'update'
-          );
-        } catch(e) {
-          console.error('[Sync] ❌ Update timeout');
-        }
+        var t = toUpdate[i];
+        await sb.from('trades')
+          .update({ data: t, updated_at: new Date().toISOString() })
+          .eq('user_id', uid)
+          .eq('trade_id', t.id);
       }
-      if (toUpdate.length > 0) {
-        console.log('[Sync] 🔄 آپدیت:', toUpdate.length);
-      }
+      if (toUpdate.length > 0) console.log('[Sync] 🔄 آپدیت:', toUpdate.length);
 
-      clearDeletedIds();
+      lastSnap = JSON.stringify(local);
       console.log('[Sync] ✅ Push کامل');
 
     } catch(e) {
       console.error('[Sync] ❌ Push error:', e);
     } finally {
-      isPushing = false;
-
-      if (needsAnother) {
-        needsAnother = false;
-        var raw = origGetItem(TRADES_KEY) || '[]';
-        setTimeout(function() {
-          pushTrades(raw, currentUserId);
-        }, 300);
+      pushing = false;
+      if (pendingPush) {
+        pendingPush = false;
+        setTimeout(pushToCloud, 400);
       }
     }
   }
 
   /* ============================================================
-     Load app.js — با safety
+     POLLING — هر 400ms تغییرات لوکال رو چک کن
      ============================================================ */
-  function loadApp() {
-    if (appLoaded) return;
-    appLoaded = true;
+  setInterval(function() {
+    if (!uid || !ready) return;
 
-    console.log('[Sync] 📦 لود app.js');
+    var cur = localStorage.getItem(TRADES_KEY) || '[]';
+    if (cur === lastSnap) return;
 
+    console.log('[Sync] 📢 تغییر لوکال تشخیص داده شد');
+    lastSnap = cur;
+
+    clearTimeout(window.__pt);
+    window.__pt = setTimeout(pushToCloud, 400);
+  }, 400);
+
+  /* ============================================================
+     BOOT
+     ============================================================ */
+  async function boot() {
+    try {
+      // 1️⃣ Session
+      var sRes = await sb.auth.getSession();
+      if (!sRes || !sRes.data || !sRes.data.session) {
+        console.log('[Sync] ⚠️ بدون session');
+        return;
+      }
+
+      uid = sRes.data.session.user.id;
+      console.log('[Sync] 👤 کاربر:', sRes.data.session.user.email);
+
+      // 2️⃣ Onboarding
+      if (localStorage.getItem(ONBOARDING_KEY) !== 'seen') {
+        console.log('[Sync] 🎉 کاربر جدید — welcome.html');
+        window.location.replace('welcome.html');
+        return;
+      }
+
+      // 3️⃣ ابری رو بگیر
+      var rRes = await sb.from('trades').select('data').eq('user_id', uid);
+      var remote = (rRes.data || [])
+        .map(function(r) { return r.data; })
+        .filter(function(t) { return t && t.id; });
+
+      var local = getLocal();
+      console.log('[Sync] 📦 ابری:', remote.length, '| لوکال:', local.length);
+
+      // 4️⃣ Merge — LOCAL اولویت داره (کاربر اخیراً چیزی عوض کرده)
+      var map = new Map();
+
+      // اول ابری
+      remote.forEach(function(t) { map.set(t.id, t); });
+
+      // بعد لوکال (اگه بود override می‌کنه)
+      local.forEach(function(t) { map.set(t.id, t); });
+
+      var merged = Array.from(map.values());
+      merged.sort(function(a, b) { return (a.createdAt || 0) - (b.createdAt || 0); });
+
+      localStorage.setItem(TRADES_KEY, JSON.stringify(merged));
+      lastSnap = JSON.stringify(merged);
+      ready = true;
+
+      console.log('[Sync] ✅ Merge کامل — مجموع:', merged.length);
+
+      // 5️⃣ اگه تفاوت داره، push کن
+      if (remote.length !== merged.length ||
+          local.length !== merged.length) {
+        setTimeout(pushToCloud, 800);
+      }
+
+    } catch(e) {
+      console.error('[Sync] ❌ Boot error:', e);
+    }
+  }
+
+  /* ============================================================
+     اجرا
+     ============================================================ */
+  boot().catch(function(e) {
+    console.error('[Sync] boot().catch:', e);
+  }).finally(function() {
+    // app.js رو لود کن
     var script = document.createElement('script');
     script.src = 'app.js';
-    script.onload = function() {
-      console.log('[Sync] ✅ app.js لود شد');
-      // Safety: بعد از 3 ثانیه از لود app.js، اگه لودر هنوز بود، مخفی کن
-      setTimeout(forceHideLoader, 3000);
-    };
     script.onerror = function() {
-      console.error('[Sync] ❌ app.js لود نشد — مخفی کردن لودر');
-      forceHideLoader();
+      console.error('[Sync] ❌ app.js لود نشد');
+      killLoader();
     };
     document.body.appendChild(script);
 
-    // Safety نهایی: بعد از 5 ثانیه هرچی شد، لودر باید بره
-    setTimeout(forceHideLoader, 5000);
-  }
-
-  /* ============================================================
-     Sync
-     ============================================================ */
-  async function doSync() {
-    try {
-      var remoteRes;
-      try {
-        remoteRes = await withTimeout(
-          sb.from('trades').select('data').eq('user_id', currentUserId),
-          5000, 'remote-fetch'
-        );
-      } catch(e) {
-        console.error('[Sync] ❌ Remote fetch timeout');
-        return;
-      }
-
-      if (remoteRes.error) {
-        console.error('[Sync] ❌ Remote error:', remoteRes.error.message);
-        return;
-      }
-
-      var deletedIds = getDeletedIds();
-      var remoteTrades = (remoteRes.data || [])
-        .map(function(r){ return r.data; })
-        .filter(function(t){ return t && t.id && !deletedIds.has(t.id); });
-
-      var localTrades = [];
-      try { localTrades = JSON.parse(origGetItem(TRADES_KEY) || '[]'); } catch(e) {}
-      if (!Array.isArray(localTrades)) localTrades = [];
-      localTrades = localTrades.filter(function(t) {
-        return t && t.id && !deletedIds.has(t.id);
-      });
-
-      var map = new Map();
-      remoteTrades.forEach(function(t){ if (t && t.id) map.set(t.id, t); });
-      localTrades.forEach(function(t){ if (t && t.id) map.set(t.id, t); });
-
-      var merged = Array.from(map.values());
-      merged.sort(function(a,b){ return (a.createdAt||0) - (b.createdAt||0); });
-
-      skipNext = true;
-      origSetItem(TRADES_KEY, JSON.stringify(merged));
-      skipNext = false;
-
-      console.log('[Sync] 📦 Sync — ابری:', remoteTrades.length,
-                  '| محلی:', localTrades.length,
-                  '| مجموع:', merged.length);
-
-      if (deletedIds.size > 0) {
-        setTimeout(function() {
-          pushTrades(JSON.stringify(merged), currentUserId);
-        }, 800);
-      } else if (localTrades.length > 0 && merged.length !== remoteTrades.length) {
-        setTimeout(function() {
-          pushTrades(JSON.stringify(merged), currentUserId);
-        }, 1200);
-      }
-
-    } catch(e) {
-      console.error('[Sync] ❌ Sync error:', e);
-    }
-  }
-
-  /* ============================================================
-     Boot
-     ============================================================ */
-  async function boot() {
-    var sessionRes;
-    try {
-      sessionRes = await withTimeout(sb.auth.getSession(), 3000, 'session');
-    } catch(e) {
-      console.error('[Sync] ❌ Session timeout');
-      return;
-    }
-
-    if (!sessionRes || !sessionRes.data || !sessionRes.data.session) {
-      console.log('[Sync] ⚠️ کاربر لاگین نیست');
-      return;
-    }
-
-    currentUserId = sessionRes.data.session.user.id;
-    console.log('[Sync] 👤 کاربر:', sessionRes.data.session.user.email);
-
-    var seenOnboarding = origGetItem(ONBOARDING_KEY);
-    if (seenOnboarding !== 'seen') {
-      console.log('[Sync] 🎉 کاربر جدید — نمایش راهنما');
-      redirected = true;
-      window.location.replace('welcome.html');
-      return;
-    }
-
-    await doSync();
-  }
-
-  /* ============================================================
-     شروع
-     ============================================================ */
-  var bootPromise = boot();
-
-  var timeoutPromise = new Promise(function(resolve) {
-    setTimeout(function() {
-      console.log('[Sync] ⏱️ Boot timeout — لود app.js با دیتای موجود');
-      resolve();
-    }, 5000);
+    // چند ثانیه بعد دوباره loader رو بکش
+    setTimeout(killLoader, 2500);
+    setTimeout(killLoader, 5000);
   });
-
-  Promise.race([bootPromise, timeoutPromise])
-    .catch(function(e) {
-      if (!redirected) console.error('[Sync] ❌ Boot error:', e);
-    })
-    .finally(function() {
-      if (redirected) return;
-      bootCompleted = true;
-      loadApp();
-    });
-
-  /* ============ Auth changes ============ */
-  sb.auth.onAuthStateChange(function(event, session) {
-    if (session) {
-      currentUserId = session.user.id;
-    } else {
-      currentUserId = null;
-      bootCompleted = false;
-    }
-  });
-
-  /* ============ API عمومی ============ */
-  window.PT_Sync = {
-    pull: async function() {
-      if (!currentUserId) return;
-      clearDeletedIds();
-      var res = await sb.from('trades').select('data').eq('user_id', currentUserId);
-      if (res.data) {
-        var trades = res.data.map(function(r){ return r.data; });
-        skipNext = true;
-        origSetItem(TRADES_KEY, JSON.stringify(trades));
-        skipNext = false;
-        location.reload();
-      }
-    },
-    push: async function() {
-      if (!currentUserId) return;
-      var raw = origGetItem(TRADES_KEY);
-      if (raw !== null) await pushTrades(raw, currentUserId);
-    },
-    hideLoader: forceHideLoader,
-    status: function() {
-      return {
-        userId: currentUserId,
-        bootCompleted: bootCompleted,
-        pendingDeletes: getDeletedIds().size,
-        isPushing: isPushing
-      };
-    }
-  };
 
 })();
