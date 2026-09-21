@@ -3,138 +3,155 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>PO-TRADE | خوش آمدی</title>
+<title>PO-TRADE | تریدر حرفه‌ای شو</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap');
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;overflow:hidden}
-
 body{
-  background:#03040a;
-  color:#eef3ff;
+  background:#02030a;color:#eef3ff;
   font-family:'Vazirmatn',system-ui,Tahoma,sans-serif;
-  direction:rtl;
-  position:relative;
-  overflow:hidden;
+  direction:rtl;position:relative;overflow:hidden;
 }
 
-/* ============ BACKGROUND ============ */
+/* ============================================================
+   BACKGROUND
+   ============================================================ */
 .bg{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
 .orb{position:absolute;border-radius:50%;filter:blur(100px);opacity:.55;animation:orbFloat 22s ease-in-out infinite;will-change:transform}
 .orb-a{width:520px;height:520px;background:radial-gradient(circle,#2ee6a6 0%,transparent 70%);top:-180px;right:-140px}
 .orb-b{width:560px;height:560px;background:radial-gradient(circle,#5b8cff 0%,transparent 70%);bottom:-220px;left:-160px;animation-delay:-7s}
-.orb-c{width:420px;height:420px;background:radial-gradient(circle,#ff5fa2 0%,transparent 70%);top:40%;left:50%;opacity:.25;animation-delay:-13s}
-.orb-d{width:380px;height:380px;background:radial-gradient(circle,#c78aff 0%,transparent 70%);bottom:10%;right:10%;opacity:.2;animation-delay:-5s}
+.orb-c{width:420px;height:420px;background:radial-gradient(circle,#ff5fa2 0%,transparent 70%);top:40%;left:50%;opacity:.28;animation-delay:-13s}
 @keyframes orbFloat{0%,100%{transform:translate3d(0,0,0) scale(1)}33%{transform:translate3d(40px,-30px,0) scale(1.08)}66%{transform:translate3d(-30px,30px,0) scale(.94)}}
 
-/* ذرات شناور */
+.grid-bg{
+  position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(46,230,166,.05) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(46,230,166,.05) 1px,transparent 1px);
+  background-size:44px 44px;
+  mask-image:radial-gradient(ellipse at center,#000 30%,transparent 75%);
+  -webkit-mask-image:radial-gradient(ellipse at center,#000 30%,transparent 75%);
+  animation:gridShift 25s linear infinite;
+}
+@keyframes gridShift{0%{background-position:0 0,0 0}100%{background-position:44px 44px,44px 44px}}
+
+/* کندل‌های پس‌زمینه */
+.candles-bg{
+  position:absolute;left:0;right:0;bottom:8vh;height:200px;
+  display:flex;align-items:flex-end;justify-content:space-around;
+  padding:0 10px;opacity:.1;pointer-events:none;
+}
+.candle{
+  width:12px;background:linear-gradient(180deg,#2ee6a6,#12b57f);
+  border-radius:2px;animation:candleGrow 4s ease-in-out infinite;
+  position:relative;
+}
+.candle.sell{background:linear-gradient(180deg,#ff5fa2,#e0324f)}
+.candle::after{
+  content:'';position:absolute;left:50%;top:-6px;bottom:-6px;
+  width:2px;background:inherit;transform:translateX(-50%);
+  border-radius:2px;opacity:.7;
+}
+@keyframes candleGrow{0%,100%{transform:scaleY(1)}50%{transform:scaleY(.55)}}
+
+/* تیکر */
+.ticker{
+  position:absolute;top:8%;left:0;white-space:nowrap;
+  font-family:'Space Mono',monospace;
+  font-size:12px;font-weight:700;
+  color:rgba(46,230,166,.25);
+  animation:tickerMove 35s linear infinite;
+  pointer-events:none;letter-spacing:.5px;
+}
+.ticker-2{top:85%;color:rgba(91,140,255,.25);animation-delay:-18s}
+@keyframes tickerMove{0%{transform:translateX(100vw)}100%{transform:translateX(-100%)}}
+
+/* ذرات */
 .particle{position:absolute;width:3px;height:3px;border-radius:50%;box-shadow:0 0 8px currentColor;opacity:0;animation:particleFloat linear infinite;pointer-events:none}
 @keyframes particleFloat{0%{transform:translateY(100vh) scale(0);opacity:0}10%{opacity:1}90%{opacity:1}100%{transform:translateY(-100px) scale(1);opacity:0}}
 
-/* خطوط نور */
-.beam{position:absolute;width:2px;height:200%;background:linear-gradient(180deg,transparent 0%,rgba(46,230,166,.4) 50%,transparent 100%);filter:blur(2px);opacity:.3;animation:beamMove 10s linear infinite}
-.beam-1{right:20%}
-.beam-2{right:55%;animation-delay:3s;background:linear-gradient(180deg,transparent 0%,rgba(91,140,255,.4) 50%,transparent 100%)}
-.beam-3{right:80%;animation-delay:6s;background:linear-gradient(180deg,transparent 0%,rgba(255,95,162,.4) 50%,transparent 100%)}
-@keyframes beamMove{0%{transform:translateY(-100%) rotate(15deg);opacity:0}20%{opacity:.4}80%{opacity:.4}100%{transform:translateY(100%) rotate(15deg);opacity:0}}
-
-/* ============ APP LAYOUT ============ */
+/* ============================================================
+   APP
+   ============================================================ */
 .app{
   position:relative;z-index:1;
   height:100vh;height:100dvh;
   display:flex;flex-direction:column;
-  max-width:480px;margin:0 auto;
-  overflow:hidden;
+  max-width:500px;margin:0 auto;overflow:hidden;
 }
 
-/* ============ PROGRESS BAR (Top) ============ */
 .progress-top{
-  position:relative;
   flex-shrink:0;
   padding:calc(14px + env(safe-area-inset-top, 0px)) 20px 0;
   display:flex;align-items:center;gap:14px;
-  z-index:10;
 }
 .progress-track{
-  flex:1;height:4px;background:rgba(120,150,200,.12);border-radius:99px;overflow:hidden;
+  flex:1;height:4px;background:rgba(46,230,166,.1);
+  border-radius:99px;overflow:hidden;
 }
 .progress-fill{
   height:100%;width:0;
   background:linear-gradient(90deg,#2ee6a6,#5b8cff,#c78aff);
-  background-size:200% 100%;
   border-radius:99px;
   transition:width .55s cubic-bezier(.2,.9,.3,1.1);
-  animation:progressShine 3s linear infinite;
-  box-shadow:0 0 12px rgba(46,230,166,.5);
+  box-shadow:0 0 12px rgba(46,230,166,.7);
 }
-@keyframes progressShine{to{background-position:200% 0}}
-
 .step-counter{
   font-size:11.5px;font-weight:800;color:#8697b8;
-  font-family:'Menlo','Consolas',monospace;
+  font-family:'Space Mono',monospace;
   direction:ltr;flex-shrink:0;
   padding:4px 10px;border-radius:8px;
-  background:rgba(120,150,200,.08);
-  border:1px solid rgba(120,150,200,.15);
+  background:rgba(46,230,166,.06);
+  border:1px solid rgba(46,230,166,.2);
 }
 .step-counter strong{color:#2ee6a6;font-weight:900}
 
-/* ============ SLIDES ============ */
 .track-wrap{flex:1;overflow:hidden;position:relative}
-.track{
-  display:flex;height:100%;
-  transition:transform .55s cubic-bezier(.2,.9,.3,1.1);
-  will-change:transform;
-}
+.track{display:flex;height:100%;transition:transform .55s cubic-bezier(.2,.9,.3,1.1);will-change:transform}
 
 .slide{
   min-width:100%;height:100%;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding:30px 32px;
-  text-align:center;
-  position:relative;
+  padding:20px 26px;text-align:center;position:relative;
 }
 
-/* ============ VISUAL ============ */
+/* ============================================================
+   VISUAL
+   ============================================================ */
 .visual{
   position:relative;
-  width:200px;height:200px;
-  margin-bottom:44px;
+  width:min(220px, 55vw);
+  height:min(220px, 55vw);
+  margin-bottom:24px;
   display:grid;place-items:center;
   flex-shrink:0;
 }
 
-/* حلقه‌های چرخان */
-.ring{
-  position:absolute;border-radius:50%;
-  border:1.5px dashed rgba(46,230,166,.35);
-  animation:spin 20s linear infinite;
-}
-.ring-1{inset:-10px}
-.ring-2{inset:6px;border-color:rgba(91,140,255,.35);animation-duration:25s;animation-direction:reverse}
-.ring-3{inset:22px;border-color:rgba(255,95,162,.3);animation-duration:30s}
+.ring{position:absolute;border-radius:50%;border:1.5px dashed rgba(46,230,166,.3);animation:spin 22s linear infinite}
+.ring-1{inset:0}
+.ring-2{inset:16px;border-color:rgba(91,140,255,.3);animation-duration:28s;animation-direction:reverse}
+.ring-3{inset:32px;border-color:rgba(255,95,162,.25);animation-duration:34s}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-/* Blob متحرک */
+.halo{
+  position:absolute;width:260px;height:260px;border-radius:50%;
+  background:radial-gradient(circle,rgba(46,230,166,.3),transparent 60%);
+  animation:haloPulse 4s ease-in-out infinite;pointer-events:none;
+}
+@keyframes haloPulse{0%,100%{transform:scale(1);opacity:.5}50%{transform:scale(1.15);opacity:.9}}
+
 .blob{
   position:absolute;inset:0;
-  background:linear-gradient(135deg,rgba(46,230,166,.28),rgba(91,140,255,.22));
+  background:linear-gradient(135deg,rgba(46,230,166,.3),rgba(91,140,255,.25));
   border-radius:42% 58% 63% 37% / 45% 38% 62% 55%;
   animation:blobMorph 8s ease-in-out infinite;
-  will-change:border-radius;
 }
 .blob-2{
-  position:absolute;inset:14px;
-  background:linear-gradient(135deg,rgba(214,163,92,.22),rgba(255,95,162,.18));
+  position:absolute;inset:16px;
+  background:linear-gradient(135deg,rgba(214,163,92,.25),rgba(255,95,162,.2));
   border-radius:63% 37% 42% 58% / 55% 62% 38% 45%;
   animation:blobMorph 10s ease-in-out infinite reverse;
-}
-.blob-3{
-  position:absolute;inset:28px;
-  background:linear-gradient(135deg,rgba(46,230,166,.2),rgba(91,140,255,.15));
-  border-radius:45% 55% 50% 50% / 55% 45% 55% 45%;
-  animation:blobMorph 12s ease-in-out infinite;
-  animation-delay:-3s;
 }
 @keyframes blobMorph{
   0%,100%{border-radius:42% 58% 63% 37% / 45% 38% 62% 55%}
@@ -142,75 +159,56 @@ body{
   66%{border-radius:50% 50% 45% 55% / 42% 48% 52% 58%}
 }
 
-/* هاله نور */
-.halo{
-  position:absolute;
-  width:240px;height:240px;
-  border-radius:50%;
-  background:radial-gradient(circle,rgba(46,230,166,.3),transparent 60%);
-  animation:haloPulse 4s ease-in-out infinite;
-  pointer-events:none;
-}
-@keyframes haloPulse{
-  0%,100%{transform:scale(1);opacity:.5}
-  50%{transform:scale(1.2);opacity:.9}
-}
-
-/* آیکون */
-.visual-icon{
+.icon-main{
   position:relative;z-index:3;
-  font-size:76px;line-height:1;
-  filter:drop-shadow(0 12px 32px rgba(46,230,166,.6));
+  font-size:78px;line-height:1;
+  filter:drop-shadow(0 12px 32px rgba(46,230,166,.7));
   animation:iconFloat 4s ease-in-out infinite;
 }
 @keyframes iconFloat{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-10px) rotate(-3deg)}}
 
-/* ستاره‌های کوچیک دور */
-.star{
+.float-badge{
   position:absolute;
-  width:6px;height:6px;border-radius:50%;
-  background:#2ee6a6;
-  box-shadow:0 0 10px currentColor;
-  animation:starOrbit 6s linear infinite;
-  z-index:4;
+  padding:5px 11px;border-radius:10px;
+  font-size:10px;font-weight:900;
+  font-family:'Space Mono',monospace;
+  background:rgba(3,4,10,.92);
+  border:1.5px solid;
+  z-index:5;white-space:nowrap;
+  animation:badgeFloat 4s ease-in-out infinite;
+  direction:ltr;
+  box-shadow:0 8px 24px -8px rgba(0,0,0,.7);
 }
-.star-1{color:#2ee6a6;animation-delay:0s;top:5%;right:15%}
-.star-2{color:#5b8cff;animation-delay:-2s;bottom:10%;left:10%}
-.star-3{color:#ff5fa2;animation-delay:-4s;top:20%;left:8%}
-@keyframes starOrbit{
-  0%{transform:scale(0) rotate(0deg);opacity:0}
-  20%{transform:scale(1) rotate(72deg);opacity:1}
-  80%{transform:scale(1) rotate(288deg);opacity:1}
-  100%{transform:scale(0) rotate(360deg);opacity:0}
-}
+.float-badge.profit{color:#2ee6a6;border-color:rgba(46,230,166,.5);top:6%;right:-6%}
+.float-badge.winrate{color:#5b8cff;border-color:rgba(91,140,255,.5);bottom:14%;left:-8%;animation-delay:-1.3s}
+.float-badge.rank{color:#ffb020;border-color:rgba(255,176,32,.5);top:52%;right:-10%;animation-delay:-2.6s}
+@keyframes badgeFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
 
-/* ============ TEXT ============ */
-.slide-badge{
+/* ============================================================
+   TEXT
+   ============================================================ */
+.badge{
   display:inline-flex;align-items:center;gap:6px;
-  padding:6px 16px;border-radius:999px;
-  font-size:11px;font-weight:800;
-  margin-bottom:18px;
+  padding:6px 14px;border-radius:999px;
+  font-size:10px;font-weight:900;
+  margin-bottom:12px;
   background:rgba(46,230,166,.1);
-  border:1px solid rgba(46,230,166,.3);
-  color:#2ee6a6;
-  letter-spacing:.3px;
-  animation:fadeUp .5s ease backwards;
-  animation-delay:.1s;
+  border:1.5px solid rgba(46,230,166,.4);
+  color:#2ee6a6;letter-spacing:.5px;
+  animation:fadeUp .5s ease backwards;animation-delay:.1s;
+  text-transform:uppercase;
 }
-.slide-badge::before{
-  content:'';
-  width:6px;height:6px;border-radius:50%;
-  background:#2ee6a6;
-  box-shadow:0 0 10px #2ee6a6;
+.badge::before{
+  content:'';width:6px;height:6px;border-radius:50%;
+  background:#2ee6a6;box-shadow:0 0 10px #2ee6a6;
   animation:pulse 2s infinite;
 }
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.8)}}
 
-.slide-title{
+.title{
   font-size:26px;font-weight:900;
-  line-height:1.3;
-  margin-bottom:16px;
-  letter-spacing:-.4px;
+  line-height:1.25;margin-bottom:12px;
+  letter-spacing:-.5px;
   background:linear-gradient(90deg,#eef3ff 0%,#2ee6a6 40%,#5b8cff 80%,#eef3ff 100%);
   background-size:200% auto;
   -webkit-background-clip:text;background-clip:text;
@@ -221,92 +219,280 @@ body{
 @keyframes titleShine{to{background-position:200% center}}
 @keyframes fadeUp{from{opacity:0;transform:translateY(15px)}to{opacity:1;transform:none}}
 
-.slide-desc{
-  font-size:14.5px;color:#8697b8;line-height:1.85;
+.desc{
+  font-size:13.5px;color:#9aa8c5;line-height:1.85;
   max-width:340px;margin:0 auto;
-  animation:fadeUp .5s ease backwards;
-  animation-delay:.3s;
+  animation:fadeUp .5s ease backwards;animation-delay:.3s;
+}
+.desc strong{color:#2ee6a6;font-weight:800}
+.desc em{color:#5b8cff;font-style:normal;font-weight:800}
+
+/* ============================================================
+   QUOTE CARD — اسلاید الهام‌بخش
+   ============================================================ */
+.quote-card{
+  position:relative;
+  width:100%;max-width:340px;
+  margin-top:16px;
+  padding:20px 22px;
+  background:linear-gradient(135deg,rgba(46,230,166,.08),rgba(91,140,255,.05));
+  border:1px solid rgba(46,230,166,.25);
+  border-radius:18px;
+  text-align:right;
+  animation:fadeUp .6s ease backwards;animation-delay:.5s;
+}
+.quote-mark{
+  position:absolute;
+  top:-10px;right:16px;
+  font-size:52px;
+  color:rgba(46,230,166,.3);
+  line-height:1;
+  font-family:Georgia,serif;
+}
+.quote-text{
+  font-size:13.5px;
+  line-height:1.75;
+  color:#c7d3ea;
+  font-weight:600;
+  position:relative;z-index:1;
+  margin-bottom:10px;
+}
+.quote-text strong{color:#2ee6a6;font-weight:900}
+.quote-author{
+  font-size:11px;
+  color:#8697b8;
+  font-weight:700;
+  display:flex;align-items:center;gap:6px;
+}
+.quote-author::before{
+  content:'';
+  width:24px;height:1.5px;
+  background:linear-gradient(90deg,#2ee6a6,transparent);
+  border-radius:2px;
 }
 
-/* لیست ویژگی‌ها */
-.features{
-  display:flex;flex-direction:column;gap:10px;
-  margin-top:20px;max-width:320px;width:100%;
-  animation:fadeUp .5s ease backwards;
-  animation-delay:.4s;
+/* ============================================================
+   STATS BAR — اسلاید آمار حرفه‌ای
+   ============================================================ */
+.live-stats{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:8px;
+  width:100%;max-width:340px;
+  margin-top:18px;
+  animation:fadeUp .6s ease backwards;animation-delay:.4s;
 }
-.feature-row{
-  display:flex;align-items:center;gap:12px;
-  padding:12px 14px;
-  background:rgba(46,230,166,.05);
-  border:1px solid rgba(46,230,166,.15);
+.live-stat{
+  padding:14px 8px;
+  background:linear-gradient(135deg,rgba(46,230,166,.06),rgba(91,140,255,.03));
+  border:1px solid rgba(46,230,166,.2);
   border-radius:14px;
-  text-align:right;
-  font-size:13px;color:#c7d3ea;font-weight:600;
+  text-align:center;
+  position:relative;
+  overflow:hidden;
 }
-.feature-row .f-icon{
+.live-stat::before{
+  content:'';
+  position:absolute;
+  top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,#2ee6a6,transparent);
+  animation:scanLine 3s linear infinite;
+}
+@keyframes scanLine{
+  0%{transform:translateX(-100%)}
+  100%{transform:translateX(100%)}
+}
+.live-stat .num{
+  font-size:17px;font-weight:900;
+  background:linear-gradient(90deg,#2ee6a6,#5b8cff);
+  -webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;
+  font-family:'Space Mono',monospace;
+  display:block;margin-bottom:3px;direction:ltr;
+}
+.live-stat .lbl{
+  font-size:9px;font-weight:800;color:#8697b8;
+  text-transform:uppercase;letter-spacing:.5px;
+}
+
+/* ============================================================
+   FEATURES LIST — لیست ویژگی‌ها
+   ============================================================ */
+.features{
+  display:flex;flex-direction:column;gap:8px;
+  margin-top:16px;width:100%;max-width:340px;
+  animation:fadeUp .5s ease backwards;animation-delay:.4s;
+}
+.feature{
+  display:flex;align-items:center;gap:11px;
+  padding:11px 13px;
+  background:linear-gradient(135deg,rgba(46,230,166,.06),rgba(91,140,255,.03));
+  border:1px solid rgba(46,230,166,.18);
+  border-radius:13px;text-align:right;
+  position:relative;overflow:hidden;
+}
+.feature .f-ico{
   width:34px;height:34px;flex:0 0 34px;
-  border-radius:10px;
   display:grid;place-items:center;
-  font-size:16px;
-  background:linear-gradient(135deg,rgba(46,230,166,.18),rgba(91,140,255,.15));
+  border-radius:10px;font-size:16px;
+  background:linear-gradient(135deg,rgba(46,230,166,.15),rgba(91,140,255,.12));
   border:1px solid rgba(46,230,166,.3);
 }
+.feature .f-txt{flex:1;min-width:0}
+.feature .f-title{
+  font-size:12px;font-weight:800;color:#eef3ff;
+  margin-bottom:2px;
+}
+.feature .f-sub{
+  font-size:10px;color:#8697b8;line-height:1.5;
+}
+.feature .f-sub b{color:#2ee6a6;font-weight:700}
 
-/* ============ BOTTOM CONTROLS ============ */
+/* بج NEW */
+.new-badge{
+  position:absolute;top:6px;left:8px;
+  padding:2px 7px;border-radius:6px;
+  font-size:8.5px;font-weight:900;
+  background:linear-gradient(135deg,#ffb020,#d68c00);
+  color:#1a1200;letter-spacing:.5px;
+  box-shadow:0 4px 12px -4px rgba(255,176,32,.6);
+  animation:newPulse 1.5s ease-in-out infinite;
+}
+@keyframes newPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+
+/* ============================================================
+   BEFORE/AFTER — مقایسه قبل و بعد
+   ============================================================ */
+.compare{
+  display:grid;
+  grid-template-columns:1fr auto 1fr;
+  gap:10px;
+  width:100%;max-width:340px;
+  margin-top:16px;
+  align-items:center;
+  animation:fadeUp .6s ease backwards;animation-delay:.4s;
+}
+.compare-box{
+  padding:14px 12px;
+  border-radius:14px;
+  text-align:center;
+}
+.compare-box.before{
+  background:rgba(255,86,116,.08);
+  border:1.5px solid rgba(255,86,116,.3);
+}
+.compare-box.after{
+  background:rgba(46,230,166,.08);
+  border:1.5px solid rgba(46,230,166,.35);
+}
+.compare-box .h{
+  font-size:9.5px;font-weight:900;
+  text-transform:uppercase;
+  letter-spacing:1px;
+  margin-bottom:8px;
+}
+.compare-box.before .h{color:#ff95a8}
+.compare-box.after .h{color:#2ee6a6}
+.compare-box .item{
+  font-size:11px;
+  color:#c7d3ea;
+  font-weight:600;
+  line-height:1.9;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:5px;
+}
+.compare-box .item .dot{
+  width:4px;height:4px;border-radius:50%;
+  flex-shrink:0;
+}
+.compare-box.before .item .dot{background:#ff5674}
+.compare-box.after .item .dot{background:#2ee6a6}
+.compare-arrow{
+  font-size:22px;
+  color:#2ee6a6;
+  font-weight:900;
+  animation:arrowPulse 2s ease-in-out infinite;
+}
+@keyframes arrowPulse{
+  0%,100%{transform:scale(1);opacity:.7}
+  50%{transform:scale(1.2);opacity:1}
+}
+
+/* چک‌لیست دمو */
+.demo-checklist{
+  display:flex;flex-direction:column;gap:6px;
+  margin-top:14px;width:100%;max-width:340px;
+  animation:fadeUp .5s ease backwards;animation-delay:.4s;
+}
+.cl-row-demo{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 12px;
+  background:linear-gradient(135deg,rgba(46,230,166,.08),rgba(91,140,255,.03));
+  border:1px solid rgba(46,230,166,.2);
+  border-radius:11px;text-align:right;
+  animation:checkIn .5s ease backwards;
+}
+.cl-row-demo:nth-child(1){animation-delay:.5s}
+.cl-row-demo:nth-child(2){animation-delay:.65s}
+.cl-row-demo:nth-child(3){animation-delay:.8s}
+.cl-row-demo:nth-child(4){animation-delay:.95s}
+@keyframes checkIn{from{opacity:0;transform:translateX(-20px)}to{opacity:1;transform:none}}
+.cl-check{
+  width:20px;height:20px;flex:0 0 20px;
+  border-radius:6px;
+  background:linear-gradient(135deg,#2ee6a6,#12b57f);
+  display:grid;place-items:center;
+  font-size:12px;font-weight:900;color:#04170f;
+  box-shadow:0 4px 12px -4px rgba(46,230,166,.6);
+}
+.cl-text-demo{
+  font-size:11.5px;color:#c7d3ea;font-weight:600;
+  flex:1;
+}
+
+/* ============================================================
+   BOTTOM
+   ============================================================ */
 .bottom{
   flex-shrink:0;
-  padding:20px 24px calc(28px + env(safe-area-inset-bottom, 0px));
-  display:flex;
-  flex-direction:column;
-  gap:16px;
+  padding:16px 24px calc(22px + env(safe-area-inset-bottom, 0px));
+  display:flex;flex-direction:column;gap:12px;
 }
 
-/* نشانگر نقطه‌ای */
-.dots-row{
-  display:flex;align-items:center;justify-content:center;
-  gap:8px;
-}
+.dots-row{display:flex;align-items:center;justify-content:center;gap:7px}
 .dot{
   width:8px;height:8px;border-radius:999px;
   background:rgba(120,150,200,.25);
   transition:all .4s cubic-bezier(.2,.9,.3,1.1);
-  cursor:pointer;flex-shrink:0;
-  border:0;padding:0;
+  cursor:pointer;flex-shrink:0;border:0;padding:0;
 }
 .dot.on{
-  width:28px;
+  width:26px;
   background:linear-gradient(90deg,#2ee6a6,#5b8cff);
   box-shadow:0 0 14px rgba(46,230,166,.7);
 }
 .dot:hover:not(.on){background:rgba(120,150,200,.5)}
 
-/* دکمه‌ها */
-.buttons-row{
-  display:flex;gap:10px;
-}
+.buttons-row{display:flex;gap:10px}
 .btn-skip{
   flex:0 0 auto;
-  padding:15px 22px;border-radius:15px;
+  padding:14px 18px;border-radius:14px;
   border:1.5px solid rgba(120,150,200,.2);
   background:rgba(120,150,200,.05);
-  color:#8697b8;
-  font:inherit;font-size:13.5px;font-weight:800;
+  color:#8697b8;font:inherit;font-size:12.5px;font-weight:800;
   cursor:pointer;transition:all .22s;
 }
-.btn-skip:hover{
-  background:rgba(120,150,200,.12);
-  border-color:rgba(120,150,200,.35);
-  color:#eef3ff;
-}
+.btn-skip:hover{background:rgba(120,150,200,.12);border-color:rgba(120,150,200,.35);color:#eef3ff}
 .btn-skip:active{transform:scale(.97)}
 
 .btn-next{
   flex:1;
   display:inline-flex;align-items:center;justify-content:center;gap:10px;
-  padding:16px 28px;border-radius:15px;border:0;
+  padding:15px 26px;border-radius:14px;border:0;
   background:linear-gradient(135deg,#2ee6a6,#12b57f);
-  color:#04170f;font:inherit;font-size:14.5px;font-weight:900;
+  color:#04170f;font:inherit;font-size:14px;font-weight:900;
   cursor:pointer;
   box-shadow:0 15px 40px -14px rgba(46,230,166,.85);
   transition:all .25s cubic-bezier(.2,.9,.3,1.1);
@@ -327,26 +513,31 @@ body{
 }
 .btn-next.finish:hover{box-shadow:0 22px 50px -14px rgba(214,163,92,1)}
 
-.btn-next .arrow{
-  display:inline-block;
-  transition:transform .25s;
-}
+.btn-next .arrow{display:inline-block;transition:transform .25s}
 .btn-next:hover .arrow{transform:translateX(-5px)}
 
-/* ============ RESPONSIVE ============ */
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
 @media (max-width:380px){
-  .visual{width:170px;height:170px;margin-bottom:32px}
-  .visual-icon{font-size:62px}
-  .slide-title{font-size:22px}
-  .slide-desc{font-size:13.5px}
-  .halo{width:200px;height:200px}
+  .visual{width:165px;height:165px;margin-bottom:18px}
+  .icon-main{font-size:60px}
+  .title{font-size:21px}
+  .desc{font-size:12px}
+  .halo{width:190px;height:190px}
+  .float-badge{font-size:9px;padding:4px 9px}
+  .feature{padding:9px 11px}
+  .feature .f-ico{width:30px;height:30px;flex:0 0 30px;font-size:14px}
+  .live-stat .num{font-size:15px}
+  .compare-box{padding:11px 8px}
+  .compare-box .item{font-size:10px}
 }
 @media (min-height:820px){
-  .visual{width:220px;height:220px;margin-bottom:52px}
-  .visual-icon{font-size:86px}
-  .slide-title{font-size:28px}
-  .slide-desc{font-size:15px}
-  .halo{width:260px;height:260px}
+  .visual{width:230px;height:230px;margin-bottom:32px}
+  .icon-main{font-size:84px}
+  .title{font-size:28px}
+  .desc{font-size:14.5px}
+  .halo{width:280px;height:280px}
 }
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{
@@ -359,34 +550,44 @@ body{
 </head>
 <body>
 
-<!-- BACKGROUND -->
 <div class="bg" id="bg">
   <div class="orb orb-a"></div>
   <div class="orb orb-b"></div>
   <div class="orb orb-c"></div>
-  <div class="orb orb-d"></div>
-  <div class="beam beam-1"></div>
-  <div class="beam beam-2"></div>
-  <div class="beam beam-3"></div>
+  <div class="grid-bg"></div>
+
+  <div class="candles-bg">
+    <div class="candle" style="height:40%"></div>
+    <div class="candle sell" style="height:65%"></div>
+    <div class="candle" style="height:35%"></div>
+    <div class="candle" style="height:80%"></div>
+    <div class="candle sell" style="height:55%"></div>
+    <div class="candle" style="height:90%"></div>
+    <div class="candle" style="height:70%"></div>
+    <div class="candle sell" style="height:50%"></div>
+    <div class="candle" style="height:75%"></div>
+    <div class="candle" style="height:60%"></div>
+  </div>
+
+  <div class="ticker">XAUUSD ▸ 2,658.42 <span style="color:#2ee6a6">▲ +1.24%</span> &nbsp;&nbsp; EURUSD ▸ 1.0876 <span style="color:#ff5fa2">▼ −0.32%</span> &nbsp;&nbsp; BTCUSD ▸ 62,341 <span style="color:#2ee6a6">▲ +2.15%</span> &nbsp;&nbsp; NAS100 ▸ 18,442 <span style="color:#2ee6a6">▲ +0.87%</span> &nbsp;&nbsp; GBPJPY ▸ 189.24 <span style="color:#ff5fa2">▼ −0.45%</span></div>
+  <div class="ticker ticker-2">WIN RATE 68% &nbsp;•&nbsp; PROFIT FACTOR 2.4 &nbsp;•&nbsp; 342 TRADES LOGGED &nbsp;•&nbsp; AVG R 1.8R &nbsp;•&nbsp; MAX DD 4.2% &nbsp;•&nbsp; EXPECTANCY +$142</div>
 </div>
 
 <div class="app">
 
-  <!-- Top: progress -->
   <div class="progress-top">
     <div class="progress-track">
       <div class="progress-fill" id="progressFill"></div>
     </div>
     <div class="step-counter">
-      <strong id="stepCur">1</strong>/<span id="stepTot">6</span>
+      <strong id="stepCur">1</strong>/<span id="stepTot">7</span>
     </div>
   </div>
 
-  <!-- Slides -->
   <div class="track-wrap">
     <div class="track" id="track">
 
-      <!-- Slide 1 -->
+      <!-- === SLIDE 1: WHY === -->
       <div class="slide">
         <div class="visual">
           <div class="halo"></div>
@@ -395,20 +596,26 @@ body{
           <div class="ring ring-3"></div>
           <div class="blob"></div>
           <div class="blob-2"></div>
-          <div class="blob-3"></div>
-          <div class="star star-1"></div>
-          <div class="star star-2"></div>
-          <div class="star star-3"></div>
-          <div class="visual-icon">👋</div>
+          <div class="float-badge profit">▲ +240%</div>
+          <div class="float-badge winrate">★★★</div>
+          <div class="float-badge rank">TOP 1%</div>
+          <div class="icon-main">🎯</div>
         </div>
-        <div class="slide-badge">✨ خوش آمدی</div>
-        <h2 class="slide-title">به PO-TRADE خوش اومدی!</h2>
-        <p class="slide-desc">
-          یه ژورنال معاملات حرفه‌ای که کمکت می‌کنه معاملاتت رو ثبت کنی، تحلیل کنی و پیشرفتت رو ببینی.
+        <div class="badge">🔥 چرا ۹۰٪ تریدرها ضرر می‌کنن؟</div>
+        <h2 class="title">چون هیچ‌وقت معاملاتشون رو یادداشت نمی‌کنن!</h2>
+        <p class="desc">
+          تریدرهای حرفه‌ای <strong>روزی ۲ ساعت</strong> صرف ژورنال‌نویسی می‌کنن. چون بدون داده، فقط <em>حدس</em> می‌زنی — نه ترید.
         </p>
+        <div class="quote-card">
+          <span class="quote-mark">"</span>
+          <div class="quote-text">
+            بهترین تریدرها <strong>بهترین ژورنال‌نویس‌ها</strong> هستن. معامله بدون ثبت، مثل رانندگی بدون آینه‌ست.
+          </div>
+          <div class="quote-author">پل تودور جونز · افسانه وال استریت</div>
+        </div>
       </div>
 
-      <!-- Slide 2 -->
+      <!-- === SLIDE 2: TRANSFORMATION === -->
       <div class="slide">
         <div class="visual">
           <div class="halo"></div>
@@ -417,30 +624,71 @@ body{
           <div class="ring ring-3"></div>
           <div class="blob"></div>
           <div class="blob-2"></div>
-          <div class="blob-3"></div>
-          <div class="star star-1"></div>
-          <div class="star star-2"></div>
-          <div class="star star-3"></div>
-          <div class="visual-icon">✍️</div>
+          <div class="float-badge profit">+۱۸۰٪</div>
+          <div class="float-badge winrate">WR ↑</div>
+          <div class="float-badge rank">PRO</div>
+          <div class="icon-main">⚡</div>
         </div>
-        <div class="slide-badge">📝 ثبت سریع</div>
-        <h2 class="slide-title">معاملاتت رو ثبت کن</h2>
-        <p class="slide-desc">
-          با یه فرم ساده، نماد، جهت، نتیجه و حالت روحی‌ت رو وارد کن.
+        <div class="badge">🚀 ترنسفورمیشن</div>
+        <h2 class="title">از تریدر شلخته به تریدر سیستماتیک</h2>
+        <p class="desc">
+          پلتفرم ما مسیر <strong>حرفه‌ای شدن</strong> رو برات هموار می‌کنه. هر معامله یه درسه، هر درس یه قدم جلوتر.
+        </p>
+        <div class="compare">
+          <div class="compare-box before">
+            <div class="h">❌ قبل</div>
+            <div class="item"><span class="dot"></span>معامله تصادفی</div>
+            <div class="item"><span class="dot"></span>بدون آمار</div>
+            <div class="item"><span class="dot"></span>تکرار اشتباه</div>
+          </div>
+          <div class="compare-arrow">←</div>
+          <div class="compare-box after">
+            <div class="h">✅ بعد</div>
+            <div class="item"><span class="dot"></span>استراتژی روشن</div>
+            <div class="item"><span class="dot"></span>داده‌محور</div>
+            <div class="item"><span class="dot"></span>پیشرفت پیوسته</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- === SLIDE 3: LOG === -->
+      <div class="slide">
+        <div class="visual">
+          <div class="halo"></div>
+          <div class="ring ring-1"></div>
+          <div class="ring ring-2"></div>
+          <div class="ring ring-3"></div>
+          <div class="blob"></div>
+          <div class="blob-2"></div>
+          <div class="float-badge profit">XAUUSD</div>
+          <div class="float-badge winrate">BUY</div>
+          <div class="float-badge rank">+۲.۵R</div>
+          <div class="icon-main">✍️</div>
+        </div>
+        <div class="badge">📝 ثبت هوشمند</div>
+        <h2 class="title">هر معامله رو در ۳۰ ثانیه ثبت کن</h2>
+        <p class="desc">
+          نماد، جهت، نتیجه، <em>اسکرین‌شات چارت</em>، حالت روحی و چک‌لیست — یه فرم سریع، تمیز، حرفه‌ای.
         </p>
         <div class="features">
-          <div class="feature-row">
-            <span class="f-icon">📸</span>
-            <span>اسکرین‌شات چارت رو ضمیمه کن</span>
+          <div class="feature">
+            <div class="f-ico">📸</div>
+            <div class="f-txt">
+              <div class="f-title">اسکرین‌شات چارت</div>
+              <div class="f-sub">هر معامله + <b>تصویرش</b> — برای مرور آینده</div>
+            </div>
           </div>
-          <div class="feature-row">
-            <span class="f-icon">🏷️</span>
-            <span>با تگ‌ها دسته‌بندی کن</span>
+          <div class="feature">
+            <div class="f-ico">🧠</div>
+            <div class="f-txt">
+              <div class="f-title">ردیابی احساسات</div>
+              <div class="f-sub">طمع، ترس، FOMO — <b>احساست رو بشناس</b></div>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- Slide 3 -->
+      <!-- === SLIDE 4: CHECKLIST === -->
       <div class="slide">
         <div class="visual">
           <div class="halo"></div>
@@ -449,30 +697,118 @@ body{
           <div class="ring ring-3"></div>
           <div class="blob"></div>
           <div class="blob-2"></div>
-          <div class="blob-3"></div>
-          <div class="star star-1"></div>
-          <div class="star star-2"></div>
-          <div class="star star-3"></div>
-          <div class="visual-icon">📊</div>
+          <div class="float-badge profit">✓ SAVED</div>
+          <div class="float-badge winrate">CUSTOM</div>
+          <div class="float-badge rank">★ NEW</div>
+          <div class="icon-main">✅</div>
         </div>
-        <div class="slide-badge">📈 آنالیز هوشمند</div>
-        <h2 class="slide-title">عملکردت رو تحلیل کن</h2>
-        <p class="slide-desc">
-          منحنی رشد سرمایه، سود/ضرر روزانه و عملکرد استراتژی‌ها رو یه نگاه ببین.
+        <div class="badge">🎯 جدید — چک‌لیست اختصاصی</div>
+        <h2 class="title">قوانین معاملاتیت رو خودت بنویس</h2>
+        <p class="desc">
+          از تنظیمات، <strong>چک‌لیست شخصی خودت</strong> رو بساز. هر تریدر قوانین خودش رو داره — تو هم مالک استراتژی خودت باش.
+        </p>
+        <div class="demo-checklist">
+          <div class="cl-row-demo">
+            <span class="cl-check">✓</span>
+            <span class="cl-text-demo">ستاپ تأیید شد</span>
+          </div>
+          <div class="cl-row-demo">
+            <span class="cl-check">✓</span>
+            <span class="cl-text-demo">حد ضرر مشخص شد</span>
+          </div>
+          <div class="cl-row-demo">
+            <span class="cl-check">✓</span>
+            <span class="cl-text-demo">حجم مناسب بود</span>
+          </div>
+          <div class="cl-row-demo">
+            <span class="cl-check">✓</span>
+            <span class="cl-text-demo">طبق پلن پیش رفتم</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- === SLIDE 5: ANALYTICS === -->
+      <div class="slide">
+        <div class="visual">
+          <div class="halo"></div>
+          <div class="ring ring-1"></div>
+          <div class="ring ring-2"></div>
+          <div class="ring ring-3"></div>
+          <div class="blob"></div>
+          <div class="blob-2"></div>
+          <div class="float-badge profit">PF 2.4</div>
+          <div class="float-badge winrate">+۱.۸R</div>
+          <div class="float-badge rank">۶۸٪ WR</div>
+          <div class="icon-main">📊</div>
+        </div>
+        <div class="badge">📈 آنالیز هوشمند</div>
+        <h2 class="title">اعداد دروغ نمی‌گن</h2>
+        <p class="desc">
+          منحنی رشد سرمایه، <em>Profit Factor</em>، وین‌ریت، Expectancy و افت سرمایه — همه محاسبه خودکار.
+        </p>
+        <div class="live-stats">
+          <div class="live-stat">
+            <span class="num">2.4</span>
+            <span class="lbl">Profit Factor</span>
+          </div>
+          <div class="live-stat">
+            <span class="num">68%</span>
+            <span class="lbl">Win Rate</span>
+          </div>
+          <div class="live-stat">
+            <span class="num">+1.8R</span>
+            <span class="lbl">Avg R</span>
+          </div>
+        </div>
+        <div class="features">
+          <div class="feature">
+            <div class="f-ico">🎯</div>
+            <div class="f-txt">
+              <div class="f-title">مقایسه استراتژی‌ها</div>
+              <div class="f-sub">ببین <b>کدوم استراتژی سوددهه</b> و کدوم نه</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- === SLIDE 6: CALENDAR + GOALS === -->
+      <div class="slide">
+        <div class="visual">
+          <div class="halo"></div>
+          <div class="ring ring-1"></div>
+          <div class="ring ring-2"></div>
+          <div class="ring ring-3"></div>
+          <div class="blob"></div>
+          <div class="blob-2"></div>
+          <div class="float-badge profit">+۵ روز سبز</div>
+          <div class="float-badge winrate">۷۸٪ هدف</div>
+          <div class="float-badge rank">DD 4.2%</div>
+          <div class="icon-main">🏆</div>
+        </div>
+        <div class="badge">⚔️ انضباط = سود</div>
+        <h2 class="title">هدف بذار، رعایت کن، برنده شو</h2>
+        <p class="desc">
+          تقویم بصری + اهداف هفتگی + <strong>قوانین پراپ فرم</strong> — تا هیچ‌وقت از چارچوب خارج نشی.
         </p>
         <div class="features">
-          <div class="feature-row">
-            <span class="f-icon">🧠</span>
-            <span>تحلیل احساسات (طمع، ترس، FOMO)</span>
+          <div class="feature">
+            <div class="f-ico">📅</div>
+            <div class="f-txt">
+              <div class="f-title">تقویم رنگی</div>
+              <div class="f-sub">الگوها رو در <b>یک نگاه</b> ببین</div>
+            </div>
           </div>
-          <div class="feature-row">
-            <span class="f-icon">🎯</span>
-            <span>مقایسه استراتژی‌ها</span>
+          <div class="feature">
+            <div class="f-ico">💥</div>
+            <div class="f-txt">
+              <div class="f-title">هشدار ریسک</div>
+              <div class="f-sub">اخطار خودکار در <b>۸۰٪ حد ضرر</b></div>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- Slide 4 -->
+      <!-- === SLIDE 7: READY === -->
       <div class="slide">
         <div class="visual">
           <div class="halo"></div>
@@ -481,77 +817,42 @@ body{
           <div class="ring ring-3"></div>
           <div class="blob"></div>
           <div class="blob-2"></div>
-          <div class="blob-3"></div>
-          <div class="star star-1"></div>
-          <div class="star star-2"></div>
-          <div class="star star-3"></div>
-          <div class="visual-icon">📅</div>
+          <div class="float-badge profit">☁️ SYNCED</div>
+          <div class="float-badge winrate">🔐 SECURE</div>
+          <div class="float-badge rank">⚡ FAST</div>
+          <div class="icon-main">🚀</div>
         </div>
-        <div class="slide-badge">🗓️ تقویم بصری</div>
-        <h2 class="slide-title">روزت رو ببین</h2>
-        <p class="slide-desc">
-          تقویم رنگی نشون می‌ده کدوم روز سود کردی و کدوم روز ضرر. الگوها رو سریع تشخیص بده.
+        <div class="badge">🎉 آماده‌ای برای پرواز</div>
+        <h2 class="title">حالا وقتشه شروع کنی!</h2>
+        <p class="desc">
+          معاملاتت روی <strong>همه دستگاه‌ها همگام</strong> می‌شن، حسابت با ایمیل محافظت می‌شه و سرعت بالاست.
         </p>
-      </div>
-
-      <!-- Slide 5 -->
-      <div class="slide">
-        <div class="visual">
-          <div class="halo"></div>
-          <div class="ring ring-1"></div>
-          <div class="ring ring-2"></div>
-          <div class="ring ring-3"></div>
-          <div class="blob"></div>
-          <div class="blob-2"></div>
-          <div class="blob-3"></div>
-          <div class="star star-1"></div>
-          <div class="star star-2"></div>
-          <div class="star star-3"></div>
-          <div class="visual-icon">🎯</div>
-        </div>
-        <div class="slide-badge">🏆 هدف‌گذاری</div>
-        <h2 class="slide-title">هدف بذار، پیگیری کن</h2>
-        <p class="slide-desc">
-          هدف هفتگی یا ماهانه تعیین کن. قوانین پراپ فرم رو هم فعال کن تا توی چارچوب بمونی.
-        </p>
-        <div class="features">
-          <div class="feature-row">
-            <span class="f-icon">💥</span>
-            <span>حد ضرر روزانه</span>
+        <div class="quote-card">
+          <span class="quote-mark">"</span>
+          <div class="quote-text">
+            موفقیت در ترید <strong>۱۰٪ استراتژی</strong> و <strong>۹۰٪ روانشناسی و انضباطه</strong>. امروز قدم اول رو بردار.
           </div>
-          <div class="feature-row">
-            <span class="f-icon">⚠️</span>
-            <span>حداکثر افت سرمایه</span>
+          <div class="quote-author">مارک داگلاس · نویسنده «تریدر منظم»</div>
+        </div>
+        <div class="live-stats">
+          <div class="live-stat">
+            <span class="num">☁️</span>
+            <span class="lbl">همگام</span>
+          </div>
+          <div class="live-stat">
+            <span class="num">🔐</span>
+            <span class="lbl">امن</span>
+          </div>
+          <div class="live-stat">
+            <span class="num">⚡</span>
+            <span class="lbl">سریع</span>
           </div>
         </div>
-      </div>
-
-      <!-- Slide 6 -->
-      <div class="slide">
-        <div class="visual">
-          <div class="halo"></div>
-          <div class="ring ring-1"></div>
-          <div class="ring ring-2"></div>
-          <div class="ring ring-3"></div>
-          <div class="blob"></div>
-          <div class="blob-2"></div>
-          <div class="blob-3"></div>
-          <div class="star star-1"></div>
-          <div class="star star-2"></div>
-          <div class="star star-3"></div>
-          <div class="visual-icon">🚀</div>
-        </div>
-        <div class="slide-badge">🎉 آماده‌ای</div>
-        <h2 class="slide-title">حالا شروع کن!</h2>
-        <p class="slide-desc">
-          معاملاتت روی همه دستگاه‌ها همگام می‌شن. یه بار ثبت کن، همه‌جا ببین. موفق باشی!
-        </p>
       </div>
 
     </div>
   </div>
 
-  <!-- Bottom -->
   <div class="bottom">
     <div class="dots-row" id="dotsRow"></div>
     <div class="buttons-row">
@@ -587,10 +888,9 @@ body{
 
   stepTot.textContent = total;
 
-  /* ============ ذرات شناور در پس‌زمینه ============ */
   (function createParticles(){
     var colors = ['#2ee6a6', '#5b8cff', '#ff5fa2', '#c78aff'];
-    for (var i = 0; i < 30; i++) {
+    for (var i = 0; i < 25; i++) {
       var p = document.createElement('span');
       p.className = 'particle';
       p.style.left = (Math.random() * 100) + '%';
@@ -603,7 +903,6 @@ body{
     }
   })();
 
-  /* ============ ساخت نقطه‌ها ============ */
   for (var i = 0; i < total; i++) {
     (function(idx){
       var dot = document.createElement('button');
@@ -616,7 +915,6 @@ body{
   }
   var dots = dotsRow.querySelectorAll('.dot');
 
-  /* ============ ناوبری ============ */
   function goTo(index){
     if (index < 0) index = 0;
     if (index >= total) index = total - 1;
@@ -625,20 +923,16 @@ body{
     isAnimating = true;
     current = index;
 
-    // حرکت track — RTL: translateX با مقادیر منفی مثبت می‌شه
     track.style.transform = 'translateX(' + (current * 100) + '%)';
 
-    // نقاط
     dots.forEach(function(d, i){
       d.classList.toggle('on', i === current);
     });
 
-    // پیشرفت
     var progress = ((current + 1) / total) * 100;
     progressFill.style.width = progress + '%';
     stepCur.textContent = current + 1;
 
-    // دکمه بعدی
     if (current === total - 1) {
       nextLabel.textContent = 'شروع کن!';
       nextArrow.textContent = '🚀';
@@ -656,7 +950,6 @@ body{
     setTimeout(function(){ isAnimating = false; }, 600);
   }
 
-  /* ============ دکمه بعدی ============ */
   nextBtn.addEventListener('click', function(){
     if (current < total - 1) {
       goTo(current + 1);
@@ -665,16 +958,10 @@ body{
     }
   });
 
-  /* ============ دکمه رد کردن ============ */
   skipBtn.addEventListener('click', function(){
     finishOnboarding();
   });
 
-  /* ============================================================
-     سوایپ — اصلاح‌شده برای RTL ✅
-     در RTL: کشیدن به چپ (dx > 0) → صفحه بعد
-             کشیدن به راست (dx < 0) → صفحه قبل
-     ============================================================ */
   var startX = 0, startY = 0, isDragging = false;
   var SWIPE_THRESHOLD = 50;
 
@@ -705,43 +992,30 @@ body{
     if (Math.abs(dx) < Math.abs(dy)) return;
     if (Math.abs(dx) < SWIPE_THRESHOLD) return;
 
-    // ✅ در RTL:
-    // کشیدن به چپ (dx > 0) → جلو
-    // کشیدن به راست (dx < 0) → عقب
     if (dx > 0) {
-      // چپ → بعدی
       if (current < total - 1) goTo(current + 1);
     } else {
-      // راست → قبلی
       if (current > 0) goTo(current - 1);
     }
   }, { passive: true });
 
-  /* ============ کیبورد ============ */
   document.addEventListener('keydown', function(e){
     if (e.key === 'ArrowLeft') {
-      // چپ → بعدی
       if (current < total - 1) goTo(current + 1);
     } else if (e.key === 'ArrowRight') {
-      // راست → قبلی
       if (current > 0) goTo(current - 1);
     } else if (e.key === 'Escape') {
       finishOnboarding();
     }
   });
 
-  /* ============ پایان ============ */
   function finishOnboarding(){
-    // ذخیره که کاربر دید
     try {
       localStorage.setItem('po.onboarding.v1', 'seen');
     } catch(e){}
-
-    // انتقال به صفحه اصلی
     window.location.replace('index.html');
   }
 
-  /* ============ شروع ============ */
   goTo(0);
 
 })();
