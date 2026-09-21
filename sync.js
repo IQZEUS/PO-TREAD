@@ -4,6 +4,11 @@
    - حذف دسته‌جمعی کار می‌کنه ✅
    - دیگه معاملات حذف‌شده برنمی‌گردن ✅
    ============================================================ */
+// بعد از auth redirect
+if (!localStorage.getItem('po.onboarding.v1')) {
+  window.location.replace('welcome.html');
+  return;
+}
 (function() {
   'use strict';
 
