@@ -1,9 +1,9 @@
 /* ============================================================
-   PO-TRADE Sync — SIMPLE & RELIABLE v1
-   ❌ بدون override localStorage
-   ❌ بدون per-user key پیچیده
-   ✅ فقط polling + push/pull ساده
-   ✅ Cloud = mirror of local
+   PO-TRADE Sync — v10 FINAL
+   ✅ همون کلید app.js (po.v4.trades)
+   ✅ حذف تکی + دسته‌جمعی کار می‌کنه
+   ✅ سوییچ حساب امن
+   ✅ Watchdog loader
    ============================================================ */
 (function() {
   'use strict';
@@ -12,158 +12,160 @@
   var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJvZGd1aGN1YXRpeGRiendqZnZ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk5MTgyMTMsImV4cCI6MjEwNTQ5NDIxM30.oXGyCA3jOcsS5inqsXuSOhELZLoUG7pYagZox1SEmhY';
   var sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  var TRADES_KEY = 'po.v4.trades';
+  var TRADES_KEY     = 'po.v4.trades';      // ⚠️ همون کلید app.js
+  var DELETED_KEY    = 'po.v4.deleted';
+  var LAST_UID_KEY   = 'po.v4.lastUid';
+  var ONBOARDING_KEY = 'po.onboarding.v1';
 
   var uid = null;
   var ready = false;
   var pushing = false;
-  var lastHash = '';
-  var pushTimer = null;
+  var pendingPush = false;
+  var lastSnap = '';
 
-  /* ============ Kill loader ============ */
+  /* ============ Loader Watchdog ============ */
   function killLoader() {
-    var l = document.getElementById('loader');
-    if (!l) return;
-    if (l.getAttribute('data-killed') === '1') return;
-    l.setAttribute('data-killed', '1');
-    l.style.transition = 'opacity .3s ease';
-    l.style.opacity = '0';
-    setTimeout(function() {
-      l.style.display = 'none';
-    }, 350);
+    try {
+      var l = document.getElementById('loader');
+      if (!l || l.getAttribute('data-killed') === '1') return;
+      l.setAttribute('data-killed', '1');
+      l.style.transition = 'opacity .3s ease';
+      l.style.opacity = '0';
+      l.style.pointerEvents = 'none';
+      setTimeout(function() {
+        l.style.display = 'none';
+        l.style.visibility = 'hidden';
+      }, 350);
+    } catch(e) {}
   }
   setTimeout(killLoader, 4000);
-  setInterval(killLoader, 1500);
+  setTimeout(killLoader, 6000);
+  setTimeout(killLoader, 9000);
+  setInterval(function() {
+    var l = document.getElementById('loader');
+    if (!l) return;
+    if (l.getAttribute('data-killed') !== '1') killLoader();
+  }, 1500);
 
-  /* ============ Hash تابع ============ */
-  function hashString(s) {
-    var h = 0;
-    if (s.length === 0) return '0';
-    for (var i = 0; i < s.length; i++) {
-      h = ((h << 5) - h) + s.charCodeAt(i);
-      h = h & h;
-    }
-    return String(h);
-  }
-
-  function getRaw() {
-    try { return localStorage.getItem(TRADES_KEY) || '[]'; }
-    catch(e) { return '[]'; }
-  }
-
+  /* ============ Helpers ============ */
   function getLocal() {
     try {
-      var a = JSON.parse(getRaw());
-      return Array.isArray(a) ? a : [];
+      var v = JSON.parse(localStorage.getItem(TRADES_KEY) || '[]');
+      return Array.isArray(v) ? v : [];
     } catch(e) { return []; }
   }
+  function setLocal(arr) {
+    localStorage.setItem(TRADES_KEY, JSON.stringify(arr));
+  }
+  function getDeleted() {
+    try {
+      return new Set(JSON.parse(localStorage.getItem(DELETED_KEY) || '[]'));
+    } catch(e) { return new Set(); }
+  }
+  function addDeleted(ids) {
+    if (!ids || !ids.length) return;
+    var s = getDeleted();
+    ids.forEach(function(id) { if (id) s.add(id); });
+    localStorage.setItem(DELETED_KEY, JSON.stringify(Array.from(s)));
+  }
+  function clearDeleted() {
+    localStorage.setItem(DELETED_KEY, '[]');
+  }
 
-  /* ============================================================
-     🔥 PUSH — کل local رو به cloud می‌فرستیم
-     ============================================================ */
-  async function pushAll() {
-    if (!uid || !ready || pushing) return;
+  /* ============ Push ============ */
+  async function pushToCloud() {
+    if (!uid || !ready) return;
+    if (pushing) { pendingPush = true; return; }
 
     pushing = true;
+    pendingPush = false;
+
     try {
-      var arr = getLocal();
-      console.log('[Sync] 🚀 Push شروع — ' + arr.length + ' معامله');
+      var local = getLocal();
+      var deleted = getDeleted();
+      var localIds = new Set(local.map(function(t) { return t.id; }));
 
-      // 1. همه معاملات قبلی این کاربر رو پاک کن
-      var delRes = await sb.from('trades').delete().eq('user_id', uid);
-      if (delRes.error) {
-        console.error('[Sync] ❌ Delete error:', delRes.error.message);
-        return;
+      console.log('[Sync] 🚀 Push — local:', local.length, '| deleted:', deleted.size);
+
+      var rRes = await sb.from('trades').select('trade_id').eq('user_id', uid);
+      if (rRes.error) throw rRes.error;
+      var remoteIds = (rRes.data || []).map(function(r) { return r.trade_id; });
+
+      // 🗑️ حذف: هرچی تو cloud هست ولی تو local نیست، یا تو لیست حذف‌شده‌هاست
+      var toDelete = remoteIds.filter(function(id) {
+        return deleted.has(id) || !localIds.has(id);
+      });
+      if (toDelete.length > 0) {
+        console.log('[Sync] 🗑️ حذف:', toDelete.length);
+        await sb.from('trades').delete().eq('user_id', uid).in('trade_id', toDelete);
       }
 
-      // 2. اگه معامله‌ای هست، اضافه کن
-      if (arr.length > 0) {
-        var rows = arr.map(function(t) {
-          return {
-            user_id: uid,
-            trade_id: t.id,
-            data: t
-          };
-        });
-
-        var insRes = await sb.from('trades').insert(rows);
-        if (insRes.error) {
-          console.error('[Sync] ❌ Insert error:', insRes.error.message);
-          return;
-        }
+      // ➕ اضافه: هرچی تو local هست ولی تو cloud نیست
+      var remoteSet = new Set(remoteIds);
+      var toInsert = local.filter(function(t) { return !remoteSet.has(t.id); });
+      if (toInsert.length > 0) {
+        console.log('[Sync] ➕ اضافه:', toInsert.length);
+        await sb.from('trades').insert(toInsert.map(function(t) {
+          return { user_id: uid, trade_id: t.id, data: t };
+        }));
       }
 
-      // 3. hash رو آپدیت کن
-      lastHash = hashString(JSON.stringify(arr));
+      // 🔄 آپدیت: هرچی تو هردو هست
+      var toUpdate = local.filter(function(t) { return remoteSet.has(t.id); });
+      for (var i = 0; i < toUpdate.length; i++) {
+        await sb.from('trades')
+          .update({ data: toUpdate[i], updated_at: new Date().toISOString() })
+          .eq('user_id', uid)
+          .eq('trade_id', toUpdate[i].id);
+      }
+      if (toUpdate.length > 0) console.log('[Sync] 🔄 آپدیت:', toUpdate.length);
 
-      console.log('[Sync] ✅ Push کامل — ' + arr.length + ' معامله');
+      clearDeleted();
+      lastSnap = JSON.stringify(local);
+      console.log('[Sync] ✅ Push کامل');
 
     } catch(e) {
-      console.error('[Sync] ❌ Push exception:', e);
+      console.error('[Sync] ❌ Push error:', e);
     } finally {
       pushing = false;
-    }
-  }
-
-  /* ============================================================
-     🔥 PULL — از cloud بگیر و local رو آپدیت کن
-     ============================================================ */
-  async function pullAll() {
-    if (!uid) return;
-
-    try {
-      var res = await sb.from('trades').select('data').eq('user_id', uid);
-      if (res.error) {
-        console.error('[Sync] ❌ Pull error:', res.error.message);
-        return [];
+      if (pendingPush) {
+        pendingPush = false;
+        setTimeout(pushToCloud, 400);
       }
-
-      var arr = (res.data || [])
-        .map(function(r) { return r.data; })
-        .filter(function(t) { return t && t.id; });
-
-      arr.sort(function(a, b) {
-        return (a.createdAt || 0) - (b.createdAt || 0);
-      });
-
-      var json = JSON.stringify(arr);
-      localStorage.setItem(TRADES_KEY, json);
-      lastHash = hashString(json);
-
-      console.log('[Sync] ✅ Pull کامل — ' + arr.length + ' معامله');
-      return arr;
-
-    } catch(e) {
-      console.error('[Sync] ❌ Pull exception:', e);
-      return [];
     }
   }
 
-  /* ============================================================
-     🔥 POLLING — هر 400ms چک کن تغییر کرده یا نه
-     ============================================================ */
+  /* ============ Poll — تغییرات محلی ============ */
   setInterval(function() {
-    if (!uid || !ready || pushing) return;
+    if (!uid || !ready) return;
 
-    var raw = getRaw();
-    var h = hashString(raw);
+    var cur = localStorage.getItem(TRADES_KEY) || '[]';
+    if (cur === lastSnap) return;
 
-    if (h === lastHash) return;
+    // ثبت حذف‌شده‌ها با مقایسه
+    try {
+      var oldArr = JSON.parse(lastSnap || '[]');
+      var newArr = JSON.parse(cur || '[]');
+      var newIds = new Set(newArr.map(function(t) { return t.id; }));
+      var removed = oldArr
+        .filter(function(t) { return t && t.id && !newIds.has(t.id); })
+        .map(function(t) { return t.id; });
+      if (removed.length > 0) {
+        addDeleted(removed);
+        console.log('[Sync] 📌 حذف ثبت شد:', removed);
+      }
+    } catch(e) {}
 
-    // تغییر کرده!
-    console.log('[Sync] 📢 تغییر در local تشخیص داده شد');
-    lastHash = h;
+    console.log('[Sync] 📢 تغییر محلی');
+    lastSnap = cur;
 
-    clearTimeout(pushTimer);
-    pushTimer = setTimeout(pushAll, 800);
+    clearTimeout(window.__pt);
+    window.__pt = setTimeout(pushToCloud, 500);
   }, 400);
 
-  /* ============================================================
-     🔥 BOOT
-     ============================================================ */
+  /* ============ Boot ============ */
   async function boot() {
     try {
-      // 1. session
       var sRes = await sb.auth.getSession();
       if (!sRes || !sRes.data || !sRes.data.session) {
         console.log('[Sync] ⚠️ بدون session');
@@ -171,43 +173,70 @@
       }
 
       uid = sRes.data.session.user.id;
-      console.log('[Sync] 👤 کاربر: ' + sRes.data.session.user.email);
+      console.log('[Sync] 👤 uid:', uid);
 
-      // 2. onboarding
-      if (localStorage.getItem('po.onboarding.v1') !== 'seen') {
+      // Onboarding
+      if (localStorage.getItem(ONBOARDING_KEY) !== 'seen') {
         console.log('[Sync] 🎉 کاربر جدید → welcome.html');
-        window.location.replace('welcome.html');
+        location.replace('welcome.html');
         return;
       }
 
-      // 3. cloud رو بگیر
-      var cloudArr = await pullAll();
-
-      // 4. اگه cloud خالی بود و local پر بود → local رو push کن
-      if (cloudArr.length === 0) {
-        var localArr = getLocal();
-        if (localArr.length > 0) {
-          console.log('[Sync] 📤 cloud خالی + local پر → push');
-          ready = true;
-          await pushAll();
-        }
+      // سوییچ حساب؟
+      var lastUid = localStorage.getItem(LAST_UID_KEY);
+      if (lastUid && lastUid !== uid) {
+        console.log('[Sync] 🔄 کاربر عوض شد → پاک کردن local');
+        localStorage.removeItem(TRADES_KEY);
+        localStorage.removeItem(DELETED_KEY);
       }
+      localStorage.setItem(LAST_UID_KEY, uid);
 
+      // از cloud بگیر
+      var rRes = await sb.from('trades').select('data').eq('user_id', uid);
+      if (rRes.error) console.error('[Sync] Remote error:', rRes.error.message);
+
+      var deleted = getDeleted();
+      var remote = (rRes.data || [])
+        .map(function(r) { return r.data; })
+        .filter(function(t) { return t && t.id && !deleted.has(t.id); });
+
+      // از local بگیر
+      var local = getLocal().filter(function(t) {
+        return t && t.id && !deleted.has(t.id);
+      });
+
+      console.log('[Sync] 📦 ابری:', remote.length, '| محلی:', local.length);
+
+      // Merge — local اولویت داره
+      var map = new Map();
+      remote.forEach(function(t) { map.set(t.id, t); });
+      local.forEach(function(t) { map.set(t.id, t); });
+
+      var final = Array.from(map.values());
+      final.sort(function(a, b) { return (a.createdAt || 0) - (b.createdAt || 0); });
+
+      setLocal(final);
+      lastSnap = JSON.stringify(final);
       ready = true;
-      console.log('[Sync] ✅ Boot کامل');
+
+      console.log('[Sync] ✅ boot — نهایی:', final.length);
+
+      // Push در صورت نیاز
+      if (deleted.size > 0 ||
+          local.length !== final.length ||
+          remote.length !== final.length) {
+        setTimeout(pushToCloud, 800);
+      }
 
     } catch(e) {
       console.error('[Sync] ❌ Boot error:', e);
     }
   }
 
-  /* ============================================================
-     اجرا + لود app.js
-     ============================================================ */
+  /* ============ شروع ============ */
   boot()
     .catch(function(e) { console.error('[Sync] boot catch:', e); })
     .finally(function() {
-      // حالا app.js رو لود کن
       var script = document.createElement('script');
       script.src = 'app.js';
       script.onerror = function() {
@@ -215,23 +244,22 @@
         killLoader();
       };
       document.body.appendChild(script);
+      setTimeout(killLoader, 2500);
+      setTimeout(killLoader, 5000);
     });
 
-  /* ============ API دیباگ ============ */
+  /* ============ API عمومی ============ */
   window.PT_Sync = {
-    info: function() {
-      var raw = getRaw();
+    status: function() {
       return {
         uid: uid,
         ready: ready,
         pushing: pushing,
-        localCount: getLocal().length,
-        localHash: hashString(raw),
-        lastHash: lastHash
+        deleted: getDeleted().size,
+        localCount: getLocal().length
       };
     },
-    pushNow: pushAll,
-    pullNow: pullAll,
+    forcePush: pushToCloud,
     killLoader: killLoader
   };
 
