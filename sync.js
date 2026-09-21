@@ -1,10 +1,9 @@
 /* ============================================================
-   PO-TRADE Sync — v8 FINAL
-   ✅ Watchdog: لودر بعد 4s حذف می‌شه
-   ✅ Deleted list: حذف تکی همیشه کار می‌کنه
-   ✅ Polling: تغییرات سریع شناسایی می‌شن
-   ✅ Push: local دقیقاً با cloud mirror می‌شه
-   ✅ Onboarding: کاربر جدید → welcome.html
+   PO-TRADE Sync — v9 FINAL FIX
+   ✅ Per-user storage: هر حساب داده خودش رو داره
+   ✅ Cloud authoritative: حذف روی هر دستگاه → همه‌جا حذف
+   ✅ No cross-account leak
+   ✅ Watchdog loader
    ============================================================ */
 (function() {
   'use strict';
@@ -13,8 +12,9 @@
   var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJvZGd1aGN1YXRpeGRiendqZnZ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk5MTgyMTMsImV4cCI6MjEwNTQ5NDIxM30.oXGyCA3jOcsS5inqsXuSOhELZLoUG7pYagZox1SEmhY';
   var sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  var TRADES_KEY     = 'po.v4.trades';
-  var DELETED_KEY    = 'po.v4.deleted';
+  var BASE_KEY       = 'po.v4.trades';
+  var LAST_UID_KEY   = 'po.v4.lastUid';
+  var LAST_SYNC_KEY  = 'po.v4.lastSync';
   var ONBOARDING_KEY = 'po.onboarding.v1';
 
   /* ============================================================
@@ -40,12 +40,9 @@
   setTimeout(killLoader, 6000);
   setTimeout(killLoader, 9000);
 
-  var wd = setInterval(function() {
+  setInterval(function() {
     var l = document.getElementById('loader');
-    if (!l || l.getAttribute('data-killed') === '1') {
-      if (!l) clearInterval(wd);
-      return;
-    }
+    if (!l || l.getAttribute('data-killed') === '1') return;
     killLoader();
   }, 1500);
 
@@ -57,38 +54,65 @@
   var pushing = false;
   var pendingPush = false;
   var lastSnap = '';
-  var bootDone = false;
 
   /* ============================================================
-     Deleted list
+     Per-user key
      ============================================================ */
-  function getDeleted() {
-    try {
-      return new Set(JSON.parse(localStorage.getItem(DELETED_KEY) || '[]'));
-    } catch(e) { return new Set(); }
-  }
-  function addDeleted(ids) {
-    if (!ids || !ids.length) return;
-    var s = getDeleted();
-    ids.forEach(function(id) { if (id) s.add(id); });
-    localStorage.setItem(DELETED_KEY, JSON.stringify(Array.from(s)));
-  }
-  function clearDeleted() {
-    localStorage.setItem(DELETED_KEY, '[]');
+  function userKey() {
+    return uid ? (BASE_KEY + '.' + uid) : BASE_KEY;
   }
 
-  /* ============================================================
-     Read local
-     ============================================================ */
   function getLocal() {
     try {
-      var v = JSON.parse(localStorage.getItem(TRADES_KEY) || '[]');
-      return Array.isArray(v) ? v : [];
+      // اول از کلید per-user بخون، اگه نبود از کلید قدیمی
+      var v = localStorage.getItem(userKey());
+      if (!v) v = localStorage.getItem(BASE_KEY);
+      var arr = JSON.parse(v || '[]');
+      return Array.isArray(arr) ? arr : [];
     } catch(e) { return []; }
   }
 
+  function setLocal(arr) {
+    try {
+      localStorage.setItem(userKey(), JSON.stringify(arr));
+      // کلید قدیمی رو هم پاک کن
+      localStorage.removeItem(BASE_KEY);
+    } catch(e) {}
+  }
+
   /* ============================================================
-     PUSH — Cloud = mirror of local
+     Migration: انتقال داده قدیمی به per-user
+     ============================================================ */
+  function handleUserSwitch(newUid) {
+    var lastUid = localStorage.getItem(LAST_UID_KEY);
+
+    if (lastUid === newUid) {
+      // همون کاربر قبلی — کاری نکن
+      return;
+    }
+
+    console.log('[Sync] 🔄 سوییچ کاربر:', lastUid, '→', newUid);
+
+    if (lastUid) {
+      // داده کاربر قبلی رو backup کن
+      var oldData = localStorage.getItem(BASE_KEY);
+      if (oldData) {
+        try {
+          localStorage.setItem(BASE_KEY + '.' + lastUid, oldData);
+          console.log('[Sync] 💾 داده کاربر قبلی backup شد');
+        } catch(e) {}
+      }
+    }
+
+    // کلید مشترک رو پاک کن
+    localStorage.removeItem(BASE_KEY);
+
+    // uid جدید رو ذخیره کن
+    localStorage.setItem(LAST_UID_KEY, newUid);
+  }
+
+  /* ============================================================
+     PUSH — cloud = mirror of local
      ============================================================ */
   async function pushToCloud() {
     if (!uid || !ready) return;
@@ -99,9 +123,7 @@
 
     try {
       var local = getLocal();
-      var deletedSet = getDeleted();
-
-      console.log('[Sync] 🚀 Push — local:', local.length, '| deleted:', deletedSet.size);
+      console.log('[Sync] 🚀 Push — local:', local.length);
 
       // ابری رو بگیر
       var rRes = await sb.from('trades').select('trade_id').eq('user_id', uid);
@@ -110,12 +132,10 @@
       var remoteIds = new Set((rRes.data || []).map(function(r) { return r.trade_id; }));
       var localIds = new Set(local.map(function(t) { return t.id; }));
 
-      // 1️⃣ حذف: remote_ids که در local نیستن یا در deleted list هستن
+      // 1️⃣ حذف: هرچی تو ابره ولی تو لوکال نیست
       var toDelete = [];
       remoteIds.forEach(function(id) {
-        if (!localIds.has(id) || deletedSet.has(id)) {
-          toDelete.push(id);
-        }
+        if (!localIds.has(id)) toDelete.push(id);
       });
 
       if (toDelete.length > 0) {
@@ -127,11 +147,8 @@
         if (delRes.error) console.error('[Sync] Delete error:', delRes.error.message);
       }
 
-      // 2️⃣ اضافه: local_ids که در remote نیستن و در deleted نیستن
-      var toInsert = local.filter(function(t) {
-        return !remoteIds.has(t.id) && !deletedSet.has(t.id);
-      });
-
+      // 2️⃣ اضافه: هرچی تو لوکاله ولی تو ابر نیست
+      var toInsert = local.filter(function(t) { return !remoteIds.has(t.id); });
       if (toInsert.length > 0) {
         console.log('[Sync] ➕ اضافه:', toInsert.length);
         var insRes = await sb.from('trades').insert(toInsert.map(function(t) {
@@ -140,11 +157,8 @@
         if (insRes.error) console.error('[Sync] Insert error:', insRes.error.message);
       }
 
-      // 3️⃣ آپدیت: هرچی تو هردو هست (و حذف نشده)
-      var toUpdate = local.filter(function(t) {
-        return remoteIds.has(t.id) && !deletedSet.has(t.id);
-      });
-
+      // 3️⃣ آپدیت: هرچی تو هردو
+      var toUpdate = local.filter(function(t) { return remoteIds.has(t.id); });
       for (var i = 0; i < toUpdate.length; i++) {
         var t = toUpdate[i];
         await sb.from('trades')
@@ -154,10 +168,8 @@
       }
       if (toUpdate.length > 0) console.log('[Sync] 🔄 آپدیت:', toUpdate.length);
 
-      // 4️⃣ حالا که همه چیز push شد → deleted list رو پاک کن
-      clearDeleted();
-
       lastSnap = JSON.stringify(local);
+      localStorage.setItem(LAST_SYNC_KEY, String(Date.now()));
       console.log('[Sync] ✅ Push کامل');
 
     } catch(e) {
@@ -172,27 +184,13 @@
   }
 
   /* ============================================================
-     POLLING — هر 400ms تغییرات لوکال رو چک کن
+     POLLING — تغییرات لوکال
      ============================================================ */
   setInterval(function() {
     if (!uid || !ready) return;
 
-    var cur = localStorage.getItem(TRADES_KEY) || '[]';
+    var cur = localStorage.getItem(userKey()) || '[]';
     if (cur === lastSnap) return;
-
-    // 🔥 اول حذف‌ها رو ثبت کن
-    try {
-      var oldArr = JSON.parse(lastSnap || '[]');
-      var newArr = JSON.parse(cur || '[]');
-      var newIds = new Set(newArr.map(function(t) { return t.id; }));
-      var removed = oldArr
-        .filter(function(t) { return t && t.id && !newIds.has(t.id); })
-        .map(function(t) { return t.id; });
-      if (removed.length > 0) {
-        addDeleted(removed);
-        console.log('[Sync] 📌 حذف تکی ثبت شد:', removed);
-      }
-    } catch(e) {}
 
     console.log('[Sync] 📢 تغییر لوکال');
     lastSnap = cur;
@@ -214,7 +212,7 @@
       }
 
       uid = sRes.data.session.user.id;
-      console.log('[Sync] 👤 کاربر:', sRes.data.session.user.email);
+      console.log('[Sync] 👤 کاربر:', sRes.data.session.user.email, '| uid:', uid);
 
       // 2️⃣ Onboarding
       if (localStorage.getItem(ONBOARDING_KEY) !== 'seen') {
@@ -223,51 +221,66 @@
         return;
       }
 
-      // 3️⃣ ابری رو بگیر
+      // 3️⃣ مدیریت سوییچ حساب
+      handleUserSwitch(uid);
+
+      // 4️⃣ اگه backup برای این کاربر داریم، بازگردون
+      var backup = localStorage.getItem(userKey());
+      if (backup && !localStorage.getItem(BASE_KEY)) {
+        // backup موجوده، ازش استفاده کن
+        console.log('[Sync] 💾 backup کاربر فعلی پیدا شد');
+      }
+
+      // 5️⃣ از cloud بخون
       var rRes = await sb.from('trades').select('data').eq('user_id', uid);
       if (rRes.error) console.error('[Sync] Remote error:', rRes.error.message);
 
-      var deletedSet = getDeleted();
-      console.log('[Sync] 📌 deleted list:', deletedSet.size);
-
       var remote = (rRes.data || [])
         .map(function(r) { return r.data; })
-        .filter(function(t) {
-          return t && t.id && !deletedSet.has(t.id);
-        });
+        .filter(function(t) { return t && t.id; });
 
-      // 4️⃣ لوکال
-      var local = getLocal().filter(function(t) {
-        return t && t.id && !deletedSet.has(t.id);
-      });
+      // 6️⃣ از local بخون (که حالا per-user هست)
+      var local = getLocal();
 
       console.log('[Sync] 📦 ابری:', remote.length, '| لوکال:', local.length);
 
-      // 5️⃣ Merge — local اولویت داره
-      var map = new Map();
-      remote.forEach(function(t) { map.set(t.id, t); });
-      local.forEach(function(t) { map.set(t.id, t); });
+      // 7️⃣ CLOUD حقیقت مطلقه
+      // معاملات local که تو cloud نیستن — یعنی از یه دستگاه دیگه حذف شدن
+      // فقط معاملاتی رو نگه دار که در 60 ثانیه اخیر اضافه شدن (احتمالاً هنوز push نشدن)
+      var lastSync = parseInt(localStorage.getItem(LAST_SYNC_KEY) || '0', 10);
+      var cutoff = Date.now() - 60000; // 60 ثانیه اخیر
 
-      var merged = Array.from(map.values());
-      merged.sort(function(a, b) { return (a.createdAt || 0) - (b.createdAt || 0); });
+      var remoteMap = new Map(remote.map(function(t) { return [t.id, t]; }));
 
-      localStorage.setItem(TRADES_KEY, JSON.stringify(merged));
-      lastSnap = JSON.stringify(merged);
+      var localOnly = local.filter(function(t) {
+        if (remoteMap.has(t.id)) return false; // تو هردو هست
+        // تو cloud نیست
+        var created = t.createdAt || 0;
+        if (created > cutoff) return true; // تازه اضافه شده، ممکنه push نشده باشه
+        return false; // قدیمیه، پس حذف شده → نگه ندار
+      });
+
+      if (localOnly.length > 0) {
+        console.log('[Sync] 🆕 معاملات تازه لوکال:', localOnly.length);
+      }
+
+      // 8️⃣ لیست نهایی = همه cloud + معاملات تازه لوکال
+      var final = remote.concat(localOnly);
+      final.sort(function(a, b) { return (a.createdAt || 0) - (b.createdAt || 0); });
+
+      setLocal(final);
+      lastSnap = JSON.stringify(final);
       ready = true;
-      bootDone = true;
 
-      console.log('[Sync] ✅ Merge — مجموع:', merged.length);
+      console.log('[Sync] ✅ Merge — مجموع:', final.length);
 
-      // 6️⃣ اگه حذف pending یا تفاوت هست → push
-      if (deletedSet.size > 0 ||
-          remote.length !== merged.length ||
-          local.length !== merged.length) {
+      // 9️⃣ اگه معاملات تازه لوکال داریم → push
+      if (localOnly.length > 0) {
         setTimeout(pushToCloud, 800);
       }
 
     } catch(e) {
       console.error('[Sync] ❌ Boot error:', e);
-      bootDone = true;
     }
   }
 
@@ -277,10 +290,8 @@
   boot()
     .catch(function(e) {
       console.error('[Sync] boot catch:', e);
-      bootDone = true;
     })
     .finally(function() {
-      // app.js رو لود کن
       var script = document.createElement('script');
       script.src = 'app.js';
       script.onerror = function() {
@@ -300,12 +311,19 @@
         uid: uid,
         ready: ready,
         pushing: pushing,
-        deleted: getDeleted().size,
-        localCount: getLocal().length
+        key: userKey(),
+        localCount: getLocal().length,
+        lastSync: localStorage.getItem(LAST_SYNC_KEY)
       };
     },
     forcePush: pushToCloud,
-    clearDeleted: clearDeleted,
+    resetDevice: function() {
+      // پاک کردن همه چیز — واسه دیباگ
+      localStorage.removeItem(BASE_KEY);
+      localStorage.removeItem(LAST_UID_KEY);
+      localStorage.removeItem(LAST_SYNC_KEY);
+      location.reload();
+    },
     killLoader: killLoader
   };
 
