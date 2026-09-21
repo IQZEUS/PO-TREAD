@@ -1,9 +1,9 @@
 /* ============================================================
-   PO-TRADE Sync — v4 FINAL
-   ✅ حذف تکی کار می‌کنه
-   ✅ حذف دسته‌جمعی کار می‌کنه
-   ✅ دیگه روی loading گیر نمی‌کنه (timeout روی همه چیز)
-   ✅ صفحه خوش‌آمد برای کاربر جدید
+   PO-TRADE Sync — v5 FINAL
+   ✅ حذف تکی + دسته‌جمعی
+   ✅ Safety: لودر بعد از ۴ ثانیه خودکار مخفی می‌شه
+   ✅ Timeout روی همه عملیات
+   ✅ راهنمای اجباری برای کاربر جدید
    ============================================================ */
 (function() {
   'use strict';
@@ -31,6 +31,29 @@
   var appLoaded      = false;
   var redirected     = false;
 
+  /* ============================================================
+     🔥 SAFETY: لودر رو زورکی مخفی کن
+     ============================================================ */
+  function forceHideLoader() {
+    var loader = document.getElementById('loader');
+    if (!loader) return;
+    if (loader.style.display === 'none') return;
+
+    console.log('[Sync] 🚨 Force hide loader');
+    loader.style.transition = 'opacity .4s ease';
+    loader.style.opacity = '0';
+    setTimeout(function() {
+      loader.style.display = 'none';
+      loader.classList.add('hide');
+    }, 450);
+  }
+
+  // اجرای safety بعد از 4 ثانیه — هرچی شد
+  setTimeout(forceHideLoader, 4000);
+
+  // و بعد از 7 ثانیه هم دوباره — برای اطمینان
+  setTimeout(forceHideLoader, 7000);
+
   /* ============ Timeout wrapper ============ */
   function withTimeout(promise, ms, label) {
     return Promise.race([
@@ -43,7 +66,7 @@
     ]);
   }
 
-  /* ============ مدیریت لیست حذف‌شده‌ها ============ */
+  /* ============ لیست حذف‌شده‌ها ============ */
   function getDeletedIds() {
     try {
       return new Set(JSON.parse(origGetItem(DELETED_KEY) || '[]'));
@@ -73,7 +96,6 @@
       var oldValue = origGetItem(key);
       origSetItem(key, value);
 
-      // ثبت حذف تکی
       try {
         var oldTrades = JSON.parse(oldValue || '[]');
         var newTrades = JSON.parse(value || '[]');
@@ -101,7 +123,7 @@
   };
 
   /* ============================================================
-     Override: removeItem ← «پاک کردن همه» از این استفاده می‌کنه
+     Override: removeItem
      ============================================================ */
   localStorage.removeItem = function(key) {
     if (key === TRADES_KEY && currentUserId && bootCompleted) {
@@ -128,7 +150,7 @@
   };
 
   /* ============================================================
-     Push با timeout روی همه عملیات
+     Push
      ============================================================ */
   async function pushTrades(jsonStr, userId) {
     if (isPushing) {
@@ -146,7 +168,6 @@
 
       console.log('[Sync] 🚀 Push شروع — محلی:', trades.length);
 
-      // 1️⃣ خوندن معاملات ابری
       var fetchRes;
       try {
         fetchRes = await withTimeout(
@@ -165,19 +186,16 @@
 
       var existingIds = new Set((fetchRes.data || []).map(function(r){ return r.trade_id; }));
 
-      // 2️⃣ محاسبه حذف‌ها
       var deletedIds = getDeletedIds();
       var toDelete = Array.from(deletedIds).filter(function(id) {
         return existingIds.has(id);
       });
 
-      // اگه local خالیه → همه از ابری حذف شن
       if (trades.length === 0 && existingIds.size > 0) {
         toDelete = Array.from(existingIds);
         console.log('[Sync] 🗑️ local خالیه → حذف همه از ابری');
       }
 
-      // 3️⃣ حذف
       if (toDelete.length > 0) {
         try {
           await withTimeout(
@@ -190,7 +208,6 @@
         }
       }
 
-      // 4️⃣ اضافه کردن جدیدها
       var toInsert = trades
         .filter(function(t){ return !existingIds.has(t.id); })
         .map(function(t){ return { user_id: userId, trade_id: t.id, data: t }; });
@@ -204,7 +221,6 @@
         }
       }
 
-      // 5️⃣ آپدیت موجودها
       var toUpdate = trades.filter(function(t){ return existingIds.has(t.id); });
       for (var i = 0; i < toUpdate.length; i++) {
         try {
@@ -223,7 +239,6 @@
         console.log('[Sync] 🔄 آپدیت:', toUpdate.length);
       }
 
-      // 6️⃣ پاک کردن لیست حذف
       clearDeletedIds();
       console.log('[Sync] ✅ Push کامل');
 
@@ -232,7 +247,6 @@
     } finally {
       isPushing = false;
 
-      // اگه در این مدت تغییر جدید اومد
       if (needsAnother) {
         needsAnother = false;
         var raw = origGetItem(TRADES_KEY) || '[]';
@@ -244,7 +258,7 @@
   }
 
   /* ============================================================
-     Load app.js — فقط یه بار
+     Load app.js — با safety
      ============================================================ */
   function loadApp() {
     if (appLoaded) return;
@@ -254,24 +268,26 @@
 
     var script = document.createElement('script');
     script.src = 'app.js';
+    script.onload = function() {
+      console.log('[Sync] ✅ app.js لود شد');
+      // Safety: بعد از 3 ثانیه از لود app.js، اگه لودر هنوز بود، مخفی کن
+      setTimeout(forceHideLoader, 3000);
+    };
     script.onerror = function() {
-      console.error('[Sync] ❌ app.js لود نشد');
-      // حداقل loader رو مخفی کن که کاربر گیر نکنه
-      var loader = document.getElementById('loader');
-      if (loader) {
-        loader.style.opacity = '0';
-        setTimeout(function(){ loader.style.display = 'none'; }, 500);
-      }
+      console.error('[Sync] ❌ app.js لود نشد — مخفی کردن لودر');
+      forceHideLoader();
     };
     document.body.appendChild(script);
+
+    // Safety نهایی: بعد از 5 ثانیه هرچی شد، لودر باید بره
+    setTimeout(forceHideLoader, 5000);
   }
 
   /* ============================================================
-     Sync در پس‌زمینه
+     Sync
      ============================================================ */
   async function doSync() {
     try {
-      // خوندن معاملات ابری
       var remoteRes;
       try {
         remoteRes = await withTimeout(
@@ -293,7 +309,6 @@
         .map(function(r){ return r.data; })
         .filter(function(t){ return t && t.id && !deletedIds.has(t.id); });
 
-      // خوندن محلی
       var localTrades = [];
       try { localTrades = JSON.parse(origGetItem(TRADES_KEY) || '[]'); } catch(e) {}
       if (!Array.isArray(localTrades)) localTrades = [];
@@ -301,7 +316,6 @@
         return t && t.id && !deletedIds.has(t.id);
       });
 
-      // Merge — local اولویت داره
       var map = new Map();
       remoteTrades.forEach(function(t){ if (t && t.id) map.set(t.id, t); });
       localTrades.forEach(function(t){ if (t && t.id) map.set(t.id, t); });
@@ -309,7 +323,6 @@
       var merged = Array.from(map.values());
       merged.sort(function(a,b){ return (a.createdAt||0) - (b.createdAt||0); });
 
-      // ذخیره بی‌صدا
       skipNext = true;
       origSetItem(TRADES_KEY, JSON.stringify(merged));
       skipNext = false;
@@ -318,7 +331,6 @@
                   '| محلی:', localTrades.length,
                   '| مجموع:', merged.length);
 
-      // Push در پس‌زمینه (اگه لازم بود)
       if (deletedIds.size > 0) {
         setTimeout(function() {
           pushTrades(JSON.stringify(merged), currentUserId);
@@ -338,7 +350,6 @@
      Boot
      ============================================================ */
   async function boot() {
-    // خوندن session
     var sessionRes;
     try {
       sessionRes = await withTimeout(sb.auth.getSession(), 3000, 'session');
@@ -355,7 +366,6 @@
     currentUserId = sessionRes.data.session.user.id;
     console.log('[Sync] 👤 کاربر:', sessionRes.data.session.user.email);
 
-    // 🎉 چک کن کاربر جدیده یا نه
     var seenOnboarding = origGetItem(ONBOARDING_KEY);
     if (seenOnboarding !== 'seen') {
       console.log('[Sync] 🎉 کاربر جدید — نمایش راهنما');
@@ -364,12 +374,11 @@
       return;
     }
 
-    // Sync
     await doSync();
   }
 
   /* ============================================================
-     شروع با timeout کل
+     شروع
      ============================================================ */
   var bootPromise = boot();
 
@@ -377,7 +386,7 @@
     setTimeout(function() {
       console.log('[Sync] ⏱️ Boot timeout — لود app.js با دیتای موجود');
       resolve();
-    }, 6000);
+    }, 5000);
   });
 
   Promise.race([bootPromise, timeoutPromise])
@@ -419,6 +428,7 @@
       var raw = origGetItem(TRADES_KEY);
       if (raw !== null) await pushTrades(raw, currentUserId);
     },
+    hideLoader: forceHideLoader,
     status: function() {
       return {
         userId: currentUserId,
