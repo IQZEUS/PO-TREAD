@@ -1,7 +1,8 @@
 /* =========================================================
-   PO-TRADE — Bilingual Trade Journal v5
+   PO-TRADE — Bilingual Trade Journal v6
    + Checklist Manager
-   + Symbol/Strategy/Tag Autocomplete (Forex + 150 Crypto)
+   + Symbol/Strategy/Tag Autocomplete
+   + ☁️ Checklist Cloud Sync (auto-save + auto-load)
    ========================================================= */
 (function () {
   'use strict';
@@ -89,7 +90,6 @@
       rc_equity: 'موجودی فعلی', rc_net: 'سود خالص',
       rc_peak: 'اوج', rc_current_dd: 'افت فعلی',
       rc_remaining: 'باقی‌مانده', rc_used: 'مصرف‌شده',
-      // modal titles
       md_del_trade: 'حذف معامله',
       md_del_trade_msg: 'این معامله برای همیشه حذف می‌شود. مطمئنی؟',
       md_del_trade_ok: 'بله، حذف کن',
@@ -103,9 +103,8 @@
       md_goal_msg: 'هدف فعلی حذف شود؟',
       md_goal_ok: 'حذف کن',
       md_cancel: 'انصراف',
-      // checklist manager
       checklist_settings: '✅ مدیریت چک‌لیست',
-      checklist_settings_sub: 'آیتم‌ها رو ویرایش، اضافه یا حذف کن',
+      checklist_settings_sub: 'آیتم‌ها رو ویرایش، اضافه یا حذف کن — خودکار روی حسابت ذخیره می‌شه',
       checklist_new_ph: 'آیتم جدید...',
       save_checklist: '💾 ذخیره چک‌لیست',
       reset_checklist: '↺ بازگردانی پیش‌فرض',
@@ -117,7 +116,10 @@
       checklist_del_ok: 'حذف کن',
       checklist_added: '➕ آیتم اضافه شد',
       checklist_deleted: '🗑️ آیتم حذف شد',
-      checklist_need_item: '❌ متن آیتم رو بنویس'
+      checklist_need_item: '❌ متن آیتم رو بنویس',
+      checklist_cloud_ok: '☁️ روی حساب کاربری ذخیره شد',
+      checklist_cloud_synced: '☁️ چک‌لیست از حسابت لود شد',
+      checklist_cloud_offline: '📴 آفلاین — بعداً sync می‌شه'
     },
     en: {
       title: 'PO-TRADE | Trade Journal',
@@ -211,7 +213,7 @@
       md_goal_ok: 'Remove',
       md_cancel: 'Cancel',
       checklist_settings: '✅ Checklist Manager',
-      checklist_settings_sub: 'Edit, add, or remove items',
+      checklist_settings_sub: 'Edit, add, or remove items — auto-saved to your account',
       checklist_new_ph: 'New item...',
       save_checklist: '💾 Save Checklist',
       reset_checklist: '↺ Reset to Default',
@@ -223,7 +225,10 @@
       checklist_del_ok: 'Delete',
       checklist_added: '➕ Item added',
       checklist_deleted: '🗑️ Item deleted',
-      checklist_need_item: '❌ Enter item text'
+      checklist_need_item: '❌ Enter item text',
+      checklist_cloud_ok: '☁️ Saved to your account',
+      checklist_cloud_synced: '☁️ Checklist loaded from your account',
+      checklist_cloud_offline: '📴 Offline — will sync later'
     }
   };
 
@@ -298,7 +303,6 @@
   };
   const emoLabel = k => (EMOTIONS[k] || EMOTIONS.calm)[lang] || EMOTIONS.calm.fa;
 
-  /* ============ PRESET CHECKLIST (default) ============ */
   const DEFAULT_CHECKLIST = [
     { id: 'setup', text_fa: 'ستاپ تأیید شد',   text_en: 'Setup confirmed' },
     { id: 'stop',  text_fa: 'حد ضرر مشخص شد',   text_en: 'Stop loss defined' },
@@ -311,56 +315,21 @@
     return r.text_fa || r.text || r.text_en || '';
   };
 
-  /* ============ PRESET STRATEGIES ============ */
   const PRESET_STRATEGIES = [
-    'Price Action',
-    'Breakout',
-    'London Breakout',
-    'New York Breakout',
-    'Mean Reversion',
-    'Trend Following',
-    'Counter Trend',
-    'Range Trading',
-    'Scalping',
-    'Day Trading',
-    'Swing Trading',
-    'Position Trading',
-    'Supply & Demand',
-    'Support & Resistance',
-    'Fibonacci Retracement',
-    'Elliott Wave',
-    'Harmonic Patterns',
-    'ICT / Smart Money',
-    'Order Block',
-    'Liquidity Grab',
-    'Fair Value Gap (FVG)',
-    'Break of Structure (BOS)',
-    'Change of Character (CHoCH)',
-    'VWAP',
-    'Volume Profile',
-    'Divergence',
-    'Momentum',
-    'Reversal',
-    'News Trading',
-    'Carry Trade',
-    'Grid Trading',
-    'Martingale',
-    'Pin Bar',
-    'Engulfing',
-    'Doji Setup',
-    'Inside Bar',
-    '3 Drives',
-    'Turtle Soup',
-    'Cup & Handle',
-    'Head & Shoulders',
-    'Triangle Breakout',
-    'Flag Pattern',
-    'Wedge Pattern',
-    'Double Top/Bottom',
+    'Price Action','Breakout','London Breakout','New York Breakout',
+    'Mean Reversion','Trend Following','Counter Trend','Range Trading',
+    'Scalping','Day Trading','Swing Trading','Position Trading',
+    'Supply & Demand','Support & Resistance','Fibonacci Retracement',
+    'Elliott Wave','Harmonic Patterns','ICT / Smart Money','Order Block',
+    'Liquidity Grab','Fair Value Gap (FVG)','Break of Structure (BOS)',
+    'Change of Character (CHoCH)','VWAP','Volume Profile','Divergence',
+    'Momentum','Reversal','News Trading','Carry Trade','Grid Trading',
+    'Martingale','Pin Bar','Engulfing','Doji Setup','Inside Bar',
+    '3 Drives','Turtle Soup','Cup & Handle','Head & Shoulders',
+    'Triangle Breakout','Flag Pattern','Wedge Pattern','Double Top/Bottom',
     'Triple Top/Bottom'
   ];
 
-  /* ============ FOREX PAIRS ============ */
   const FOREX_PAIRS = [
     'EURUSD','GBPUSD','USDJPY','USDCHF','USDCAD','AUDUSD','NZDUSD',
     'EURGBP','EURJPY','EURCHF','EURCAD','EURAUD','EURNZD',
@@ -368,15 +337,11 @@
     'AUDJPY','AUDCHF','AUDCAD','AUDNZD',
     'NZDJPY','NZDCHF','NZDCAD',
     'CADJPY','CADCHF','CHFJPY',
-    // Metals
     'XAUUSD','XAGUSD','XPTUSD','XPDUSD',
-    // Indices
     'US30','NAS100','SPX500','GER40','UK100','JP225','HK50','AUS200',
-    // Energy
     'USOIL','UKOIL','NATGAS'
   ];
 
-  /* ============ 150 TOP CRYPTOS (USD pairs) ============ */
   const CRYPTO_SYMBOLS = [
     'BTCUSD','ETHUSD','BNBUSD','SOLUSD','XRPUSD','ADAUSD','DOGEUSD','TRXUSD','TONUSD','DOTUSD',
     'MATICUSD','LTCUSD','SHIBUSD','AVAXUSD','BCHUSD','LINKUSD','XLMUSD','UNIUSD','ATOMUSD','ETCUSD',
@@ -401,7 +366,8 @@
   const KEYS = {
     trades: 'po.v4.trades', theme: 'po.v4.theme',
     goal: 'po.v4.goal', rules: 'po.v4.rules',
-    checklist: 'po.v4.checklist'
+    checklist: 'po.v4.checklist',
+    checklistUpdatedAt: 'po.v4.checklist.updatedAt'
   };
   function loadJSON(key, fallback) {
     try {
@@ -420,7 +386,6 @@
   let trades = loadJSON(KEYS.trades, []);
   if (!Array.isArray(trades)) trades = [];
 
-  // ---- Checklist state
   let checklistItems = loadJSON(KEYS.checklist, null);
   if (!Array.isArray(checklistItems) || !checklistItems.length) {
     checklistItems = DEFAULT_CHECKLIST.map(x => ({
@@ -445,7 +410,153 @@
     emotion: 'all', side: 'all', from: '', to: ''
   };
   function saveTrades() { saveJSON(KEYS.trades, trades); }
-  function saveChecklist() { saveJSON(KEYS.checklist, checklistItems); }
+
+  /* ============================ CLOUD CHECKLIST SYNC ============================ */
+  const CHECKLIST_CLOUD_ID = '__checklist_v1__';
+  let checklistCloudReady = false;
+  let checklistPushTimer = null;
+  let lastPushedItemsJson = '';
+
+  function getSbClient() {
+    return window.__PT_SB || null;
+  }
+
+  async function getCurrentUid() {
+    const sb = getSbClient();
+    if (!sb) return null;
+    try {
+      const s = await sb.auth.getSession();
+      return (s && s.data && s.data.session && s.data.session.user && s.data.session.user.id) || null;
+    } catch (e) { return null; }
+  }
+
+  async function loadChecklistFromCloud() {
+    const sb = getSbClient();
+    if (!sb) return null;
+    try {
+      const uid = await getCurrentUid();
+      if (!uid) return null;
+      const res = await sb.from('trades')
+        .select('data')
+        .eq('user_id', uid)
+        .eq('trade_id', CHECKLIST_CLOUD_ID)
+        .limit(1);
+      if (res.error) {
+        console.warn('[Checklist] cloud load error:', res.error.message);
+        return null;
+      }
+      const row = res.data && res.data[0];
+      if (row && row.data && Array.isArray(row.data.items)) {
+        return {
+          items: row.data.items,
+          updatedAt: Number(row.data.updatedAt) || 0
+        };
+      }
+      return null;
+    } catch (e) {
+      console.warn('[Checklist] cloud load failed:', e);
+      return null;
+    }
+  }
+
+  async function pushChecklistToCloud(items) {
+    const sb = getSbClient();
+    if (!sb) return false;
+    try {
+      const uid = await getCurrentUid();
+      if (!uid) return false;
+
+      const itemsJson = JSON.stringify(items);
+      if (itemsJson === lastPushedItemsJson) return true;
+
+      // حذف ردیف قبلی و درج جدید
+      await sb.from('trades')
+        .delete()
+        .eq('user_id', uid)
+        .eq('trade_id', CHECKLIST_CLOUD_ID);
+
+      const res = await sb.from('trades').insert({
+        user_id: uid,
+        trade_id: CHECKLIST_CLOUD_ID,
+        data: {
+          _type: 'checklist',
+          items: items,
+          updatedAt: Date.now()
+        }
+      });
+      if (res.error) {
+        console.warn('[Checklist] cloud save error:', res.error.message);
+        return false;
+      }
+      lastPushedItemsJson = itemsJson;
+      return true;
+    } catch (e) {
+      console.warn('[Checklist] cloud save failed:', e);
+      return false;
+    }
+  }
+
+  // auto push (debounced) — هر تغییری، بدون نیاز به دکمه
+  function autoPushChecklist() {
+    if (!checklistCloudReady) return;
+    clearTimeout(checklistPushTimer);
+    checklistPushTimer = setTimeout(async () => {
+      const ok = await pushChecklistToCloud(checklistItems);
+      if (ok) {
+        try { localStorage.setItem(KEYS.checklistUpdatedAt, String(Date.now())); } catch (e) {}
+        console.log('[Checklist] ☁️ auto-saved to account');
+        if (el.checklistMsg) toast(el.checklistMsg, t('checklist_cloud_ok'));
+      } else {
+        console.warn('[Checklist] ⚠️ cloud save failed');
+      }
+    }, 700);
+  }
+
+  // این تابع رو همه‌جا صدا می‌زنیم وقتی چک‌لیست لوکال تغییر کرد
+  function saveChecklist() {
+    saveJSON(KEYS.checklist, checklistItems);
+    try { localStorage.setItem(KEYS.checklistUpdatedAt, String(Date.now())); } catch (e) {}
+    if (checklistCloudReady) autoPushChecklist();
+  }
+
+  async function syncChecklistOnBoot() {
+    // صبر کن تا session آماده شه
+    for (let i = 0; i < 30; i++) {
+      const uid = await getCurrentUid();
+      if (uid) break;
+      await new Promise(r => setTimeout(r, 150));
+    }
+
+    const cloud = await loadChecklistFromCloud();
+    const localUpdated = Number(localStorage.getItem(KEYS.checklistUpdatedAt) || 0);
+
+    if (cloud && cloud.items && cloud.items.length) {
+      if (cloud.updatedAt >= localUpdated) {
+        // کلاود جدیدتره → از کلاود بگیر
+        checklistItems = cloud.items;
+        saveJSON(KEYS.checklist, checklistItems);
+        try { localStorage.setItem(KEYS.checklistUpdatedAt, String(cloud.updatedAt)); } catch (e) {}
+        lastPushedItemsJson = JSON.stringify(checklistItems);
+        renderChecklistForm({});
+        renderChecklistManager();
+        renderKPIs();
+        if (el.checklistMsg) toast(el.checklistMsg, t('checklist_cloud_synced'));
+        console.log('[Checklist] ⬇️ pulled from cloud:', checklistItems.length, 'items');
+      } else {
+        // لوکال جدیدتره → push کن به کلاود
+        await pushChecklistToCloud(checklistItems);
+        try { localStorage.setItem(KEYS.checklistUpdatedAt, String(Date.now())); } catch (e) {}
+        console.log('[Checklist] ⬆️ pushed local → cloud (local was newer)');
+      }
+    } else if (checklistItems && checklistItems.length) {
+      // کلاود خالیه → لوکال رو بفرست
+      await pushChecklistToCloud(checklistItems);
+      try { localStorage.setItem(KEYS.checklistUpdatedAt, String(Date.now())); } catch (e) {}
+      console.log('[Checklist] ⬆️ initial push → cloud');
+    }
+
+    checklistCloudReady = true;
+  }
 
   /* ============================ CALCULATIONS ============================ */
   const pnl = t => {
@@ -1076,7 +1187,6 @@
     saveRules: $('#save-rules'), rulesMsg: $('#rules-msg'), rulesStatus: $('#rules-status'),
     demoBtn: $('#demo-btn'), exportBtn: $('#export-btn'),
     importInput: $('#import-input'), clearBtn: $('#clear-btn'),
-    // NEW
     checklistManager: $('#checklist-manager'),
     newChecklistInput: $('#new-checklist-input'),
     addChecklistBtn: $('#add-checklist-btn'),
@@ -1096,7 +1206,7 @@
     target.classList.toggle('err', !!isError);
     target.classList.add('show');
     clearTimeout(msgTimers.get(target));
-    msgTimers.set(target, setTimeout(() => target.classList.remove('show'), 2600));
+    msgTimers.set(target, setTimeout(() => target.classList.remove('show'), 2800));
   }
 
   /* ============================ CONFIRM MODAL ============================ */
@@ -1194,7 +1304,7 @@
     renderAll();
   }
 
-  /* ============================ AUTOCCOMPLETE ============================ */
+  /* ============================ AUTOCOMPLETE ============================ */
   function updateAutocomplete() {
     const symbolSet = new Set(FOREX_PAIRS.concat(CRYPTO_SYMBOLS));
     const stratSet = new Set(PRESET_STRATEGIES);
@@ -1206,9 +1316,9 @@
       for (const g of (tr.tags || [])) if (g) tagSet.add(g);
     }
 
-    const symArr = Array.from(symbolSet);
-    const strArr = Array.from(stratSet);
-    const tagArr = Array.from(tagSet);
+    const symArr = Array.from(symbolSet).sort();
+    const strArr = Array.from(stratSet).sort();
+    const tagArr = Array.from(tagSet).sort();
 
     if (el.symbolsList) {
       el.symbolsList.innerHTML = symArr.map(s => '<option value="' + esc(s) + '"></option>').join('');
@@ -1246,7 +1356,6 @@
       if (!item) return;
       const v = inp.value.trim();
       if (!v) return;
-      // ذخیره در هر دو زبان (ساده‌سازی)
       item.text_fa = v;
       item.text_en = v;
     });
@@ -2341,7 +2450,7 @@
       toast(el.rulesMsg, t('ok_rules'));
     });
 
-    /* ===== CHECKLIST MANAGER ===== */
+    /* ===== CHECKLIST MANAGER (AUTO-SAVE TO CLOUD) ===== */
     if (el.addChecklistBtn) {
       el.addChecklistBtn.addEventListener('click', addChecklistItem);
     }
@@ -2357,11 +2466,21 @@
           removeChecklistItem(del.dataset.del);
         }
       });
-      el.checklistManager.addEventListener('change', e => {
-        if (e.target.matches('.cm-input')) {
-          // ذخیره‌ی خیلی سبک — اختیاری
-        }
-      });
+      // 🎯 auto-save وقتی کاربر توی input تایپ می‌کنه یا از input خارج می‌شه
+      el.checklistManager.addEventListener('input', debounce(e => {
+        if (!e.target.matches('.cm-input')) return;
+        commitChecklistFromInputs();
+        saveChecklist();               // ← local + auto cloud push
+        renderChecklistForm({});
+        renderKPIs();
+      }, 600));
+      el.checklistManager.addEventListener('blur', e => {
+        if (!e.target.matches('.cm-input')) return;
+        commitChecklistFromInputs();
+        saveChecklist();
+        renderChecklistForm({});
+        renderKPIs();
+      }, true);
     }
     if (el.saveChecklistBtn) {
       el.saveChecklistBtn.addEventListener('click', saveChecklistAll);
@@ -2453,6 +2572,37 @@
     renderChecklistManager();
 
     runLoader();
+
+    // ☁️ راه‌اندازی sync چک‌لیست با اکانت — بعد از لود کامل
+    syncChecklistOnBoot();
+
+    // وقتی کاربر tab رو دوباره باز کرد، اگه کلاود آپدیت شده بود بگیر
+    window.addEventListener('focus', () => {
+      if (!checklistCloudReady) return;
+      // بعد از فوکوس، چک کن اگه جای دیگه تغییر کرده
+      loadChecklistFromCloud().then(cloud => {
+        if (!cloud || !cloud.items) return;
+        const localUpdated = Number(localStorage.getItem(KEYS.checklistUpdatedAt) || 0);
+        if (cloud.updatedAt > localUpdated + 1000) {
+          checklistItems = cloud.items;
+          saveJSON(KEYS.checklist, checklistItems);
+          try { localStorage.setItem(KEYS.checklistUpdatedAt, String(cloud.updatedAt)); } catch (e) {}
+          lastPushedItemsJson = JSON.stringify(checklistItems);
+          renderChecklistForm({});
+          renderChecklistManager();
+          renderKPIs();
+          console.log('[Checklist] 🔄 refreshed from cloud (focus)');
+        }
+      });
+    });
+
+    // وقتی صفحه داره بسته می‌شه، اگه pending هست فورا push کن
+    window.addEventListener('beforeunload', () => {
+      if (!checklistCloudReady) return;
+      clearTimeout(checklistPushTimer);
+      // best-effort sync push
+      pushChecklistToCloud(checklistItems);
+    });
   }
 
   if (document.readyState === 'loading') {
