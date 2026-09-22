@@ -1,5 +1,5 @@
 /* =========================================================
-   PO-TRADE — Bilingual Trade Journal v6
+   PO-TRADE — Bilingual Trade Journal v6 FINAL
    + Checklist Manager
    + Symbol/Strategy/Tag Autocomplete
    + ☁️ Checklist Cloud Sync (auto-save + auto-load)
@@ -118,8 +118,7 @@
       checklist_deleted: '🗑️ آیتم حذف شد',
       checklist_need_item: '❌ متن آیتم رو بنویس',
       checklist_cloud_ok: '☁️ روی حساب کاربری ذخیره شد',
-      checklist_cloud_synced: '☁️ چک‌لیست از حسابت لود شد',
-      checklist_cloud_offline: '📴 آفلاین — بعداً sync می‌شه'
+      checklist_cloud_synced: '☁️ چک‌لیست از حسابت لود شد'
     },
     en: {
       title: 'PO-TRADE | Trade Journal',
@@ -227,8 +226,7 @@
       checklist_deleted: '🗑️ Item deleted',
       checklist_need_item: '❌ Enter item text',
       checklist_cloud_ok: '☁️ Saved to your account',
-      checklist_cloud_synced: '☁️ Checklist loaded from your account',
-      checklist_cloud_offline: '📴 Offline — will sync later'
+      checklist_cloud_synced: '☁️ Checklist loaded from your account'
     }
   };
 
@@ -314,6 +312,9 @@
     if (lang === 'en') return r.text_en || r.text_fa || r.text || '';
     return r.text_fa || r.text || r.text_en || '';
   };
+
+  const MONTHS_FA = ['ژانویه','فوریه','مارس','آوریل','مه','ژوئن','جولای','اوت','سپتامبر','اکتبر','نوامبر','دسامبر'];
+  const MONTHS_EN = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 
   const PRESET_STRATEGIES = [
     'Price Action','Breakout','London Breakout','New York Breakout',
@@ -469,7 +470,6 @@
       const itemsJson = JSON.stringify(items);
       if (itemsJson === lastPushedItemsJson) return true;
 
-      // حذف ردیف قبلی و درج جدید
       await sb.from('trades')
         .delete()
         .eq('user_id', uid)
@@ -496,7 +496,6 @@
     }
   }
 
-  // auto push (debounced) — هر تغییری، بدون نیاز به دکمه
   function autoPushChecklist() {
     if (!checklistCloudReady) return;
     clearTimeout(checklistPushTimer);
@@ -512,7 +511,6 @@
     }, 700);
   }
 
-  // این تابع رو همه‌جا صدا می‌زنیم وقتی چک‌لیست لوکال تغییر کرد
   function saveChecklist() {
     saveJSON(KEYS.checklist, checklistItems);
     try { localStorage.setItem(KEYS.checklistUpdatedAt, String(Date.now())); } catch (e) {}
@@ -520,7 +518,6 @@
   }
 
   async function syncChecklistOnBoot() {
-    // صبر کن تا session آماده شه
     for (let i = 0; i < 30; i++) {
       const uid = await getCurrentUid();
       if (uid) break;
@@ -532,7 +529,6 @@
 
     if (cloud && cloud.items && cloud.items.length) {
       if (cloud.updatedAt >= localUpdated) {
-        // کلاود جدیدتره → از کلاود بگیر
         checklistItems = cloud.items;
         saveJSON(KEYS.checklist, checklistItems);
         try { localStorage.setItem(KEYS.checklistUpdatedAt, String(cloud.updatedAt)); } catch (e) {}
@@ -543,13 +539,11 @@
         if (el.checklistMsg) toast(el.checklistMsg, t('checklist_cloud_synced'));
         console.log('[Checklist] ⬇️ pulled from cloud:', checklistItems.length, 'items');
       } else {
-        // لوکال جدیدتره → push کن به کلاود
         await pushChecklistToCloud(checklistItems);
         try { localStorage.setItem(KEYS.checklistUpdatedAt, String(Date.now())); } catch (e) {}
         console.log('[Checklist] ⬆️ pushed local → cloud (local was newer)');
       }
     } else if (checklistItems && checklistItems.length) {
-      // کلاود خالیه → لوکال رو بفرست
       await pushChecklistToCloud(checklistItems);
       try { localStorage.setItem(KEYS.checklistUpdatedAt, String(Date.now())); } catch (e) {}
       console.log('[Checklist] ⬆️ initial push → cloud');
@@ -1331,7 +1325,7 @@
     }
   }
 
-  /* ============================ CHECKLIST MANAGER (Settings) ============================ */
+  /* ============================ CHECKLIST MANAGER ============================ */
   function renderChecklistManager() {
     if (!el.checklistManager) return;
     if (!checklistItems.length) {
@@ -2450,7 +2444,7 @@
       toast(el.rulesMsg, t('ok_rules'));
     });
 
-    /* ===== CHECKLIST MANAGER (AUTO-SAVE TO CLOUD) ===== */
+    /* ===== CHECKLIST MANAGER (AUTO-SAVE) ===== */
     if (el.addChecklistBtn) {
       el.addChecklistBtn.addEventListener('click', addChecklistItem);
     }
@@ -2466,11 +2460,10 @@
           removeChecklistItem(del.dataset.del);
         }
       });
-      // 🎯 auto-save وقتی کاربر توی input تایپ می‌کنه یا از input خارج می‌شه
       el.checklistManager.addEventListener('input', debounce(e => {
         if (!e.target.matches('.cm-input')) return;
         commitChecklistFromInputs();
-        saveChecklist();               // ← local + auto cloud push
+        saveChecklist();
         renderChecklistForm({});
         renderKPIs();
       }, 600));
@@ -2573,13 +2566,10 @@
 
     runLoader();
 
-    // ☁️ راه‌اندازی sync چک‌لیست با اکانت — بعد از لود کامل
     syncChecklistOnBoot();
 
-    // وقتی کاربر tab رو دوباره باز کرد، اگه کلاود آپدیت شده بود بگیر
     window.addEventListener('focus', () => {
       if (!checklistCloudReady) return;
-      // بعد از فوکوس، چک کن اگه جای دیگه تغییر کرده
       loadChecklistFromCloud().then(cloud => {
         if (!cloud || !cloud.items) return;
         const localUpdated = Number(localStorage.getItem(KEYS.checklistUpdatedAt) || 0);
@@ -2596,11 +2586,9 @@
       });
     });
 
-    // وقتی صفحه داره بسته می‌شه، اگه pending هست فورا push کن
     window.addEventListener('beforeunload', () => {
       if (!checklistCloudReady) return;
       clearTimeout(checklistPushTimer);
-      // best-effort sync push
       pushChecklistToCloud(checklistItems);
     });
   }
