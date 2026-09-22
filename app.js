@@ -87,7 +87,6 @@
       rc_equity: 'موجودی فعلی', rc_net: 'سود خالص',
       rc_peak: 'اوج', rc_current_dd: 'افت فعلی',
       rc_remaining: 'باقی‌مانده', rc_used: 'مصرف‌شده',
-      // modal titles
       md_del_trade: 'حذف معامله',
       md_del_trade_msg: 'این معامله برای همیشه حذف می‌شود. مطمئنی؟',
       md_del_trade_ok: 'بله، حذف کن',
@@ -100,7 +99,20 @@
       md_goal_title: 'حذف هدف',
       md_goal_msg: 'هدف فعلی حذف شود؟',
       md_goal_ok: 'حذف کن',
-      md_cancel: 'انصراف'
+      md_cancel: 'انصراف',
+      /* Checklist manager */
+      checklist_settings: '✅ مدیریت چک‌لیست',
+      checklist_settings_sub: 'موارد رو اضافه، ویرایش یا حذف کن',
+      checklist_add_ph: 'مورد جدید...',
+      checklist_add: '➕ افزودن',
+      checklist_empty: 'هنوز موردی وجود ندارد',
+      checklist_added: '✅ مورد اضافه شد',
+      checklist_deleted: '🗑️ مورد حذف شد',
+      checklist_saved: '✅ ذخیره شد',
+      checklist_max: '❌ حداکثر ۱۲ مورد مجاز است',
+      checklist_del_title: 'حذف مورد چک‌لیست',
+      checklist_del_msg: 'این مورد از چک‌لیست حذف شود؟',
+      checklist_del_ok: 'حذف کن'
     },
     en: {
       title: 'PO-TRADE | Trade Journal',
@@ -192,7 +204,20 @@
       md_goal_title: 'Remove Goal',
       md_goal_msg: 'Remove the current goal?',
       md_goal_ok: 'Remove',
-      md_cancel: 'Cancel'
+      md_cancel: 'Cancel',
+      /* Checklist manager */
+      checklist_settings: '✅ Checklist Manager',
+      checklist_settings_sub: 'Add, edit or remove items',
+      checklist_add_ph: 'New item...',
+      checklist_add: '➕ Add',
+      checklist_empty: 'No items yet',
+      checklist_added: '✅ Item added',
+      checklist_deleted: '🗑️ Item removed',
+      checklist_saved: '✅ Saved',
+      checklist_max: '❌ Maximum 12 items',
+      checklist_del_title: 'Delete Checklist Item',
+      checklist_del_msg: 'Remove this item from the checklist?',
+      checklist_del_ok: 'Delete'
     }
   };
 
@@ -273,7 +298,68 @@
     { id: 'size',  fa: 'حجم مناسب بود',    en: 'Position size correct' },
     { id: 'plan',  fa: 'طبق پلن پیش رفتم', en: 'Followed the plan' }
   ];
-  const ruleText = r => r[lang] || r.fa;
+  const ruleText = r => r ? (r.text || r[lang] || r.fa || r.en || r.id) : '';
+
+  /* ============ AUTOCOMPLETE LISTS ============ */
+  const FOREX_SYMBOLS = [
+    'EURUSD','GBPUSD','USDJPY','USDCHF','USDCAD','AUDUSD','NZDUSD',
+    'EURGBP','EURJPY','EURCHF','EURCAD','EURAUD','EURNZD',
+    'GBPJPY','GBPCHF','GBPCAD','GBPAUD','GBPNZD',
+    'AUDJPY','AUDCHF','AUDCAD','AUDNZD',
+    'NZDJPY','NZDCHF','NZDCAD','CADJPY','CADCHF','CHFJPY',
+    'XAUUSD','XAGUSD','XPTUSD','XPDUSD','USOIL','UKOIL','NGAS',
+    'NAS100','SPX500','US30','GER40','UK100','JP225','HK50','AUS200','US2000',
+    'EURTRY','USDTRY','USDZAR','USDMXN','USDSEK','USDNOK','USDDKK','USDPLN','USDHUF','USDCZK',
+    'USDCNH','USDHKD','USDSGD','USDINR','USDTHB','USDKRW','USDBRL','USDARS'
+  ];
+
+  const CRYPTO_SYMBOLS = [
+    'BTCUSD','ETHUSD','BNBUSD','SOLUSD','XRPUSD','ADAUSD','DOGEUSD','AVAXUSD',
+    'DOTUSD','MATICUSD','LINKUSD','LTCUSD','BCHUSD','UNIUSD','ATOMUSD','XLMUSD',
+    'ETCUSD','FILUSD','APTUSD','ARBUSD','OPUSD','NEARUSD','INJUSD','SUIUSD',
+    'IMXUSD','HBARUSD','VETUSD','ALGOUSD','FTMUSD','SANDUSD','MANAUSD','AXSUSD',
+    'GRTUSD','AAVEUSD','MKRUSD','SNXUSD','CRVUSD','COMPUSD','SUSHIUSD','YFIUSD',
+    'ZECUSD','DASHUSD','XMRUSD','EOSUSD','NEOUSD','QTUMUSD','IOTAUSD','THETAUSD',
+    'EGLDUSD','FLOWUSD','CHZUSD','ENJUSD','BATUSD','ZILUSD','ONEUSD','HOTUSD',
+    'ANKRUSD','CELOUSD','KSMUSD','ICPUSD','RNDRUSD','RPLUSD','LDOUSD','GMXUSD',
+    'DYDXUSD','APEUSD','GALAUSD','KAVAUSD','ROSEUSD','OCEANUSD','BANDUSD','STORJUSD',
+    'KNCUSD','ZRXUSD','REPUSD','MLNUSD','BALUSD','RENUSD','LRCUSD','CTSIUSD',
+    'TRXUSD','TONUSD','SHIBUSD','PEPEUSD','FLOKIUSD','BONKUSD','WIFUSD','MEMEUSD',
+    'SEIUSD','TIAUSD','JUPUSD','PYTHUSD','STRKUSD','DYMUSD','ALTUSD','MANTAUSD',
+    'PIXELUSD','PORTALUSD','AEVOUSD','ETHFIUSD','ENAUSD','OMNIUSD','REZUSD',
+    'SAGAUSD','TNSRUSD','OMUSD','NOTUSD','IOUSD','ZKUSD','LISTAUSD','ZROUSD',
+    'BLASTUSD','TAIKOUSD','MOCAUSD','RENDERUSD','POLUSD','NEIROUSD','TURBOUSD',
+    'EIGENUSD','HAMSTERUSD','SCRUSD','MOVEUSD','MEUSD','USUALUSD','PENGUUSD',
+    'AI16ZUSD','GRASSUSD','VIRTUALUSD','SWARMSUSD','TRUMPUSD','ANIMEUSD','VINEUSD','BERAUSD',
+    'KAITOUSD','IPUSD','REDUSD','SHELLUSD','PLUMEUSD','BMTUSD','PARTIUSD','BABYUSD',
+    'WCTUSD','HYPERUSD','INITUSD','SIGNUSD','SXTUSD','MILKUSD','OBOLUSD','AEROUSD',
+    'ZKJUSD','HUMAUSD','RESOLVUSD','HOMEUSD','PUMPUSD','SAHARAUSD','NEWTUSD','SPKUSD'
+  ];
+
+  const ALL_SYMBOLS = FOREX_SYMBOLS.concat(CRYPTO_SYMBOLS);
+
+  const STRATEGIES = [
+    'London Breakout','NY Breakout','Asia Range','Mean Reversion','Trend Following',
+    'Structure Break','Price Action','Supply & Demand','Order Block','Liquidity Grab',
+    'Fibonacci Retracement','Support & Resistance','Scalping','Day Trading','Swing Trading',
+    'Range Trading','Momentum','Reversal','Pullback','Channel Trading',
+    'EMA Crossover','MA Ribbon','RSI Divergence','MACD Signal','Bollinger Bounce',
+    'VWAP','Ichimoku','Elliott Wave','Harmonic Pattern','Smart Money Concept',
+    'ICT Concepts','Break & Retest','Trendline Break','Gap Fill','News Trading',
+    'Carry Trade','Grid','Hedge','Cup & Handle','Head & Shoulders',
+    'Triangle','Wedge','Flag Pattern','Double Top','Double Bottom',
+    'Bat Pattern','Gartley Pattern','Butterfly Pattern','Crab Pattern','Shark Pattern'
+  ];
+
+  const TAGS = [
+    'Breakout','Pullback','Reversal','Trend','Range','Trendline',
+    'London','NY','Asia','M5','M15','M30','H1','H4','D1','W1',
+    'News','NFP','CPI','FOMC','ECB','BOE','BOJ',
+    'Stop Hunt','Liquidity','Order Block','FVG','BOS','CHoCH',
+    'Confluence','A+','B','C','Setup A','Setup B',
+    'Mistake','FOMO','Revenge','Overtrade','Discipline','Plan Followed',
+    'Scalp','Day','Swing','Position','Gold','Oil','Indices','Crypto','Forex'
+  ];
 
   const MONTHS_FA = ['ژانویه','فوریه','مارس','آوریل','مه','ژوئن','جولای','اوت','سپتامبر','اکتبر','نوامبر','دسامبر'];
   const MONTHS_EN = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -281,7 +367,8 @@
   /* ============================ STORAGE ============================ */
   const KEYS = {
     trades: 'po.v4.trades', theme: 'po.v4.theme',
-    goal: 'po.v4.goal', rules: 'po.v4.rules'
+    goal: 'po.v4.goal', rules: 'po.v4.rules',
+    checklist: 'po.v4.checklist'
   };
   function loadJSON(key, fallback) {
     try {
@@ -299,6 +386,20 @@
   /* ============================ STATE ============================ */
   let trades = loadJSON(KEYS.trades, []);
   if (!Array.isArray(trades)) trades = [];
+
+  // Checklist items (managed from settings)
+  let checklistItems = (function () {
+    const stored = loadJSON(KEYS.checklist, null);
+    if (Array.isArray(stored) && stored.length) {
+      const cleaned = stored
+        .filter(x => x && x.id && (x.text || x.fa || x.en))
+        .map(x => ({ id: x.id, text: x.text || x.fa || x.en }));
+      if (cleaned.length) return cleaned;
+    }
+    return DEFAULT_RULES.map(r => ({ id: r.id, text: r.fa || r.en }));
+  })();
+  let clEditingId = null;
+
   let editingId = null;
   let range = '30';
   let calDate = new Date();
@@ -943,1216 +1044,9 @@
     ruleMaxDD: $('#rule-maxdd'), ruleTarget: $('#rule-target'), ruleBalance: $('#rule-balance'),
     saveRules: $('#save-rules'), rulesMsg: $('#rules-msg'), rulesStatus: $('#rules-status'),
     demoBtn: $('#demo-btn'), exportBtn: $('#export-btn'),
-    importInput: $('#import-input'), clearBtn: $('#clear-btn')
-  };
-
-  /* ============================ TOAST ============================ */
-  const msgTimers = new WeakMap();
-  function toast(target, text, isError) {
-    if (!target) return;
-    target.textContent = text;
-    target.classList.toggle('err', !!isError);
-    target.classList.add('show');
-    clearTimeout(msgTimers.get(target));
-    msgTimers.set(target, setTimeout(() => target.classList.remove('show'), 2600));
-  }
-
-  /* ============================ CONFIRM MODAL ============================ */
-  function confirmDialog(opts) {
-    return new Promise(resolve => {
-      const cfg = opts || {};
-      const variant = cfg.variant || 'info';
-      const icon = cfg.icon || '❓';
-      const title = cfg.title || 'Confirm';
-      const message = cfg.message || '';
-      const okText = cfg.okText || 'OK';
-      const cancelText = cfg.cancelText || 'Cancel';
-
-      const overlay = document.createElement('div');
-      overlay.className = 'confirm-overlay';
-      overlay.innerHTML =
-        '<div class="confirm-card ' + variant + '" role="dialog" aria-modal="true">' +
-          '<div class="confirm-deco"><span></span><span></span></div>' +
-          '<div class="confirm-icon">' + icon + '</div>' +
-          '<div class="confirm-title">' + esc(title) + '</div>' +
-          '<div class="confirm-msg">' + esc(message) + '</div>' +
-          '<div class="confirm-actions">' +
-            '<button type="button" class="cf-cancel">' + esc(cancelText) + '</button>' +
-            '<button type="button" class="cf-ok">' + esc(okText) + '</button>' +
-          '</div>' +
-          '<div class="confirm-hint"><kbd>Enter</kbd> ✓ &nbsp; <kbd>Esc</kbd> ✕</div>' +
-        '</div>';
-
-      document.body.appendChild(overlay);
-
-      const okBtn = overlay.querySelector('.cf-ok');
-      const cancelBtn = overlay.querySelector('.cf-cancel');
-      setTimeout(() => okBtn.focus(), 60);
-
-      let settled = false;
-      function close(result) {
-        if (settled) return;
-        settled = true;
-        overlay.classList.add('closing');
-        document.removeEventListener('keydown', onKey);
-        setTimeout(() => {
-          overlay.remove();
-          resolve(result);
-        }, 200);
-      }
-      function onKey(e) {
-        if (e.key === 'Escape') { e.preventDefault(); close(false); }
-        else if (e.key === 'Enter') { e.preventDefault(); close(true); }
-      }
-
-      okBtn.addEventListener('click', () => close(true));
-      cancelBtn.addEventListener('click', () => close(false));
-      overlay.addEventListener('click', e => { if (e.target === overlay) close(false); });
-      document.addEventListener('keydown', onKey);
-    });
-  }
-
-  /* ============================ THEME ============================ */
-  function applyTheme(th) {
-    theme = th;
-    el.html.dataset.theme = th;
-    if (el.themeBtn) {
-      const icon = el.themeBtn.querySelector('.theme-icon');
-      if (icon) icon.textContent = th === 'light' ? '☀️' : '🌙';
-    }
-    const meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.content = th === 'light' ? '#f3f6fc' : '#05070f';
-    saveJSON(KEYS.theme, th);
-    if (el.pageAnalysis && el.pageAnalysis.classList.contains('active')) renderCharts();
-  }
-  function toggleTheme() { applyTheme(theme === 'dark' ? 'light' : 'dark'); }
-
-  /* ============================ I18N APPLY ============================ */
-  function applyLang(l) {
-    lang = l;
-    localStorage.setItem('po.lang', l);
-    const dir = l === 'fa' ? 'rtl' : 'ltr';
-    document.documentElement.setAttribute('lang', l);
-    document.documentElement.setAttribute('dir', dir);
-    if (el.langLabel) el.langLabel.textContent = l === 'fa' ? 'EN' : 'FA';
-    document.title = t('title');
-
-    $$('[data-i18n]').forEach(node => {
-      const k = node.getAttribute('data-i18n');
-      const v = t(k);
-      if (v) node.textContent = v;
-    });
-    $$('[data-i18n-ph]').forEach(node => {
-      const k = node.getAttribute('data-i18n-ph');
-      const v = t(k);
-      if (v) node.setAttribute('placeholder', v);
-    });
-    renderChecklistForm(getChecklistValues());
-    renderAll();
-  }
-
-  /* ============================ FORM HELPERS ============================ */
-  function renderChecklistForm(checked) {
-    checked = checked || {};
-    el.checklistWrap.innerHTML = DEFAULT_RULES.map(r =>
-      '<label>' +
-        '<input type="checkbox" data-rule="' + r.id + '" ' + (checked[r.id] ? 'checked' : '') + ' />' +
-        '<span class="box">✓</span>' +
-        '<span>' + esc(ruleText(r)) + '</span>' +
-      '</label>'
-    ).join('');
-  }
-  function getChecklistValues() {
-    const out = {};
-    $$('input[data-rule]', el.checklistWrap).forEach(inp => {
-      out[inp.dataset.rule] = inp.checked;
-    });
-    return out;
-  }
-  function parseTags(str) {
-    return String(str || '').split(/[,،]/).map(s => s.trim()).filter(Boolean).slice(0, 8);
-  }
-  function renderTagsPreview() {
-    if (!el.fTags) return;
-    const tags = parseTags(el.fTags.value);
-    if (!tags.length) { el.tagsPreview.innerHTML = ''; return; }
-    el.tagsPreview.innerHTML = tags.map(x => '<span class="tag">' + esc(x) + '</span>').join('');
-  }
-  function initEmotions() {
-    el.emotionWrap.addEventListener('click', e => {
-      const btn = e.target.closest('button[data-e]');
-      if (!btn) return;
-      $$('button', el.emotionWrap).forEach(b => b.classList.toggle('active', b === btn));
-      selectedEmotion = btn.dataset.e;
-    });
-  }
-  function initSeg(seg, def) {
-    if (!seg) return;
-    seg.dataset.value = def;
-    seg.addEventListener('click', e => {
-      const btn = e.target.closest('button[data-v]');
-      if (!btn) return;
-      $$('button[data-v]', seg).forEach(b => b.classList.toggle('active', b === btn));
-      seg.dataset.value = btn.dataset.v;
-    });
-  }
-  function setSeg(seg, val) {
-    if (!seg) return;
-    $$('button[data-v]', seg).forEach(b => b.classList.toggle('active', b.dataset.v === val));
-    seg.dataset.value = val;
-  }
-  function setEmotion(val) {
-    selectedEmotion = val;
-    $$('button', el.emotionWrap).forEach(b => b.classList.toggle('active', b.dataset.e === val));
-  }
-
-  /* ============================ SCREENSHOT UI ============================ */
-  function setScreenshot(base64) {
-    currentScreenshot = base64 || null;
-    if (currentScreenshot) {
-      el.uploadImg.src = currentScreenshot;
-      el.uploadInner.hidden = true;
-      el.uploadPreview.hidden = false;
-    } else {
-      el.uploadImg.src = '';
-      el.uploadInner.hidden = false;
-      el.uploadPreview.hidden = true;
-      if (el.fScreenshot) el.fScreenshot.value = '';
-    }
-  }
-  function initScreenshot() {
-    el.uploadZone.addEventListener('click', e => {
-      if (e.target === el.uploadRemove || e.target.closest('.upload-remove')) return;
-      if (currentScreenshot && e.target.closest('.upload-preview')) {
-        openLightbox(currentScreenshot); return;
-      }
-      el.fScreenshot.click();
-    });
-    el.fScreenshot.addEventListener('change', async e => {
-      const file = e.target.files && e.target.files[0];
-      if (!file) return;
-      try {
-        const b64 = await compressImage(file);
-        setScreenshot(b64);
-      } catch (err) {
-        console.warn('Image error:', err);
-        toast(el.formMsg, t('err_image'), true);
-      }
-    });
-    el.uploadRemove.addEventListener('click', e => {
-      e.stopPropagation(); setScreenshot(null);
-    });
-  }
-  function openLightbox(src) {
-    const lb = document.createElement('div');
-    lb.className = 'lightbox';
-    lb.innerHTML = '<button class="lightbox-close">✕</button><img alt="" />';
-    lb.querySelector('img').src = src;
-    lb.addEventListener('click', e => {
-      if (e.target === lb || e.target.classList.contains('lightbox-close')) lb.remove();
-    });
-    document.body.appendChild(lb);
-  }
-
-  /* ============================ NAVIGATION ============================ */
-  function switchView(name) {
-    $$('.tab', el.tabs).forEach(tb => tb.classList.toggle('active', tb.dataset.view === name));
-    el.pageAdd.classList.toggle('active', name === 'add');
-    el.pageAnalysis.classList.toggle('active', name === 'analysis');
-    el.pageCalendar.classList.toggle('active', name === 'calendar');
-    el.pageTrades.classList.toggle('active', name === 'trades');
-    el.pageSettings.classList.toggle('active', name === 'settings');
-    if (name === 'analysis') requestAnimationFrame(renderCharts);
-    if (name === 'calendar') renderCalendar();
-    if (name === 'trades') renderAllTrades();
-    if (name === 'settings') renderSettingsPage();
-  }
-
-  /* ============================ FORM SUBMIT ============================ */
-  function resetForm() {
-    editingId = null;
-    el.form.reset();
-    el.fDate.value = todayISO();
-    el.submitBtn.textContent = t('submit_trade');
-    el.cancelEdit.hidden = true;
-    setSeg(el.sideSeg, 'buy');
-    setSeg(el.resultSeg, 'win');
-    setEmotion('calm');
-    renderChecklistForm({});
-    renderTagsPreview();
-    setScreenshot(null);
-  }
-  function startEdit(id) {
-    const tr = trades.find(x => x.id === id);
-    if (!tr) return;
-    editingId = id;
-    el.fDate.value = tr.date;
-    el.fSymbol.value = tr.symbol;
-    el.fStrategy.value = tr.strategy;
-    el.fAmount.value = tr.amount;
-    el.fRisk.value = tr.risk || '';
-    el.fTags.value = (tr.tags || []).join(', ');
-    el.fNote.value = tr.note || '';
-    setSeg(el.sideSeg, tr.side);
-    setSeg(el.resultSeg, tr.result);
-    setEmotion(tr.emotion || 'calm');
-    renderChecklistForm(tr.checklist || {});
-    renderTagsPreview();
-    setScreenshot(tr.screenshot || null);
-    el.submitBtn.textContent = '💾 ' + t('ok_saved').replace('✅ ', '');
-    el.cancelEdit.hidden = false;
-    switchView('add');
-    el.fSymbol.focus();
-  }
-  function onSubmit(e) {
-    e.preventDefault();
-    const date = el.fDate.value || todayISO();
-    const symbol = el.fSymbol.value.trim();
-    const strategy = el.fStrategy.value.trim();
-    const amountRaw = el.fAmount.value;
-    const amount = Math.abs(parseFloat(amountRaw));
-    const riskRaw = el.fRisk.value;
-    const risk = riskRaw ? Math.abs(parseFloat(riskRaw)) : null;
-
-    if (!symbol)   { toast(el.formMsg, t('err_symbol'), true);   el.fSymbol.focus();   return; }
-    if (!strategy) { toast(el.formMsg, t('err_strategy'), true); el.fStrategy.focus(); return; }
-    if (!amountRaw || isNaN(amount)) { toast(el.formMsg, t('err_amount'), true); el.fAmount.focus(); return; }
-
-    const trade = {
-      id: editingId || uid(),
-      date, symbol, strategy,
-      side: el.sideSeg.dataset.value,
-      result: el.resultSeg.dataset.value,
-      amount,
-      risk: (risk && !isNaN(risk)) ? risk : null,
-      tags: parseTags(el.fTags.value),
-      emotion: selectedEmotion,
-      checklist: getChecklistValues(),
-      screenshot: currentScreenshot || null,
-      note: el.fNote.value.trim(),
-      createdAt: Date.now()
-    };
-
-    if (editingId) {
-      const i = trades.findIndex(x => x.id === editingId);
-      if (i > -1) {
-        trade.createdAt = trades[i].createdAt || Date.now();
-        trades[i] = trade;
-      } else trades.push(trade);
-      toast(el.formMsg, t('ok_saved'));
-    } else {
-      trades.push(trade);
-      toast(el.formMsg, t('ok_added'));
-    }
-    try { saveTrades(); }
-    catch (err) { toast(el.formMsg, t('err_storage'), true); return; }
-    resetForm();
-    renderAll();
-  }
-
-  /* ============================ RENDER: TRADE ITEM ============================ */
-  function renderTradeItem(tr, showActions) {
-    if (showActions === undefined) showActions = true;
-    const p = pnl(tr);
-    const cls = tr.result === 'win' ? 'win' : tr.result === 'loss' ? 'loss' : 'be';
-    const amt = tr.result === 'be' ? t('be_label') : money(p);
-    const emo = EMOTIONS[tr.emotion] || EMOTIONS.calm;
-    const rm = rMultiple(tr);
-    const rmTxt = rm != null ? ((rm > 0 ? '+' : '') + rm + 'R') : '';
-    const SIDE = { buy: t('buy'), sell: t('sell') };
-    const tags = (tr.tags || []).slice(0, 4);
-    const thumb = tr.screenshot
-      ? '<div class="ti-thumb" data-thumb="' + esc(tr.id) + '"><img src="' + tr.screenshot + '" alt="" loading="lazy" /></div>'
-      : '';
-
-    return '' +
-      '<div class="trade-item ' + (tr.side === 'sell' ? 'sell' : '') + '" data-id="' + esc(tr.id) + '">' +
-        thumb +
-        '<div class="ti-main">' +
-          '<span class="ti-symbol">' +
-            '<span class="dot ' + (tr.side === 'sell' ? 'sell' : '') + '"></span>' +
-            esc(tr.symbol) +
-          '</span>' +
-          '<span class="ti-meta">' +
-            '<span class="emo" title="' + esc(emoLabel(tr.emotion)) + '">' + emo.ico + '</span>' +
-            '<span>🎯 ' + esc(tr.strategy) + '</span>' +
-            '<span>' + SIDE[tr.side] + ' · ' + fullDate(tr.date) + '</span>' +
-            (rmTxt ? '<span>' + rmTxt + '</span>' : '') +
-          '</span>' +
-          (tags.length ? '<div class="ti-tags">' + tags.map(g => '<span class="tag">' + esc(g) + '</span>').join('') + '</div>' : '') +
-        '</div>' +
-        '<div class="ti-right">' +
-          '<span class="pill ' + cls + '">' + amt + '</span>' +
-          (showActions
-            ? '<div class="ti-actions">' +
-                '<button data-act="edit" type="button" title="Edit">✏️</button>' +
-                '<button data-act="del" type="button" title="Delete">🗑️</button>' +
-              '</div>'
-            : '') +
-        '</div>' +
-      '</div>';
-  }
-
-  /* ============================ RENDER: RECENT ============================ */
-  function renderRecent() {
-    const sorted = trades.slice().sort((a, b) => {
-      if (a.date !== b.date) return a.date < b.date ? 1 : -1;
-      return (b.createdAt || 0) - (a.createdAt || 0);
-    });
-    el.recentCount.textContent = sorted.length ? sorted.length + ' ' + t('trades_word') : '';
-    const list = sorted.slice(0, 12);
-    if (!list.length) {
-      el.recentList.innerHTML = '<div class="empty">' + t('no_trades') + '</div>';
-      return;
-    }
-    el.recentList.innerHTML = list.map(tr => renderTradeItem(tr)).join('');
-  }
-
-  /* ============================ RENDER: KPI ============================ */
-  function renderKPIs() {
-    const filtered = inRange(trades, range);
-    const s = computeStats(filtered);
-    const days = byDay(filtered);
-    let bestDay = null, worstDay = null;
-    for (const d of days) {
-      if (!bestDay || d.net > bestDay.net) bestDay = d;
-      if (!worstDay || d.net < worstDay.net) worstDay = d;
-    }
-    let dcSum = 0, dcCount = 0;
-    for (const tr of filtered) {
-      const dc = disciplineScore(tr, DEFAULT_RULES);
-      if (dc != null) { dcSum += dc; dcCount++; }
-    }
-    const avgDiscipline = dcCount ? Math.round(dcSum / dcCount) : 0;
-    const cards = [
-      { ico: '💎', l: t('kpi_net'),      v: money(s.net),            c: s.net > 0 ? 'pos' : s.net < 0 ? 'neg' : '' },
-      { ico: '🎯', l: t('kpi_winrate'),  v: pct(s.winRate),          c: s.winRate >= 50 ? 'pos' : 'neg' },
-      { ico: '📊', l: t('kpi_total'),    v: num(s.total),            c: '' },
-      { ico: '⚖️', l: t('kpi_pf'),       v: isFinite(s.profitFactor) ? s.profitFactor.toFixed(2) : '∞', c: s.profitFactor >= 1 ? 'pos' : 'neg' },
-      { ico: '📐', l: t('kpi_avgr'),     v: s.rCount ? ((s.avgR > 0 ? '+' : '') + s.avgR.toFixed(2) + 'R') : '—', c: s.avgR > 0 ? 'pos' : s.avgR < 0 ? 'neg' : '' },
-      { ico: '🧮', l: t('kpi_exp'),      v: money(s.expectancy),     c: s.expectancy > 0 ? 'pos' : 'neg' },
-      { ico: '✅', l: t('kpi_disc'),     v: dcCount ? pct(avgDiscipline) : '—', c: avgDiscipline >= 75 ? 'pos' : avgDiscipline >= 50 ? '' : 'neg' },
-      { ico: '📈', l: t('kpi_gp'),       v: money(s.grossProfit, false), c: 'pos' },
-      { ico: '📉', l: t('kpi_gl'),       v: money(-s.grossLoss),     c: 'neg' },
-      { ico: '🟢', l: t('kpi_aw'),       v: money(s.avgWin, false),  c: 'pos' },
-      { ico: '🔴', l: t('kpi_al'),       v: money(-s.avgLoss),       c: 'neg' },
-      { ico: '⚠️', l: t('kpi_mdd'),      v: money(-s.maxDrawdown),   c: 'neg' },
-      { ico: '🏆', l: t('kpi_bd'),       v: bestDay ? money(bestDay.net) : '—',  c: 'pos' },
-      { ico: '💔', l: t('kpi_wd'),       v: worstDay ? money(worstDay.net) : '—', c: 'neg' }
-    ];
-    el.kpis.innerHTML = cards.map((c, i) =>
-      '<div class="kpi ' + c.c + '" style="animation-delay:' + Math.min(i * 30, 400) + 'ms">' +
-        '<span class="ico">' + c.ico + '</span>' +
-        '<span class="lbl">' + esc(c.l) + '</span>' +
-        '<span class="val">' + c.v + '</span>' +
-      '</div>'
-    ).join('');
-  }
-
-  /* ============================ RENDER: CHARTS ============================ */
-  function renderCharts() {
-    const filtered = inRange(trades, range);
-    const days = byDay(filtered);
-    chartLine(el.equityChart, days.map(d => ({ label: d.date, value: d.cum })));
-    chartBars(el.dailyChart,  days.map(d => ({ label: d.date, value: d.net })));
-  }
-
-  /* ============================ RENDER: EMOTIONS ============================ */
-  function renderEmotions() {
-    const filtered = inRange(trades, range);
-    const rows = byEmotion(filtered);
-    if (!rows.length) {
-      el.emotionsStats.innerHTML = '<div class="empty">' + t('no_data_short') + '</div>';
-      return;
-    }
-    el.emotionsStats.innerHTML = rows.map(r => {
-      const emo = EMOTIONS[r.key] || EMOTIONS.calm;
-      const cls = r.net > 0 ? 'pos' : r.net < 0 ? 'neg' : '';
-      return '' +
-        '<div class="emo-stat ' + cls + '">' +
-          '<div class="emo-ico">' + emo.ico + '</div>' +
-          '<div class="emo-info">' +
-            '<div class="emo-name">' + esc(emoLabel(r.key)) + '</div>' +
-            '<div class="emo-meta">' + num(r.count) + ' ' + t('trades_word') + ' · ' + pct(r.winRate) + '</div>' +
-          '</div>' +
-          '<div class="emo-net">' + money(r.net) + '</div>' +
-        '</div>';
-    }).join('');
-  }
-
-  /* ============================ RENDER: TABLES ============================ */
-  function renderStrategyTable() {
-    const rows = byStrategy(inRange(trades, range));
-    if (!rows.length) {
-      el.strategyTable.innerHTML = '<div class="empty">' + t('no_data_short') + '</div>';
-      return;
-    }
-    el.strategyTable.innerHTML =
-      '<table><thead><tr>' +
-        '<th>' + t('th_strategy') + '</th><th>' + t('th_count') + '</th>' +
-        '<th>' + t('th_win') + '</th><th>' + t('th_loss') + '</th>' +
-        '<th>' + t('th_wr') + '</th><th>' + t('th_net') + '</th>' +
-      '</tr></thead><tbody>' +
-        rows.map(r =>
-          '<tr>' +
-            '<td>' + esc(r.name) + '</td>' +
-            '<td class="num dim">' + num(r.count) + '</td>' +
-            '<td class="num pos">' + num(r.wins) + '</td>' +
-            '<td class="num neg">' + num(r.losses) + '</td>' +
-            '<td class="num">' + pct(r.winRate) + '</td>' +
-            '<td class="num ' + (r.net > 0 ? 'pos' : r.net < 0 ? 'neg' : 'dim') + '">' + money(r.net) + '</td>' +
-          '</tr>'
-        ).join('') +
-      '</tbody></table>';
-  }
-  function renderDailyTable() {
-    const rows = byDay(inRange(trades, range)).reverse();
-    if (!rows.length) {
-      el.dailyTable.innerHTML = '<div class="empty">' + t('no_data_short') + '</div>';
-      return;
-    }
-    el.dailyTable.innerHTML =
-      '<table><thead><tr>' +
-        '<th>' + t('th_date') + '</th><th>' + t('th_trades') + '</th>' +
-        '<th>' + t('th_profit') + '</th><th>' + t('th_loss2') + '</th>' +
-        '<th>' + t('th_net2') + '</th><th>' + t('th_cum') + '</th>' +
-      '</tr></thead><tbody>' +
-        rows.map(r =>
-          '<tr>' +
-            '<td class="num dim">' + fullDate(r.date) + '</td>' +
-            '<td class="num dim">' + num(r.count) + '</td>' +
-            '<td class="num pos">' + (r.profit ? money(r.profit, false) : '—') + '</td>' +
-            '<td class="num neg">' + (r.loss ? money(-r.loss) : '—') + '</td>' +
-            '<td class="num ' + (r.net > 0 ? 'pos' : r.net < 0 ? 'neg' : 'dim') + '">' + money(r.net) + '</td>' +
-            '<td class="num ' + (r.cum > 0 ? 'pos' : r.cum < 0 ? 'neg' : 'dim') + '">' + money(r.cum) + '</td>' +
-          '</tr>'
-        ).join('') +
-      '</tbody></table>';
-  }
-
-  /* ============================ RENDER: GOALS MINI ============================ */
-  function renderGoalsMini() {
-    if (!el.goalsMiniCard) return;
-    const g = getGoalProgress();
-    if (!g) { el.goalsMiniCard.style.display = 'none'; return; }
-    el.goalsMiniCard.style.display = '';
-    el.goalsMiniPeriod.textContent = g.period === 'week' ? t('this_week') : t('this_month');
-
-    let metricLabel, currentTxt, targetTxt;
-    if (g.metric === 'pnl') {
-      metricLabel = t('goal_pnl');
-      currentTxt = money(g.current);
-      targetTxt = money(g.target, false);
-    } else if (g.metric === 'trades') {
-      metricLabel = t('goal_trades');
-      currentTxt = num(g.current);
-      targetTxt = num(g.target);
-    } else {
-      metricLabel = t('goal_winrate');
-      currentTxt = pct(g.current);
-      targetTxt = pct(g.target);
-    }
-    const p = Math.min(100, Math.max(0, g.progress));
-    let progCls = '';
-    if (g.progress >= 100) progCls = '';
-    else if (g.progress >= 60) progCls = 'warn';
-    else if (g.progress < 30) progCls = 'danger';
-
-    el.goalsMini.innerHTML =
-      '<div class="goal-box">' +
-        '<div class="goal-ico">🎯</div>' +
-        '<div class="goal-info">' +
-          '<div class="goal-label">' + esc(metricLabel) + '</div>' +
-          '<div class="goal-vals">' +
-            '<span class="cur">' + currentTxt + '</span>' +
-            '<span class="sep">/</span>' +
-            '<span class="tgt">' + targetTxt + '</span>' +
-          '</div>' +
-          '<div class="goal-progress">' +
-            '<div class="goal-progress-fill ' + progCls + '" style="width:' + p + '%"></div>' +
-          '</div>' +
-        '</div>' +
-        '<div style="font-size:12px;font-weight:800;color:var(--muted);min-width:42px;text-align:center">' + Math.round(p) + '%</div>' +
-      '</div>';
-  }
-
-  /* ============================ RENDER: RULES BANNER ============================ */
-  function renderRulesBanner() {
-    if (!el.rulesBanner) return;
-    const checks = checkRules();
-    if (!checks) { el.rulesBanner.innerHTML = ''; return; }
-    let banner = '';
-    if (checks.dailyLoss && checks.dailyLoss.status === 'bad') {
-      banner = '<div class="rules-banner danger">' +
-        '<span class="rb-ico">🚨</span>' +
-        '<span class="rb-msg">' + fmt('bn_daily', { v: money(-checks.dailyLoss.loss) }) + '</span>' +
-      '</div>';
-    } else if (checks.maxDD && checks.maxDD.status === 'bad') {
-      banner = '<div class="rules-banner danger">' +
-        '<span class="rb-ico">🚨</span>' +
-        '<span class="rb-msg">' + fmt('bn_dd', { v: money(-checks.maxDD.dd) }) + '</span>' +
-      '</div>';
-    } else if (checks.target && checks.target.progress >= 100) {
-      banner = '<div class="rules-banner success">' +
-        '<span class="rb-ico">🏆</span>' +
-        '<span class="rb-msg">' + fmt('bn_target', { v: money(checks.target.net) }) + '</span>' +
-      '</div>';
-    } else if (checks.dailyLoss && checks.dailyLoss.status === 'warn') {
-      banner = '<div class="rules-banner warn">' +
-        '<span class="rb-ico">⚠️</span>' +
-        '<span class="rb-msg">' + fmt('bn_daily_warn', { p: Math.round(checks.dailyLoss.usage) }) + '</span>' +
-      '</div>';
-    } else if (checks.maxDD && checks.maxDD.status === 'warn') {
-      banner = '<div class="rules-banner warn">' +
-        '<span class="rb-ico">⚠️</span>' +
-        '<span class="rb-msg">' + fmt('bn_dd_warn', { p: Math.round(checks.maxDD.usage) }) + '</span>' +
-      '</div>';
-    }
-    el.rulesBanner.innerHTML = banner;
-  }
-
-  /* ============================ RENDER: CALENDAR ============================ */
-  function renderCalendar() {
-    const year = calDate.getFullYear();
-    const month = calDate.getMonth();
-    const months = lang === 'fa' ? MONTHS_FA : MONTHS_EN;
-    el.calTitle.textContent = months[month] + ' ' + year;
-
-    const first = new Date(year, month, 1);
-    const startWeekday = first.getDay();
-    const offset = (startWeekday + 1) % 7;
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-    const dayMap = new Map();
-    for (const tr of trades) {
-      const p = tr.date.split('-');
-      if (Number(p[0]) === year && Number(p[1]) - 1 === month) {
-        const d = Number(p[2]);
-        if (!dayMap.has(d)) dayMap.set(d, { net: 0, count: 0 });
-        const rec = dayMap.get(d);
-        rec.net += pnl(tr); rec.count++;
-      }
-    }
-    let maxAbs = 0;
-    for (const v of dayMap.values()) {
-      const a = Math.abs(v.net);
-      if (a > maxAbs) maxAbs = a;
-    }
-    const intensity = val => {
-      if (maxAbs === 0) return 1;
-      const ratio = Math.abs(val) / maxAbs;
-      if (ratio < 0.34) return 1;
-      if (ratio < 0.67) return 2;
-      return 3;
-    };
-
-    let html = '';
-    for (let i = 0; i < offset; i++) html += '<div class="cal-cell empty-day"></div>';
-    for (let d = 1; d <= daysInMonth; d++) {
-      const rec = dayMap.get(d);
-      const iso = year + '-' + String(month + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
-      if (!rec) {
-        html += '<div class="cal-cell no-trade" data-date="' + iso + '">' +
-          '<span class="day-num">' + d + '</span></div>';
-        continue;
-      }
-      const inten = intensity(rec.net);
-      const cls = rec.net > 0 ? ('pos-' + inten) : rec.net < 0 ? ('neg-' + inten) : '';
-      const sign = rec.net > 0 ? '+' : '';
-      const pnlTxt = rec.net === 0 ? '0' : (sign + Math.round(rec.net));
-      html += '<div class="cal-cell has-trade ' + cls + '" data-date="' + iso + '">' +
-        '<span class="trade-count">' + rec.count + '</span>' +
-        '<span class="day-num">' + d + '</span>' +
-        '<span class="day-pnl">' + pnlTxt + '</span>' +
-      '</div>';
-    }
-    el.calGrid.innerHTML = html;
-    el.calDetailCard.hidden = true;
-  }
-  function showCalDetail(dateISO) {
-    const dayTrades = trades.filter(tr => tr.date === dateISO);
-    if (!dayTrades.length) return;
-    let net = 0;
-    for (const tr of dayTrades) net += pnl(tr);
-    el.calDetailTitle.textContent = fullDate(dateISO) + ' — ' + money(net) + ' (' + dayTrades.length + ' ' + t('trades_word') + ')';
-    el.calDetailList.innerHTML = dayTrades.map(tr => renderTradeItem(tr, false)).join('');
-    el.calDetailCard.hidden = false;
-    el.calDetailCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  }
-
-  /* ============================ RENDER: TRADES PAGE ============================ */
-  function applyFilters(list) {
-    const f = filters;
-    const search = f.search.trim().toLowerCase();
-    return list.filter(tr => {
-      if (f.strategy !== 'all' && (tr.strategy || '') !== f.strategy) return false;
-      if (f.tag !== 'all' && !(tr.tags || []).includes(f.tag)) return false;
-      if (f.result !== 'all' && tr.result !== f.result) return false;
-      if (f.emotion !== 'all' && (tr.emotion || 'calm') !== f.emotion) return false;
-      if (f.side !== 'all' && tr.side !== f.side) return false;
-      if (f.from && tr.date < f.from) return false;
-      if (f.to && tr.date > f.to) return false;
-      if (search) {
-        const hay = (tr.symbol + ' ' + tr.strategy + ' ' + (tr.note || '') + ' ' +
-                    (tr.tags || []).join(' ')).toLowerCase();
-        if (hay.indexOf(search) === -1) return false;
-      }
-      return true;
-    });
-  }
-  function populateFilterOptions() {
-    const strategies = new Set();
-    const tags = new Set();
-    for (const tr of trades) {
-      if (tr.strategy) strategies.add(tr.strategy);
-      for (const g of (tr.tags || [])) tags.add(g);
-    }
-    const sSorted = Array.from(strategies).sort();
-    const tSorted = Array.from(tags).sort();
-    el.fltStrategy.innerHTML = '<option value="all">' + t('all') + '</option>' +
-      sSorted.map(s => '<option value="' + esc(s) + '">' + esc(s) + '</option>').join('');
-    el.fltTag.innerHTML = '<option value="all">' + t('all') + '</option>' +
-      tSorted.map(s => '<option value="' + esc(s) + '">' + esc(s) + '</option>').join('');
-    el.fltEmotion.innerHTML = '<option value="all">' + t('all') + '</option>' +
-      Object.keys(EMOTIONS).map(k =>
-        '<option value="' + k + '">' + EMOTIONS[k].ico + ' ' + esc(emoLabel(k)) + '</option>'
-      ).join('');
-  }
-  function renderAllTrades() {
-    populateFilterOptions();
-    el.fltStrategy.value = filters.strategy;
-    el.fltTag.value = filters.tag;
-    el.fltResult.value = filters.result;
-    el.fltEmotion.value = filters.emotion;
-    el.fltSide.value = filters.side;
-    el.fltFrom.value = filters.from;
-    el.fltTo.value = filters.to;
-    el.fltSearch.value = filters.search;
-
-    const filtered = applyFilters(trades);
-    const sorted = filtered.slice().sort((a, b) => {
-      if (a.date !== b.date) return a.date < b.date ? 1 : -1;
-      return (b.createdAt || 0) - (a.createdAt || 0);
-    });
-    el.allCount.textContent = sorted.length + ' ' + t('of_label') + ' ' + trades.length + ' ' + t('trades_word');
-    if (!sorted.length) {
-      el.allTradesList.innerHTML = '<div class="empty">' + t('no_filter') + '</div>';
-      return;
-    }
-    el.allTradesList.innerHTML = sorted.map(tr => renderTradeItem(tr)).join('');
-  }
-
-  /* ============================ RENDER: SETTINGS ============================ */
-  function renderSettingsPage() {
-    if (goal) {
-      setSeg(el.goalPeriod, goal.period || 'week');
-      setSeg(el.goalMetric, goal.metric || 'pnl');
-      el.goalTarget.value = goal.target || '';
-    } else {
-      setSeg(el.goalPeriod, 'week');
-      setSeg(el.goalMetric, 'pnl');
-      el.goalTarget.value = '';
-    }
-    el.rulesEnabled.checked = !!rules.enabled;
-    el.ruleBalance.value = rules.balance || '';
-    el.ruleDaily.value = rules.dailyLoss || '';
-    el.ruleMaxDD.value = rules.maxDD || '';
-    el.ruleTarget.value = rules.target || '';
-    renderGoalsPreview();
-    renderRulesStatus();
-  }
-
-  function renderGoalsPreview() {
-    const g = getGoalProgress();
-    if (!g) {
-      el.goalsPreview.innerHTML = '<div class="empty" style="padding:14px;font-size:12px">' + t('no_goal') + '</div>';
-      return;
-    }
-    let currentTxt, targetTxt;
-    if (g.metric === 'pnl') { currentTxt = money(g.current); targetTxt = money(g.target, false); }
-    else if (g.metric === 'trades') { currentTxt = num(g.current); targetTxt = num(g.target); }
-    else { currentTxt = pct(g.current); targetTxt = pct(g.target); }
-    const p = Math.min(100, Math.max(0, g.progress));
-    el.goalsPreview.innerHTML =
-      '<div class="goal-box">' +
-        '<div class="goal-ico">🎯</div>' +
-        '<div class="goal-info">' +
-          '<div class="goal-label">' + (g.period === 'week' ? t('this_week') : t('this_month')) + '</div>' +
-          '<div class="goal-vals">' +
-            '<span class="cur">' + currentTxt + '</span>' +
-            '<span class="sep">/</span>' +
-            '<span class="tgt">' + targetTxt + '</span>' +
-          '</div>' +
-          '<div class="goal-progress"><div class="goal-progress-fill" style="width:' + p + '%"></div></div>' +
-        '</div>' +
-        '<div style="font-size:12px;font-weight:800;color:var(--muted);min-width:42px;text-align:center">' + Math.round(p) + '%</div>' +
-      '</div>';
-  }
-
-  function renderRulesStatus() {
-    if (!rules.enabled) {
-      el.rulesStatus.innerHTML = '<div class="empty" style="padding:14px;font-size:12px">' + t('rules_disabled') + '</div>';
-      return;
-    }
-    const checks = checkRules();
-    if (!checks) { el.rulesStatus.innerHTML = ''; return; }
-    const pf = checks.pf;
-
-    let html = '';
-
-    html +=
-      '<div class="rule-card">' +
-        '<div class="rc-head">' +
-          '<div class="rc-title"><span class="rc-ico">💼</span>' + t('rc_equity') + '</div>' +
-          '<div class="rs-status ok" style="background:rgba(91,140,255,.15);color:var(--blue)">' + money(pf.currentEquity, false) + '</div>' +
-        '</div>' +
-        '<div class="rc-detail">' +
-          '<span>' + t('rc_net') + ': ' + money(pf.net) + '</span>' +
-          '<span>' + t('rc_peak') + ': ' + money(pf.peakEquity, false) + '</span>' +
-        '</div>' +
-      '</div>';
-
-    if (checks.dailyLoss) {
-      const sc = checks.dailyLoss.status;
-      const txt = sc === 'ok' ? t('rc_ok') : sc === 'warn' ? t('rc_warn') : t('rc_bad');
-      const p = Math.min(100, checks.dailyLoss.usage);
-      html +=
-        '<div class="rule-card ' + (sc === 'ok' ? '' : sc) + '">' +
-          '<div class="rc-head">' +
-            '<div class="rc-title"><span class="rc-ico">💥</span>' + t('rc_daily') + '</div>' +
-            '<div class="rs-status ' + sc + '">' + txt + '</div>' +
-          '</div>' +
-          '<div class="rc-detail">' +
-            '<span>' + t('rc_used') + ': ' + money(checks.dailyLoss.loss) + '</span>' +
-            '<span>' + t('rc_remaining') + ': ' + money(-Math.max(0, checks.dailyLoss.limit - checks.dailyLoss.loss)) + '</span>' +
-          '</div>' +
-          '<div class="rc-bar"><div class="rc-bar-fill" style="width:' + p + '%"></div></div>' +
-        '</div>';
-    }
-
-    if (checks.maxDD) {
-      const sc = checks.maxDD.status;
-      const txt = sc === 'ok' ? t('rc_ok') : sc === 'warn' ? t('rc_warn') : t('rc_bad');
-      const p = Math.min(100, checks.maxDD.usage);
-      html +=
-        '<div class="rule-card ' + (sc === 'ok' ? '' : sc) + '">' +
-          '<div class="rc-head">' +
-            '<div class="rc-title"><span class="rc-ico">⚠️</span>' + t('rc_dd') + '</div>' +
-            '<div class="rs-status ' + sc + '">' + txt + '</div>' +
-          '</div>' +
-          '<div class="rc-detail">' +
-            '<span>' + t('rc_current_dd') + ': ' + money(-checks.maxDD.dd) + '</span>' +
-            '<span>' + t('rc_remaining') + ': ' + money(-Math.max(0, checks.maxDD.limit - checks.maxDD.dd)) + '</span>' +
-          '</div>' +
-          '<div class="rc-bar"><div class="rc-bar-fill" style="width:' + p + '%"></div></div>' +
-        '</div>';
-    }
-
-    if (checks.target) {
-      const reached = checks.target.progress >= 100;
-      const sc = reached ? 'ok' : 'warn';
-      const txt = reached ? t('rc_reached') : Math.round(checks.target.progress) + '%';
-      const p = Math.min(100, checks.target.progress);
-      html +=
-        '<div class="rule-card ' + (reached ? '' : 'warn') + '">' +
-          '<div class="rc-head">' +
-            '<div class="rc-title"><span class="rc-ico">🏆</span>' + t('rc_target') + '</div>' +
-            '<div class="rs-status ' + sc + '">' + txt + '</div>' +
-          '</div>' +
-          '<div class="rc-detail">' +
-            '<span>' + money(checks.target.net) + '</span>' +
-            '<span>/ ' + money(checks.target.target, false) + '</span>' +
-          '</div>' +
-          '<div class="rc-bar"><div class="rc-bar-fill" style="width:' + p + '%"></div></div>' +
-        '</div>';
-    }
-
-    el.rulesStatus.innerHTML = html || '<div class="empty" style="padding:14px;font-size:12px">' + t('no_rule') + '</div>';
-  }
-
-  /* ============================ RENDER ALL ============================ */
-  function renderAll() {
-    renderRecent();
-    renderKPIs();
-    renderCharts();
-    renderEmotions();
-    renderStrategyTable();
-    renderDailyTable();
-    renderGoalsMini();
-    renderRulesBanner();
-    if (el.pageCalendar.classList.contains('active')) renderCalendar();
-    if (el.pageTrades.classList.contains('active')) renderAllTrades();
-    if (el.pageSettings.classList.contains('active')) renderSettingsPage();
-  }
-
-  /* ============================ DEMO DATA ============================ */
-  function demoData() {
-    const symbols = ['XAUUSD', 'EURUSD', 'BTCUSD', 'GBPJPY', 'NAS100'];
-    const strategies = lang === 'fa'
-      ? ['بریک‌اوت لندن', 'بازگشت به میانگین', 'شکست ساختار', 'پرایس اکشن', 'اسکالپ نیویورک']
-      : ['London Breakout', 'Mean Reversion', 'Structure Break', 'Price Action', 'NY Scalp'];
-    const tagPool = lang === 'fa'
-      ? ['بریک‌اوت', 'پولبک', 'لندن', 'نیویورک', 'M5', 'M15', 'روند', 'رنج']
-      : ['Breakout', 'Pullback', 'London', 'NY', 'M5', 'M15', 'Trend', 'Range'];
-    const emoKeys = Object.keys(EMOTIONS);
-    const out = [];
-    const now = Date.now();
-    for (let i = 29; i >= 0; i--) {
-      const d = new Date();
-      d.setDate(d.getDate() - i);
-      const iso = toISO(d);
-      const count = Math.random() < 0.2 ? 0 : 1 + Math.floor(Math.random() * 3);
-      for (let j = 0; j < count; j++) {
-        const r = Math.random();
-        const result = r < 0.55 ? 'win' : r < 0.94 ? 'loss' : 'be';
-        const amount = result === 'be' ? 0 : Math.round((40 + Math.random() * 260) * 100) / 100;
-        const risk = result === 'be' ? 50 : Math.round((30 + Math.random() * 70) * 100) / 100;
-        const emotion = emoKeys[Math.floor(Math.random() * emoKeys.length)];
-        const checklist = {
-          setup: Math.random() < 0.8, stop: Math.random() < 0.9,
-          size: Math.random() < 0.75, plan: Math.random() < 0.7
-        };
-        const tags = [];
-        while (tags.length < 2) {
-          const x = tagPool[Math.floor(Math.random() * tagPool.length)];
-          if (tags.indexOf(x) === -1) tags.push(x);
-        }
-        out.push({
-          id: uid(), date: iso,
-          symbol: symbols[Math.floor(Math.random() * symbols.length)],
-          strategy: strategies[Math.floor(Math.random() * strategies.length)],
-          side: Math.random() < 0.5 ? 'buy' : 'sell',
-          result, amount, risk, tags, emotion, checklist,
-          screenshot: null, note: '',
-          createdAt: now - i * 86400000 + j * 60000
-        });
-      }
-    }
-    return out;
-  }
-
-  /* ============================ EXPORT / IMPORT ============================ */
-  function exportJSON() {
-    const blob = new Blob([JSON.stringify(trades, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'po-trade-' + todayISO() + '.json';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    setTimeout(() => URL.revokeObjectURL(url), 1500);
-    toast(el.formMsg, t('ok_export'));
-  }
-  function importJSON(file) {
-    const reader = new FileReader();
-    reader.onload = () => {
-      try {
-        const parsed = JSON.parse(reader.result);
-        if (!Array.isArray(parsed)) throw new Error('Invalid file structure');
-        const existing = new Set(trades.map(tr => tr.id));
-        let added = 0;
-        for (const raw of parsed) {
-          if (!raw || typeof raw !== 'object') continue;
-          const id = raw.id || uid();
-          if (existing.has(id)) continue;
-          trades.push({
-            id,
-            date: /^\d{4}-\d{2}-\d{2}$/.test(raw.date) ? raw.date : todayISO(),
-            symbol: String(raw.symbol || '—').slice(0, 24),
-            strategy: String(raw.strategy || '—').slice(0, 48),
-            side: raw.side === 'sell' ? 'sell' : 'buy',
-            result: ['win','loss','be'].indexOf(raw.result) > -1 ? raw.result : 'be',
-            amount: Math.abs(Number(raw.amount) || 0),
-            risk: raw.risk != null ? Math.abs(Number(raw.risk)) : null,
-            tags: Array.isArray(raw.tags) ? raw.tags.slice(0, 8) : [],
-            emotion: EMOTIONS[raw.emotion] ? raw.emotion : 'calm',
-            checklist: raw.checklist && typeof raw.checklist === 'object' ? raw.checklist : {},
-            screenshot: typeof raw.screenshot === 'string' ? raw.screenshot : null,
-            note: String(raw.note || '').slice(0, 500),
-            createdAt: Number(raw.createdAt) || Date.now()
-          });
-          existing.add(id);
-          added++;
-        }
-        saveTrades();
-        renderAll();
-        toast(el.formMsg, fmt('ok_import', { n: added }));
-      } catch (err) {
-        toast(el.formMsg, fmt('err_import', { m: err.message }), true);
-      }
-    };
-    reader.readAsText(file);
-  }
-
-  /* ============================ EVENT BINDING ============================ */
-  function bindEvents() {
-    el.themeBtn.addEventListener('click', toggleTheme);
-    el.langBtn.addEventListener('click', () => applyLang(lang === 'fa' ? 'en' : 'fa'));
-
-    el.tabs.addEventListener('click', e => {
-      const tab = e.target.closest('.tab');
-      if (tab) switchView(tab.dataset.view);
-    });
-
-    el.form.addEventListener('submit', onSubmit);
-    el.cancelEdit.addEventListener('click', () => {
-      resetForm();
-      toast(el.formMsg, t('cancel_edit'));
-    });
-    el.fTags.addEventListener('input', renderTagsPreview);
-
-    async function handleListClick(e) {
-      const thumb = e.target.closest('.ti-thumb');
-      if (thumb) {
-        const item = thumb.closest('.trade-item');
-        const tr = trades.find(x => x.id === item.dataset.id);
-        if (tr && tr.screenshot) openLightbox(tr.screenshot);
-        return;
-      }
-      const btn = e.target.closest('button[data-act]');
-      if (!btn) return;
-      const item = btn.closest('.trade-item');
-      if (!item) return;
-      const id = item.dataset.id;
-      if (btn.dataset.act === 'edit') {
-        startEdit(id);
-      } else if (btn.dataset.act === 'del') {
-        const ok = await confirmDialog({
-          variant: 'danger',
-          icon: '🗑️',
-          title: t('md_del_trade'),
-          message: t('md_del_trade_msg'),
-          okText: t('md_del_trade_ok'),
-          cancelText: t('md_cancel')
-        });
-        if (!ok) return;
-        trades = trades.filter(tr => tr.id !== id);
-        saveTrades(); renderAll();
-        toast(el.formMsg, t('del_done'));
-      }
-    }
-    el.recentList.addEventListener('click', handleListClick);
-    el.allTradesList.addEventListener('click', handleListClick);
-    el.calDetailList.addEventListener('click', e => {
-      const thumb = e.target.closest('.ti-thumb');
-      if (thumb) {
-        const item = thumb.closest('.trade-item');
-        const tr = trades.find(x => x.id === item.dataset.id);
-        if (tr && tr.screenshot) openLightbox(tr.screenshot);
-      }
-    });
-
-    el.rangeFilter.addEventListener('click', e => {
-      const btn = e.target.closest('button[data-r]');
-      if (!btn) return;
-      $$('button', el.rangeFilter).forEach(b => b.classList.toggle('active', b === btn));
-      range = btn.dataset.r;
-      renderKPIs(); renderCharts(); renderEmotions();
-      renderStrategyTable(); renderDailyTable(); renderGoalsMini();
-    });
-
-    el.demoBtn.addEventListener('click', async () => {
-      if (trades.length) {
-        const ok = await confirmDialog({
-          variant: 'info',
-          icon: '✨',
-          title: t('md_demo_title'),
-          message: t('md_demo_msg'),
-          okText: t('md_demo_ok'),
-          cancelText: t('md_cancel')
-        });
-        if (!ok) return;
-      }
-      trades = trades.concat(demoData());
-      saveTrades(); renderAll();
-      switchView('analysis');
-      toast(el.formMsg, t('ok_demo'));
-    });
-
-    el.exportBtn.addEventListener('click', exportJSON);
-    el.importInput.addEventListener('change', e => {
-      const file = e.target.files && e.target.files[0];
-      if (file) importJSON(file);
-      e.target.value = '';
-    });
-    el.clearBtn.addEventListener('click', async () => {
-      if (!trades.length) { toast(el.formMsg, t('empty_list')); return; }
-      const ok = await confirmDialog({
-        variant: 'danger',
-        icon: '💣',
-        title: t('md_clear_title'),
-        message: t('md_clear_msg'),
-        okText: t('md_clear_ok'),
-        cancelText: t('md_cancel')
-      });
-      if (!ok) return;
-      trades = [];
-      try { localStorage.removeItem(KEYS.trades); } catch (err) {}
-      renderAll();
-      toast(el.formMsg, t('cleared'));
-    });
-
-    el.calPrev.addEventListener('click', () => { calDate.setMonth(calDate.getMonth() - 1); renderCalendar(); });
-    el.calNext.addEventListener('click', () => { calDate.setMonth(calDate.getMonth() + 1); renderCalendar(); });
-    el.calGrid.addEventListener('click', e => {
-      const cell = e.target.closest('.cal-cell.has-trade');
-      if (!cell) return;
-      showCalDetail(cell.dataset.date);
-    });
-    el.calDetailClose.addEventListener('click', () => { el.calDetailCard.hidden = true; });
-
-    el.fltSearch.addEventListener('input', debounce(e => {
-      filters.search = e.target.value; renderAllTrades();
-    }, 200));
-    el.fltStrategy.addEventListener('change', e => { filters.strategy = e.target.value; renderAllTrades(); });
-    el.fltTag.addEventListener('change', e => { filters.tag = e.target.value; renderAllTrades(); });
-    el.fltResult.addEventListener('change', e => { filters.result = e.target.value; renderAllTrades(); });
-    el.fltEmotion.addEventListener('change', e => { filters.emotion = e.target.value; renderAllTrades(); });
-    el.fltSide.addEventListener('change', e => { filters.side = e.target.value; renderAllTrades(); });
-    el.fltFrom.addEventListener('change', e => { filters.from = e.target.value; renderAllTrades(); });
-    el.fltTo.addEventListener('change', e => { filters.to = e.target.value; renderAllTrades(); });
-    el.fltClear.addEventListener('click', () => {
-      filters = { search: '', strategy: 'all', tag: 'all', result: 'all',
-                  emotion: 'all', side: 'all', from: '', to: '' };
-      renderAllTrades();
-    });
-
-    /* ===== GOAL ===== */
-    el.saveGoal.addEventListener('click', () => {
-      const target = Math.abs(parseFloat(el.goalTarget.value));
-      if (!target || isNaN(target)) { toast(el.goalMsg, t('err_goal_target'), true); return; }
-      goal = {
-        period: el.goalPeriod.dataset.value || 'week',
-        metric: el.goalMetric.dataset.value || 'pnl',
-        target
-      };
-      saveJSON(KEYS.goal, goal);
-      renderGoalsPreview();
-      renderGoalsMini();
-      toast(el.goalMsg, t('ok_goal'));
-    });
-    el.clearGoal.addEventListener('click', async () => {
-      if (!goal) { toast(el.goalMsg, t('empty_goal')); return; }
-      const ok = await confirmDialog({
-        variant: 'warning',
-        icon: '🎯',
-        title: t('md_goal_title'),
-        message: t('md_goal_msg'),
-        okText: t('md_goal_ok'),
-        cancelText: t('md_cancel')
-      });
-      if (!ok) return;
-      goal = null;
-      try { localStorage.removeItem(KEYS.goal); } catch (err) {}
-      el.goalTarget.value = '';
-      renderGoalsPreview();
-      renderGoalsMini();
-      toast(el.goalMsg, t('goal_cleared'));
-    });
-
-    /* ===== RULES ===== */
-    el.saveRules.addEventListener('click', () => {
-      rules = {
-        enabled: !!el.rulesEnabled.checked,
-        dailyLoss: Math.abs(parseFloat(el.ruleDaily.value)) || 0,
-        maxDD: Math.abs(parseFloat(el.ruleMaxDD.value)) || 0,
-        target: Math.abs(parseFloat(el.ruleTarget.value)) || 0,
-        balance: Math.abs(parseFloat(el.ruleBalance.value)) || 10000
-      };
-      saveJSON(KEYS.rules, rules);
-      renderRulesStatus();
-      renderRulesBanner();
-      toast(el.rulesMsg, t('ok_rules'));
-    });
-
-    window.addEventListener('resize', debounce(() => {
-      if (el.pageAnalysis.classList.contains('active')) renderCharts();
-    }, 160));
-    window.addEventListener('orientationchange', () => {
-      setTimeout(() => {
-        if (el.pageAnalysis.classList.contains('active')) renderCharts();
-      }, 250);
-    });
-
-    document.addEventListener('keydown', e => {
-      if (e.target.matches('input, textarea, select')) return;
-      if (e.key === 't' || e.key === 'T') toggleTheme();
-    });
-  }
-
-  /* ============================ LOADER ============================ */
-  function runLoader() {
-    const loader = document.getElementById('loader');
-    const fill = document.getElementById('loader-fill');
-    const pct = document.getElementById('loader-pct');
-    const sub = document.getElementById('loader-sub');
-    if (!loader) return Promise.resolve();
-
-    const messagesFa = ['اتصال به بازار…', 'دریافت داده‌ها…', 'آماده‌سازی نمودارها…', 'آماده!'];
-    const messagesEn = ['Connecting to markets…', 'Fetching data…', 'Preparing charts…', 'Ready!'];
-    const messages = lang === 'fa' ? messagesFa : messagesEn;
-
-    return new Promise(resolve => {
-      let progress = 0;
-      const step = () => {
-        progress += Math.random() * 14 + 4;
-        if (progress >= 100) progress = 100;
-        if (fill) fill.style.width = progress + '%';
-        if (pct) pct.textContent = Math.round(progress) + '%';
-        const idx = Math.min(messages.length - 1, Math.floor(progress / 30));
-        if (sub) sub.textContent = messages[idx];
-        if (progress < 100) {
-          setTimeout(step, Math.random() * 180 + 80);
-        } else {
-          setTimeout(() => {
-            loader.classList.add('hide');
-            setTimeout(() => { loader.style.display = 'none'; resolve(); }, 600);
-          }, 320);
-        }
-      };
-      step();
-    });
-  }
-
-  /* ============================ INIT ============================ */
-  function init() {
-    applyTheme(theme);
-    document.documentElement.setAttribute('lang', lang);
-    document.documentElement.setAttribute('dir', lang === 'fa' ? 'rtl' : 'ltr');
-    if (el.langLabel) el.langLabel.textContent = lang === 'fa' ? 'EN' : 'FA';
-    document.title = t('title');
-
-    $$('[data-i18n]').forEach(node => {
-      const v = t(node.getAttribute('data-i18n'));
-      if (v) node.textContent = v;
-    });
-    $$('[data-i18n-ph]').forEach(node => {
-      const v = t(node.getAttribute('data-i18n-ph'));
-      if (v) node.setAttribute('placeholder', v);
-    });
-
-    initSeg(el.sideSeg, 'buy');
-    initSeg(el.resultSeg, 'win');
-    initSeg(el.goalPeriod, 'week');
-    initSeg(el.goalMetric, 'pnl');
-
-    initEmotions();
-    initScreenshot();
-    renderChecklistForm({});
-    el.fDate.value = todayISO();
-    renderTagsPreview();
-
-    bindEvents();
-    renderAll();
-
-    runLoader();
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
-    init();
-  }
-
-})();
+    importInput: $('#import-input'), clearBtn: $('#clear-btn'),
+    /* Checklist manager */
+    clNewInput: $('#cl-new-input'),
+    clAddBtn: $('#cl-add-btn'),
+    clItems: $('#cl-items'),
+    clMsg: $('#cl-msg')
