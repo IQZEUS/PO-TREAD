@@ -1,5 +1,7 @@
 /* =========================================================
-   PO-TRADE — Bilingual Trade Journal v4 (COMPLETE + MODAL)
+   PO-TRADE — Bilingual Trade Journal v5
+   + Checklist Manager
+   + Symbol/Strategy/Tag Autocomplete (Forex + 150 Crypto)
    ========================================================= */
 (function () {
   'use strict';
@@ -87,6 +89,7 @@
       rc_equity: 'موجودی فعلی', rc_net: 'سود خالص',
       rc_peak: 'اوج', rc_current_dd: 'افت فعلی',
       rc_remaining: 'باقی‌مانده', rc_used: 'مصرف‌شده',
+      // modal titles
       md_del_trade: 'حذف معامله',
       md_del_trade_msg: 'این معامله برای همیشه حذف می‌شود. مطمئنی؟',
       md_del_trade_ok: 'بله، حذف کن',
@@ -100,19 +103,21 @@
       md_goal_msg: 'هدف فعلی حذف شود؟',
       md_goal_ok: 'حذف کن',
       md_cancel: 'انصراف',
-      /* Checklist manager */
+      // checklist manager
       checklist_settings: '✅ مدیریت چک‌لیست',
-      checklist_settings_sub: 'موارد رو اضافه، ویرایش یا حذف کن',
-      checklist_add_ph: 'مورد جدید...',
-      checklist_add: '➕ افزودن',
-      checklist_empty: 'هنوز موردی وجود ندارد',
-      checklist_added: '✅ مورد اضافه شد',
-      checklist_deleted: '🗑️ مورد حذف شد',
-      checklist_saved: '✅ ذخیره شد',
-      checklist_max: '❌ حداکثر ۱۲ مورد مجاز است',
-      checklist_del_title: 'حذف مورد چک‌لیست',
-      checklist_del_msg: 'این مورد از چک‌لیست حذف شود؟',
-      checklist_del_ok: 'حذف کن'
+      checklist_settings_sub: 'آیتم‌ها رو ویرایش، اضافه یا حذف کن',
+      checklist_new_ph: 'آیتم جدید...',
+      save_checklist: '💾 ذخیره چک‌لیست',
+      reset_checklist: '↺ بازگردانی پیش‌فرض',
+      checklist_saved: '✅ چک‌لیست ذخیره شد',
+      checklist_reset: '✅ چک‌لیست به حالت پیش‌فرض بازگشت',
+      checklist_empty: 'هنوز آیتمی نداری — یکی اضافه کن',
+      checklist_del_title: 'حذف آیتم چک‌لیست',
+      checklist_del_msg: 'این آیتم حذف شود؟',
+      checklist_del_ok: 'حذف کن',
+      checklist_added: '➕ آیتم اضافه شد',
+      checklist_deleted: '🗑️ آیتم حذف شد',
+      checklist_need_item: '❌ متن آیتم رو بنویس'
     },
     en: {
       title: 'PO-TRADE | Trade Journal',
@@ -205,19 +210,20 @@
       md_goal_msg: 'Remove the current goal?',
       md_goal_ok: 'Remove',
       md_cancel: 'Cancel',
-      /* Checklist manager */
       checklist_settings: '✅ Checklist Manager',
-      checklist_settings_sub: 'Add, edit or remove items',
-      checklist_add_ph: 'New item...',
-      checklist_add: '➕ Add',
-      checklist_empty: 'No items yet',
-      checklist_added: '✅ Item added',
-      checklist_deleted: '🗑️ Item removed',
-      checklist_saved: '✅ Saved',
-      checklist_max: '❌ Maximum 12 items',
+      checklist_settings_sub: 'Edit, add, or remove items',
+      checklist_new_ph: 'New item...',
+      save_checklist: '💾 Save Checklist',
+      reset_checklist: '↺ Reset to Default',
+      checklist_saved: '✅ Checklist saved',
+      checklist_reset: '✅ Checklist reset to default',
+      checklist_empty: 'No items yet — add one',
       checklist_del_title: 'Delete Checklist Item',
-      checklist_del_msg: 'Remove this item from the checklist?',
-      checklist_del_ok: 'Delete'
+      checklist_del_msg: 'Remove this item?',
+      checklist_del_ok: 'Delete',
+      checklist_added: '➕ Item added',
+      checklist_deleted: '🗑️ Item deleted',
+      checklist_need_item: '❌ Enter item text'
     }
   };
 
@@ -292,77 +298,104 @@
   };
   const emoLabel = k => (EMOTIONS[k] || EMOTIONS.calm)[lang] || EMOTIONS.calm.fa;
 
-  const DEFAULT_RULES = [
-    { id: 'setup', fa: 'ستاپ تأیید شد',   en: 'Setup confirmed' },
-    { id: 'stop',  fa: 'حد ضرر مشخص شد',   en: 'Stop loss defined' },
-    { id: 'size',  fa: 'حجم مناسب بود',    en: 'Position size correct' },
-    { id: 'plan',  fa: 'طبق پلن پیش رفتم', en: 'Followed the plan' }
+  /* ============ PRESET CHECKLIST (default) ============ */
+  const DEFAULT_CHECKLIST = [
+    { id: 'setup', text_fa: 'ستاپ تأیید شد',   text_en: 'Setup confirmed' },
+    { id: 'stop',  text_fa: 'حد ضرر مشخص شد',   text_en: 'Stop loss defined' },
+    { id: 'size',  text_fa: 'حجم مناسب بود',    text_en: 'Position size correct' },
+    { id: 'plan',  text_fa: 'طبق پلن پیش رفتم', text_en: 'Followed the plan' }
   ];
-  const ruleText = r => r ? (r.text || r[lang] || r.fa || r.en || r.id) : '';
+  const ruleText = r => {
+    if (!r) return '';
+    if (lang === 'en') return r.text_en || r.text_fa || r.text || '';
+    return r.text_fa || r.text || r.text_en || '';
+  };
 
-  /* ============ AUTOCOMPLETE LISTS ============ */
-  const FOREX_SYMBOLS = [
+  /* ============ PRESET STRATEGIES ============ */
+  const PRESET_STRATEGIES = [
+    'Price Action',
+    'Breakout',
+    'London Breakout',
+    'New York Breakout',
+    'Mean Reversion',
+    'Trend Following',
+    'Counter Trend',
+    'Range Trading',
+    'Scalping',
+    'Day Trading',
+    'Swing Trading',
+    'Position Trading',
+    'Supply & Demand',
+    'Support & Resistance',
+    'Fibonacci Retracement',
+    'Elliott Wave',
+    'Harmonic Patterns',
+    'ICT / Smart Money',
+    'Order Block',
+    'Liquidity Grab',
+    'Fair Value Gap (FVG)',
+    'Break of Structure (BOS)',
+    'Change of Character (CHoCH)',
+    'VWAP',
+    'Volume Profile',
+    'Divergence',
+    'Momentum',
+    'Reversal',
+    'News Trading',
+    'Carry Trade',
+    'Grid Trading',
+    'Martingale',
+    'Pin Bar',
+    'Engulfing',
+    'Doji Setup',
+    'Inside Bar',
+    '3 Drives',
+    'Turtle Soup',
+    'Cup & Handle',
+    'Head & Shoulders',
+    'Triangle Breakout',
+    'Flag Pattern',
+    'Wedge Pattern',
+    'Double Top/Bottom',
+    'Triple Top/Bottom'
+  ];
+
+  /* ============ FOREX PAIRS ============ */
+  const FOREX_PAIRS = [
     'EURUSD','GBPUSD','USDJPY','USDCHF','USDCAD','AUDUSD','NZDUSD',
     'EURGBP','EURJPY','EURCHF','EURCAD','EURAUD','EURNZD',
     'GBPJPY','GBPCHF','GBPCAD','GBPAUD','GBPNZD',
     'AUDJPY','AUDCHF','AUDCAD','AUDNZD',
-    'NZDJPY','NZDCHF','NZDCAD','CADJPY','CADCHF','CHFJPY',
-    'XAUUSD','XAGUSD','XPTUSD','XPDUSD','USOIL','UKOIL','NGAS',
-    'NAS100','SPX500','US30','GER40','UK100','JP225','HK50','AUS200','US2000',
-    'EURTRY','USDTRY','USDZAR','USDMXN','USDSEK','USDNOK','USDDKK','USDPLN','USDHUF','USDCZK',
-    'USDCNH','USDHKD','USDSGD','USDINR','USDTHB','USDKRW','USDBRL','USDARS'
+    'NZDJPY','NZDCHF','NZDCAD',
+    'CADJPY','CADCHF','CHFJPY',
+    // Metals
+    'XAUUSD','XAGUSD','XPTUSD','XPDUSD',
+    // Indices
+    'US30','NAS100','SPX500','GER40','UK100','JP225','HK50','AUS200',
+    // Energy
+    'USOIL','UKOIL','NATGAS'
   ];
 
+  /* ============ 150 TOP CRYPTOS (USD pairs) ============ */
   const CRYPTO_SYMBOLS = [
-    'BTCUSD','ETHUSD','BNBUSD','SOLUSD','XRPUSD','ADAUSD','DOGEUSD','AVAXUSD',
-    'DOTUSD','MATICUSD','LINKUSD','LTCUSD','BCHUSD','UNIUSD','ATOMUSD','XLMUSD',
-    'ETCUSD','FILUSD','APTUSD','ARBUSD','OPUSD','NEARUSD','INJUSD','SUIUSD',
-    'IMXUSD','HBARUSD','VETUSD','ALGOUSD','FTMUSD','SANDUSD','MANAUSD','AXSUSD',
-    'GRTUSD','AAVEUSD','MKRUSD','SNXUSD','CRVUSD','COMPUSD','SUSHIUSD','YFIUSD',
-    'ZECUSD','DASHUSD','XMRUSD','EOSUSD','NEOUSD','QTUMUSD','IOTAUSD','THETAUSD',
-    'EGLDUSD','FLOWUSD','CHZUSD','ENJUSD','BATUSD','ZILUSD','ONEUSD','HOTUSD',
-    'ANKRUSD','CELOUSD','KSMUSD','ICPUSD','RNDRUSD','RPLUSD','LDOUSD','GMXUSD',
-    'DYDXUSD','APEUSD','GALAUSD','KAVAUSD','ROSEUSD','OCEANUSD','BANDUSD','STORJUSD',
-    'KNCUSD','ZRXUSD','REPUSD','MLNUSD','BALUSD','RENUSD','LRCUSD','CTSIUSD',
-    'TRXUSD','TONUSD','SHIBUSD','PEPEUSD','FLOKIUSD','BONKUSD','WIFUSD','MEMEUSD',
-    'SEIUSD','TIAUSD','JUPUSD','PYTHUSD','STRKUSD','DYMUSD','ALTUSD','MANTAUSD',
-    'PIXELUSD','PORTALUSD','AEVOUSD','ETHFIUSD','ENAUSD','OMNIUSD','REZUSD',
-    'SAGAUSD','TNSRUSD','OMUSD','NOTUSD','IOUSD','ZKUSD','LISTAUSD','ZROUSD',
-    'BLASTUSD','TAIKOUSD','MOCAUSD','RENDERUSD','POLUSD','NEIROUSD','TURBOUSD',
-    'EIGENUSD','HAMSTERUSD','SCRUSD','MOVEUSD','MEUSD','USUALUSD','PENGUUSD',
-    'AI16ZUSD','GRASSUSD','VIRTUALUSD','SWARMSUSD','TRUMPUSD','ANIMEUSD','VINEUSD','BERAUSD',
-    'KAITOUSD','IPUSD','REDUSD','SHELLUSD','PLUMEUSD','BMTUSD','PARTIUSD','BABYUSD',
-    'WCTUSD','HYPERUSD','INITUSD','SIGNUSD','SXTUSD','MILKUSD','OBOLUSD','AEROUSD',
-    'ZKJUSD','HUMAUSD','RESOLVUSD','HOMEUSD','PUMPUSD','SAHARAUSD','NEWTUSD','SPKUSD'
+    'BTCUSD','ETHUSD','BNBUSD','SOLUSD','XRPUSD','ADAUSD','DOGEUSD','TRXUSD','TONUSD','DOTUSD',
+    'MATICUSD','LTCUSD','SHIBUSD','AVAXUSD','BCHUSD','LINKUSD','XLMUSD','UNIUSD','ATOMUSD','ETCUSD',
+    'XMRUSD','FILUSD','APTUSD','ARBUSD','OPUSD','NEARUSD','ICPUSD','INJUSD','IMXUSD','SUIUSD',
+    'SEIUSD','TIAUSD','RUNEUSD','HBARUSD','ALGOUSD','FTMUSD','SANDUSD','MANAUSD','AXSUSD','GALAUSD',
+    'EGLDUSD','FLOWUSD','KAVAUSD','ROSEUSD','ZECUSD','DASHUSD','EOSUSD','XTZUSD','THETAUSD','NEOUSD',
+    'IOTAUSD','QTUMUSD','WAVESUSD','ZILUSD','ONEUSD','CHZUSD','ENJUSD','BATUSD','CRVUSD','COMPUSD',
+    'MKRUSD','SNXUSD','YFIUSD','SUSHIUSD','1INCHUSD','LDOUSD','GRTUSD','RNDRUSD','FETUSD','OCEANUSD',
+    'ARUSD','STXUSD','CFXUSD','KASUSD','ORDIUSD','PEPEUSD','WIFUSD','BONKUSD','FLOKIUSD','JUPUSD',
+    'PYTHUSD','STRKUSD','DYMUSD','ALTUSD','ENAUSD','ZKUSD','BLASTUSD','ZROUSD','AAVEUSD','DYDXUSD',
+    'CAKEUSD','GMTUSD','APEUSD','ILVUSD','KSMUSD','GLMRUSD','MOVRUSD','AUDIOUSD','CELRUSD','CKBUSD',
+    'DUSKUSD','RENUSD','STORJUSD','ANKRUSD','COTIUSD','RSRUSD','BANDUSD','API3USD','OGNUSD','SXPUSD',
+    'WANUSD','YGGUSD','JASMYUSD','FIDAUSD','BICOUSD','ALPHAUSD','DENTUSD','HOTUSD','ARPAUSD','TLMUSD',
+    'VRAUSD','KNCUSD','ZRXUSD','LRCUSD','BALUSD','RPLUSD','METISUSD','OMGUSD','ELFUSD','ICXUSD',
+    'ARKUSD','STEEMUSD','HIVEUSD','LSKUSD','NANOUSD','VETUSD','RVNUSD','SCUSD','DGBUSD','FTTUSD',
+    'WOOUSD','BLURUSD','IDUSD','ARKMUSD','AGIXUSD','MASKUSD','ENSUSD','PENDLEUSD','MAGICUSD','HIGHUSD',
+    'RDNTUSD','HOOKUSD','ACHUSD','LQTYUSD','SSVUSD','RPLUSD','MULTIUSD','FLUXUSD','MINAUSD','ASTRUSD',
+    'GLMRUSD','IOTXUSD','ZENUSD','XEMUSD','ARRRUSD','DCRUSD','BTGUSD','XVGUSD','KMDUSD','NMCUSD'
   ];
-
-  const ALL_SYMBOLS = FOREX_SYMBOLS.concat(CRYPTO_SYMBOLS);
-
-  const STRATEGIES = [
-    'London Breakout','NY Breakout','Asia Range','Mean Reversion','Trend Following',
-    'Structure Break','Price Action','Supply & Demand','Order Block','Liquidity Grab',
-    'Fibonacci Retracement','Support & Resistance','Scalping','Day Trading','Swing Trading',
-    'Range Trading','Momentum','Reversal','Pullback','Channel Trading',
-    'EMA Crossover','MA Ribbon','RSI Divergence','MACD Signal','Bollinger Bounce',
-    'VWAP','Ichimoku','Elliott Wave','Harmonic Pattern','Smart Money Concept',
-    'ICT Concepts','Break & Retest','Trendline Break','Gap Fill','News Trading',
-    'Carry Trade','Grid','Hedge','Cup & Handle','Head & Shoulders',
-    'Triangle','Wedge','Flag Pattern','Double Top','Double Bottom',
-    'Bat Pattern','Gartley Pattern','Butterfly Pattern','Crab Pattern','Shark Pattern'
-  ];
-
-  const TAGS = [
-    'Breakout','Pullback','Reversal','Trend','Range','Trendline',
-    'London','NY','Asia','M5','M15','M30','H1','H4','D1','W1',
-    'News','NFP','CPI','FOMC','ECB','BOE','BOJ',
-    'Stop Hunt','Liquidity','Order Block','FVG','BOS','CHoCH',
-    'Confluence','A+','B','C','Setup A','Setup B',
-    'Mistake','FOMO','Revenge','Overtrade','Discipline','Plan Followed',
-    'Scalp','Day','Swing','Position','Gold','Oil','Indices','Crypto','Forex'
-  ];
-
-  const MONTHS_FA = ['ژانویه','فوریه','مارس','آوریل','مه','ژوئن','جولای','اوت','سپتامبر','اکتبر','نوامبر','دسامبر'];
-  const MONTHS_EN = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 
   /* ============================ STORAGE ============================ */
   const KEYS = {
@@ -387,18 +420,15 @@
   let trades = loadJSON(KEYS.trades, []);
   if (!Array.isArray(trades)) trades = [];
 
-  // Checklist items (managed from settings)
-  let checklistItems = (function () {
-    const stored = loadJSON(KEYS.checklist, null);
-    if (Array.isArray(stored) && stored.length) {
-      const cleaned = stored
-        .filter(x => x && x.id && (x.text || x.fa || x.en))
-        .map(x => ({ id: x.id, text: x.text || x.fa || x.en }));
-      if (cleaned.length) return cleaned;
-    }
-    return DEFAULT_RULES.map(r => ({ id: r.id, text: r.fa || r.en }));
-  })();
-  let clEditingId = null;
+  // ---- Checklist state
+  let checklistItems = loadJSON(KEYS.checklist, null);
+  if (!Array.isArray(checklistItems) || !checklistItems.length) {
+    checklistItems = DEFAULT_CHECKLIST.map(x => ({
+      id: x.id,
+      text_fa: x.text_fa,
+      text_en: x.text_en
+    }));
+  }
 
   let editingId = null;
   let range = '30';
@@ -415,6 +445,7 @@
     emotion: 'all', side: 'all', from: '', to: ''
   };
   function saveTrades() { saveJSON(KEYS.trades, trades); }
+  function saveChecklist() { saveJSON(KEYS.checklist, checklistItems); }
 
   /* ============================ CALCULATIONS ============================ */
   const pnl = t => {
@@ -1045,11 +1076,16 @@
     saveRules: $('#save-rules'), rulesMsg: $('#rules-msg'), rulesStatus: $('#rules-status'),
     demoBtn: $('#demo-btn'), exportBtn: $('#export-btn'),
     importInput: $('#import-input'), clearBtn: $('#clear-btn'),
-    /* Checklist manager */
-    clNewInput: $('#cl-new-input'),
-    clAddBtn: $('#cl-add-btn'),
-    clItems: $('#cl-items'),
-    clMsg: $('#cl-msg')
+    // NEW
+    checklistManager: $('#checklist-manager'),
+    newChecklistInput: $('#new-checklist-input'),
+    addChecklistBtn: $('#add-checklist-btn'),
+    saveChecklistBtn: $('#save-checklist-btn'),
+    resetChecklistBtn: $('#reset-checklist-btn'),
+    checklistMsg: $('#checklist-msg'),
+    symbolsList: $('#symbols-list'),
+    strategiesList: $('#strategies-list'),
+    tagsList: $('#tags-list')
   };
 
   /* ============================ TOAST ============================ */
@@ -1158,12 +1194,134 @@
     renderAll();
   }
 
+  /* ============================ AUTOCCOMPLETE ============================ */
+  function updateAutocomplete() {
+    const symbolSet = new Set(FOREX_PAIRS.concat(CRYPTO_SYMBOLS));
+    const stratSet = new Set(PRESET_STRATEGIES);
+    const tagSet = new Set();
+
+    for (const tr of trades) {
+      if (tr.symbol) symbolSet.add(String(tr.symbol).toUpperCase());
+      if (tr.strategy) stratSet.add(tr.strategy);
+      for (const g of (tr.tags || [])) if (g) tagSet.add(g);
+    }
+
+    const symArr = Array.from(symbolSet);
+    const strArr = Array.from(stratSet);
+    const tagArr = Array.from(tagSet);
+
+    if (el.symbolsList) {
+      el.symbolsList.innerHTML = symArr.map(s => '<option value="' + esc(s) + '"></option>').join('');
+    }
+    if (el.strategiesList) {
+      el.strategiesList.innerHTML = strArr.map(s => '<option value="' + esc(s) + '"></option>').join('');
+    }
+    if (el.tagsList) {
+      el.tagsList.innerHTML = tagArr.map(s => '<option value="' + esc(s) + '"></option>').join('');
+    }
+  }
+
+  /* ============================ CHECKLIST MANAGER (Settings) ============================ */
+  function renderChecklistManager() {
+    if (!el.checklistManager) return;
+    if (!checklistItems.length) {
+      el.checklistManager.innerHTML = '<div class="cm-empty">' + t('checklist_empty') + '</div>';
+      return;
+    }
+    el.checklistManager.innerHTML = checklistItems.map((item, i) =>
+      '<div class="cm-item" data-id="' + esc(item.id) + '">' +
+        '<input type="text" class="cm-input" value="' + esc(ruleText(item)) + '" maxlength="80" ' +
+               'data-idx="' + i + '" placeholder="' + esc(t('checklist_new_ph')) + '" />' +
+        '<button type="button" class="cm-del" data-del="' + esc(item.id) + '" title="Delete">✕</button>' +
+      '</div>'
+    ).join('');
+  }
+
+  function commitChecklistFromInputs() {
+    if (!el.checklistManager) return;
+    const inputs = $$('.cm-input', el.checklistManager);
+    inputs.forEach(inp => {
+      const idx = Number(inp.dataset.idx);
+      const item = checklistItems[idx];
+      if (!item) return;
+      const v = inp.value.trim();
+      if (!v) return;
+      // ذخیره در هر دو زبان (ساده‌سازی)
+      item.text_fa = v;
+      item.text_en = v;
+    });
+  }
+
+  async function removeChecklistItem(id) {
+    const ok = await confirmDialog({
+      variant: 'danger',
+      icon: '🗑️',
+      title: t('checklist_del_title'),
+      message: t('checklist_del_msg'),
+      okText: t('checklist_del_ok'),
+      cancelText: t('md_cancel')
+    });
+    if (!ok) return;
+    checklistItems = checklistItems.filter(x => x.id !== id);
+    saveChecklist();
+    renderChecklistManager();
+    renderChecklistForm({});
+    renderKPIs();
+    renderSettingsPage();
+    toast(el.checklistMsg, t('checklist_deleted'));
+  }
+
+  function addChecklistItem() {
+    const inp = el.newChecklistInput;
+    if (!inp) return;
+    const v = inp.value.trim();
+    if (!v) { toast(el.checklistMsg, t('checklist_need_item'), true); inp.focus(); return; }
+    const id = 'c_' + uid();
+    checklistItems.push({ id, text_fa: v, text_en: v });
+    inp.value = '';
+    saveChecklist();
+    renderChecklistManager();
+    renderChecklistForm({});
+    renderKPIs();
+    renderSettingsPage();
+    toast(el.checklistMsg, t('checklist_added'));
+    inp.focus();
+  }
+
+  function saveChecklistAll() {
+    commitChecklistFromInputs();
+    saveChecklist();
+    renderChecklistManager();
+    renderChecklistForm({});
+    renderKPIs();
+    toast(el.checklistMsg, t('checklist_saved'));
+  }
+
+  async function resetChecklistAll() {
+    const ok = await confirmDialog({
+      variant: 'warning',
+      icon: '↺',
+      title: t('reset_checklist'),
+      message: t('checklist_del_msg'),
+      okText: t('md_goal_ok'),
+      cancelText: t('md_cancel')
+    });
+    if (!ok) return;
+    checklistItems = DEFAULT_CHECKLIST.map(x => ({
+      id: x.id, text_fa: x.text_fa, text_en: x.text_en
+    }));
+    saveChecklist();
+    renderChecklistManager();
+    renderChecklistForm({});
+    renderKPIs();
+    toast(el.checklistMsg, t('checklist_reset'));
+  }
+
   /* ============================ FORM HELPERS ============================ */
   function renderChecklistForm(checked) {
     checked = checked || {};
-    if (!el.checklistWrap) return;
     if (!checklistItems.length) {
-      el.checklistWrap.innerHTML = '<div class="cl-empty" style="grid-column:1/-1">' + esc(t('checklist_empty')) + '</div>';
+      el.checklistWrap.innerHTML = '<div class="empty" style="padding:10px;font-size:12px">' + t('checklist_empty') + '</div>';
       return;
     }
     el.checklistWrap.innerHTML = checklistItems.map(r =>
@@ -1359,6 +1517,7 @@
     try { saveTrades(); }
     catch (err) { toast(el.formMsg, t('err_storage'), true); return; }
     resetForm();
+    updateAutocomplete();
     renderAll();
   }
 
@@ -1754,31 +1913,6 @@
     el.allTradesList.innerHTML = sorted.map(tr => renderTradeItem(tr)).join('');
   }
 
-  /* ============================ RENDER: CHECKLIST MANAGER ============================ */
-  function renderChecklistManager() {
-    if (!el.clItems) return;
-    if (!checklistItems.length) {
-      el.clItems.innerHTML = '<div class="cl-empty">' + esc(t('checklist_empty')) + '</div>';
-      return;
-    }
-    el.clItems.innerHTML = checklistItems.map((item, i) => {
-      const editing = clEditingId === item.id;
-      return '<div class="cl-item' + (editing ? ' editing' : '') + '" data-cid="' + esc(item.id) + '">' +
-        '<span class="cl-num">' + (i + 1) + '</span>' +
-        (editing
-          ? '<input type="text" class="cl-edit-input" value="' + esc(ruleText(item)) + '" maxlength="80" />'
-          : '<span class="cl-text">' + esc(ruleText(item)) + '</span>') +
-        '<div class="cl-actions">' +
-          (editing
-            ? '<button type="button" data-cact="save" title="Save">✓</button>' +
-              '<button type="button" data-cact="cancel" title="Cancel">✕</button>'
-            : '<button type="button" data-cact="edit" title="Edit">✏️</button>' +
-              '<button type="button" data-cact="del" title="Delete">🗑️</button>') +
-        '</div>' +
-      '</div>';
-    }).join('');
-  }
-
   /* ============================ RENDER: SETTINGS ============================ */
   function renderSettingsPage() {
     if (goal) {
@@ -1795,9 +1929,9 @@
     el.ruleDaily.value = rules.dailyLoss || '';
     el.ruleMaxDD.value = rules.maxDD || '';
     el.ruleTarget.value = rules.target || '';
-    renderChecklistManager();
     renderGoalsPreview();
     renderRulesStatus();
+    renderChecklistManager();
   }
 
   function renderGoalsPreview() {
@@ -1923,16 +2057,6 @@
     if (el.pageSettings.classList.contains('active')) renderSettingsPage();
   }
 
-  /* ============================ DATALISTS ============================ */
-  function populateDatalists() {
-    const dlS  = document.getElementById('dl-symbols');
-    const dlSt = document.getElementById('dl-strategies');
-    const dlT  = document.getElementById('dl-tags');
-    if (dlS)  dlS.innerHTML  = ALL_SYMBOLS.map(s => '<option value="' + esc(s) + '"></option>').join('');
-    if (dlSt) dlSt.innerHTML = STRATEGIES.map(s => '<option value="' + esc(s) + '"></option>').join('');
-    if (dlT)  dlT.innerHTML  = TAGS.map(s => '<option value="' + esc(s) + '"></option>').join('');
-  }
-
   /* ============================ DEMO DATA ============================ */
   function demoData() {
     const symbols = ['XAUUSD', 'EURUSD', 'BTCUSD', 'GBPJPY', 'NAS100'];
@@ -1957,7 +2081,7 @@
         const risk = result === 'be' ? 50 : Math.round((30 + Math.random() * 70) * 100) / 100;
         const emotion = emoKeys[Math.floor(Math.random() * emoKeys.length)];
         const checklist = {};
-        for (const rItem of checklistItems) checklist[rItem.id] = Math.random() < 0.75;
+        for (const it of checklistItems) checklist[it.id] = Math.random() < 0.75;
         const tags = [];
         while (tags.length < 2) {
           const x = tagPool[Math.floor(Math.random() * tagPool.length)];
@@ -2022,6 +2146,7 @@
           added++;
         }
         saveTrades();
+        updateAutocomplete();
         renderAll();
         toast(el.formMsg, fmt('ok_import', { n: added }));
       } catch (err) {
@@ -2074,7 +2199,9 @@
         });
         if (!ok) return;
         trades = trades.filter(tr => tr.id !== id);
-        saveTrades(); renderAll();
+        saveTrades();
+        updateAutocomplete();
+        renderAll();
         toast(el.formMsg, t('del_done'));
       }
     }
@@ -2111,7 +2238,9 @@
         if (!ok) return;
       }
       trades = trades.concat(demoData());
-      saveTrades(); renderAll();
+      saveTrades();
+      updateAutocomplete();
+      renderAll();
       switchView('analysis');
       toast(el.formMsg, t('ok_demo'));
     });
@@ -2213,83 +2342,32 @@
     });
 
     /* ===== CHECKLIST MANAGER ===== */
-    if (el.clAddBtn && el.clNewInput) {
-      el.clAddBtn.addEventListener('click', () => {
-        const v = el.clNewInput.value.trim();
-        if (!v) return;
-        if (checklistItems.length >= 12) { toast(el.clMsg, t('checklist_max'), true); return; }
-        checklistItems.push({ id: 'ci_' + uid(), text: v });
-        saveJSON(KEYS.checklist, checklistItems);
-        el.clNewInput.value = '';
-        renderChecklistManager();
-        renderChecklistForm(getChecklistValues());
-        renderAll();
-        toast(el.clMsg, t('checklist_added'));
-      });
-      el.clNewInput.addEventListener('keydown', e => {
-        if (e.key === 'Enter') { e.preventDefault(); el.clAddBtn.click(); }
+    if (el.addChecklistBtn) {
+      el.addChecklistBtn.addEventListener('click', addChecklistItem);
+    }
+    if (el.newChecklistInput) {
+      el.newChecklistInput.addEventListener('keydown', e => {
+        if (e.key === 'Enter') { e.preventDefault(); addChecklistItem(); }
       });
     }
-    if (el.clItems) {
-      el.clItems.addEventListener('click', async e => {
-        const btn = e.target.closest('button[data-cact]');
-        if (!btn) return;
-        const itemEl = btn.closest('.cl-item');
-        const id = itemEl.dataset.cid;
-        const act = btn.dataset.cact;
-
-        if (act === 'edit') {
-          clEditingId = id;
-          renderChecklistManager();
-          setTimeout(() => {
-            const inp = el.clItems.querySelector('.cl-item[data-cid="' + id + '"] .cl-edit-input');
-            if (inp) { inp.focus(); inp.select(); }
-          }, 30);
-        } else if (act === 'cancel') {
-          clEditingId = null;
-          renderChecklistManager();
-        } else if (act === 'save') {
-          const inp = itemEl.querySelector('.cl-edit-input');
-          const v = inp ? inp.value.trim() : '';
-          if (!v) return;
-          const item = checklistItems.find(x => x.id === id);
-          if (item) { item.text = v; delete item.fa; delete item.en; }
-          clEditingId = null;
-          saveJSON(KEYS.checklist, checklistItems);
-          renderChecklistManager();
-          renderChecklistForm(getChecklistValues());
-          renderAll();
-          toast(el.clMsg, t('checklist_saved'));
-        } else if (act === 'del') {
-          const ok = await confirmDialog({
-            variant: 'danger',
-            icon: '🗑️',
-            title: t('checklist_del_title'),
-            message: t('checklist_del_msg'),
-            okText: t('checklist_del_ok'),
-            cancelText: t('md_cancel')
-          });
-          if (!ok) return;
-          checklistItems = checklistItems.filter(x => x.id !== id);
-          saveJSON(KEYS.checklist, checklistItems);
-          renderChecklistManager();
-          renderChecklistForm({});
-          renderAll();
-          toast(el.clMsg, t('checklist_deleted'));
+    if (el.checklistManager) {
+      el.checklistManager.addEventListener('click', e => {
+        const del = e.target.closest('[data-del]');
+        if (del) {
+          removeChecklistItem(del.dataset.del);
         }
       });
-      el.clItems.addEventListener('keydown', e => {
-        if (e.key === 'Enter' && e.target.classList.contains('cl-edit-input')) {
-          e.preventDefault();
-          const itemEl = e.target.closest('.cl-item');
-          const saveBtn = itemEl.querySelector('button[data-cact="save"]');
-          if (saveBtn) saveBtn.click();
-        } else if (e.key === 'Escape' && e.target.classList.contains('cl-edit-input')) {
-          const itemEl = e.target.closest('.cl-item');
-          const cancelBtn = itemEl.querySelector('button[data-cact="cancel"]');
-          if (cancelBtn) cancelBtn.click();
+      el.checklistManager.addEventListener('change', e => {
+        if (e.target.matches('.cm-input')) {
+          // ذخیره‌ی خیلی سبک — اختیاری
         }
       });
+    }
+    if (el.saveChecklistBtn) {
+      el.saveChecklistBtn.addEventListener('click', saveChecklistAll);
+    }
+    if (el.resetChecklistBtn) {
+      el.resetChecklistBtn.addEventListener('click', resetChecklistAll);
     }
 
     window.addEventListener('resize', debounce(() => {
@@ -2368,10 +2446,11 @@
     renderChecklistForm({});
     el.fDate.value = todayISO();
     renderTagsPreview();
-    populateDatalists();
 
     bindEvents();
+    updateAutocomplete();
     renderAll();
+    renderChecklistManager();
 
     runLoader();
   }
