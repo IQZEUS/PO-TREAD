@@ -1117,96 +1117,6 @@ html[dir="ltr"] .switch input:checked + .switch-track .switch-thumb {
 }
 
 /* =========================================================
-   RESPONSIVE
-   ========================================================= */
-@media (max-width: 1024px) {
-  .grid { grid-template-columns: 1fr; }
-  .filter-grid { grid-template-columns: repeat(2, 1fr); }
-}
-
-@media (max-width: 640px) {
-  .app { padding: 10px 12px 60px; padding-bottom: calc(60px + env(safe-area-inset-bottom)); }
-  .topbar { padding: 8px 0 8px; }
-  .logo { width: 40px; height: 40px; flex: 0 0 40px; }
-  .brand-text h1 { font-size: 14px; }
-  .brand-text p { display: none; }
-  .theme-btn { width: 38px; height: 38px; flex: 0 0 38px; font-size: 16px; }
-  .lang-btn { height: 38px; padding: 0 10px; }
-
-  .tabs { padding: 4px; gap: 3px; }
-  .tab { padding: 10px 8px; font-size: 11px; flex-direction: column; gap: 2px; }
-  .tab em { display: none; }
-  .tab span { font-size: 19px; }
-  .tab.active { transform: scale(1.05); }
-
-  .grid { gap: 12px; margin-bottom: 12px; }
-  .card { padding: 15px; border-radius: 16px; margin-bottom: 12px; }
-  .card-head h2 { font-size: 13.5px; }
-
-  .form-grid { grid-template-columns: 1fr; gap: 12px; }
-  .field.full { grid-column: 1; }
-  input, textarea, select { font-size: 16px; padding: 13px 14px; }
-
-  .emotions { grid-template-columns: repeat(3, 1fr); }
-  .checklist { grid-template-columns: 1fr; }
-
-  .btn { padding: 13px 18px; font-size: 13.5px; }
-  .btn.sm { padding: 9px 12px; font-size: 12px; }
-
-  .toolbar { padding: 11px; gap: 10px; }
-  .toolbar .seg { width: 100%; overflow-x: auto; scrollbar-width: none; }
-  .toolbar .seg::-webkit-scrollbar { display: none; }
-  .tools { width: 100%; }
-  .tools .btn.sm, .tools label.btn.sm { flex: 1; padding: 11px 8px; }
-
-  .kpis { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-  .kpi { padding: 12px 12px 14px; border-radius: 14px; }
-  .kpi .ico { width: 30px; height: 30px; font-size: 14px; margin-bottom: 7px; }
-  .kpi .lbl { font-size: 10.5px; }
-  .kpi .val { font-size: 16px; }
-
-  .chart-box { height: 210px; }
-  .table-wrap { margin: 0 -15px -15px; padding: 0 15px 15px; max-height: 300px; }
-  table { font-size: 11.5px; }
-
-  .trade-list { max-height: none; }
-  .trade-item {
-    padding: 11px 12px; gap: 10px;
-    border-radius: 12px; min-height: 60px;
-  }
-  .ti-thumb { width: 38px; height: 38px; flex: 0 0 38px; }
-  .ti-symbol { font-size: 12.5px; gap: 6px; }
-  .ti-meta { font-size: 10px; gap: 6px; }
-  .pill { font-size: 10.5px; padding: 4px 9px; }
-  .ti-actions button { padding: 5px 6px; font-size: 12px; }
-  .ti-tags .tag { font-size: 9px; padding: 1px 6px; }
-
-  .cal-cell { min-height: 44px; border-radius: 8px; padding: 4px 3px; }
-  .cal-cell .day-num { font-size: 10px; }
-  .cal-cell .day-pnl { font-size: 9px; }
-  .cal-cell .trade-count { font-size: 8px; top: 2px; left: 2px; }
-  .cal-weekdays span { font-size: 10px; }
-
-  .filter-grid { grid-template-columns: 1fr; gap: 10px; }
-  .upload-preview { max-height: 180px; }
-}
-
-@media (max-width: 380px) {
-  .kpis { gap: 8px; }
-  .kpi { padding: 11px 10px 13px; }
-  .kpi .val { font-size: 14.5px; }
-  .emotions button { font-size: 10px; padding: 8px 2px; }
-  .emotions button span { font-size: 18px; }
-  .tab span { font-size: 17px; }
-
-  .trade-item { gap: 8px; padding: 10px; }
-  .ti-thumb { width: 34px; height: 34px; flex: 0 0 34px; }
-  .ti-symbol { font-size: 12px; }
-  .ti-meta { font-size: 9.5px; gap: 5px; }
-  .pill { font-size: 10px; padding: 4px 8px; }
-  .ti-actions button { padding: 4px 5px; font-size: 11px; }
-}
-/* =========================================================
    CHECKLIST MANAGER (Settings)
    ========================================================= */
 .cl-add-row {
@@ -1300,8 +1210,97 @@ html[dir="ltr"] .switch input:checked + .switch-track .switch-thumb {
   background: var(--card-2);
 }
 
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+@media (max-width: 1024px) {
+  .grid { grid-template-columns: 1fr; }
+  .filter-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
 @media (max-width: 640px) {
+  .app { padding: 10px 12px 60px; padding-bottom: calc(60px + env(safe-area-inset-bottom)); }
+  .topbar { padding: 8px 0 8px; }
+  .logo { width: 40px; height: 40px; flex: 0 0 40px; }
+  .brand-text h1 { font-size: 14px; }
+  .brand-text p { display: none; }
+  .theme-btn { width: 38px; height: 38px; flex: 0 0 38px; font-size: 16px; }
+  .lang-btn { height: 38px; padding: 0 10px; }
+
+  .tabs { padding: 4px; gap: 3px; }
+  .tab { padding: 10px 8px; font-size: 11px; flex-direction: column; gap: 2px; }
+  .tab em { display: none; }
+  .tab span { font-size: 19px; }
+  .tab.active { transform: scale(1.05); }
+
+  .grid { gap: 12px; margin-bottom: 12px; }
+  .card { padding: 15px; border-radius: 16px; margin-bottom: 12px; }
+  .card-head h2 { font-size: 13.5px; }
+
+  .form-grid { grid-template-columns: 1fr; gap: 12px; }
+  .field.full { grid-column: 1; }
+  input, textarea, select { font-size: 16px; padding: 13px 14px; }
+
+  .emotions { grid-template-columns: repeat(3, 1fr); }
+  .checklist { grid-template-columns: 1fr; }
+
+  .btn { padding: 13px 18px; font-size: 13.5px; }
+  .btn.sm { padding: 9px 12px; font-size: 12px; }
+
+  .toolbar { padding: 11px; gap: 10px; }
+  .toolbar .seg { width: 100%; overflow-x: auto; scrollbar-width: none; }
+  .toolbar .seg::-webkit-scrollbar { display: none; }
+  .tools { width: 100%; }
+  .tools .btn.sm, .tools label.btn.sm { flex: 1; padding: 11px 8px; }
+
+  .kpis { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .kpi { padding: 12px 12px 14px; border-radius: 14px; }
+  .kpi .ico { width: 30px; height: 30px; font-size: 14px; margin-bottom: 7px; }
+  .kpi .lbl { font-size: 10.5px; }
+  .kpi .val { font-size: 16px; }
+
+  .chart-box { height: 210px; }
+  .table-wrap { margin: 0 -15px -15px; padding: 0 15px 15px; max-height: 300px; }
+  table { font-size: 11.5px; }
+
+  .trade-list { max-height: none; }
+  .trade-item {
+    padding: 11px 12px; gap: 10px;
+    border-radius: 12px; min-height: 60px;
+  }
+  .ti-thumb { width: 38px; height: 38px; flex: 0 0 38px; }
+  .ti-symbol { font-size: 12.5px; gap: 6px; }
+  .ti-meta { font-size: 10px; gap: 6px; }
+  .pill { font-size: 10.5px; padding: 4px 9px; }
+  .ti-actions button { padding: 5px 6px; font-size: 12px; }
+  .ti-tags .tag { font-size: 9px; padding: 1px 6px; }
+
+  .cal-cell { min-height: 44px; border-radius: 8px; padding: 4px 3px; }
+  .cal-cell .day-num { font-size: 10px; }
+  .cal-cell .day-pnl { font-size: 9px; }
+  .cal-cell .trade-count { font-size: 8px; top: 2px; left: 2px; }
+  .cal-weekdays span { font-size: 10px; }
+
+  .filter-grid { grid-template-columns: 1fr; gap: 10px; }
+  .upload-preview { max-height: 180px; }
+
   .cl-item .cl-actions button { padding: 6px 8px; font-size: 13px; }
   .cl-add-row { flex-direction: column; }
   .cl-add-row .btn { width: 100%; }
+}
+
+@media (max-width: 380px) {
+  .kpis { gap: 8px; }
+  .kpi { padding: 11px 10px 13px; }
+  .kpi .val { font-size: 14.5px; }
+  .emotions button { font-size: 10px; padding: 8px 2px; }
+  .emotions button span { font-size: 18px; }
+  .tab span { font-size: 17px; }
+
+  .trade-item { gap: 8px; padding: 10px; }
+  .ti-thumb { width: 34px; height: 34px; flex: 0 0 34px; }
+  .ti-symbol { font-size: 12px; }
+  .ti-meta { font-size: 9.5px; gap: 5px; }
+  .pill { font-size: 10px; padding: 4px 8px; }
+  .ti-actions button { padding: 4px 5px; font-size: 11px; }
 }
