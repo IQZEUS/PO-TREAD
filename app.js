@@ -1,8 +1,5 @@
 /* =========================================================
-   PO-TRADE — Bilingual Trade Journal v7
-   + Checklist Cloud Sync
-   + Symbol/Strategy/Tag Autocomplete
-   + Theme Manager (Classic/Neon/Cyberpunk + Dark/Light)
+   PO-TRADE — Bilingual Trade Journal v4 (COMPLETE + MODAL)
    ========================================================= */
 (function () {
   'use strict';
@@ -90,6 +87,7 @@
       rc_equity: 'موجودی فعلی', rc_net: 'سود خالص',
       rc_peak: 'اوج', rc_current_dd: 'افت فعلی',
       rc_remaining: 'باقی‌مانده', rc_used: 'مصرف‌شده',
+      // modal titles
       md_del_trade: 'حذف معامله',
       md_del_trade_msg: 'این معامله برای همیشه حذف می‌شود. مطمئنی؟',
       md_del_trade_ok: 'بله، حذف کن',
@@ -102,31 +100,7 @@
       md_goal_title: 'حذف هدف',
       md_goal_msg: 'هدف فعلی حذف شود؟',
       md_goal_ok: 'حذف کن',
-      md_cancel: 'انصراف',
-      checklist_settings: '✅ مدیریت چک‌لیست',
-      checklist_settings_sub: 'آیتم‌ها رو ویرایش، اضافه یا حذف کن — خودکار روی حسابت ذخیره می‌شه',
-      checklist_new_ph: 'آیتم جدید...',
-      save_checklist: '💾 ذخیره چک‌لیست',
-      reset_checklist: '↺ بازگردانی پیش‌فرض',
-      checklist_saved: '✅ چک‌لیست ذخیره شد',
-      checklist_reset: '✅ چک‌لیست به حالت پیش‌فرض بازگشت',
-      checklist_empty: 'هنوز آیتمی نداری — یکی اضافه کن',
-      checklist_del_title: 'حذف آیتم چک‌لیست',
-      checklist_del_msg: 'این آیتم حذف شود؟',
-      checklist_del_ok: 'حذف کن',
-      checklist_added: '➕ آیتم اضافه شد',
-      checklist_deleted: '🗑️ آیتم حذف شد',
-      checklist_need_item: '❌ متن آیتم رو بنویس',
-      checklist_cloud_ok: '☁️ روی حساب کاربری ذخیره شد',
-      checklist_cloud_synced: '☁️ چک‌لیست از حسابت لود شد',
-      // Theme manager
-      theme_title: 'تم ظاهری',
-      theme_classic: 'کلاسیک',
-      theme_neon: 'نئون',
-      theme_cyberpunk: 'سایبرپانک',
-      theme_light: 'حالت روشن',
-      theme_dark: 'حالت تاریک',
-      theme_applied: '🎨 تم {name} فعال شد'
+      md_cancel: 'انصراف'
     },
     en: {
       title: 'PO-TRADE | Trade Journal',
@@ -218,30 +192,7 @@
       md_goal_title: 'Remove Goal',
       md_goal_msg: 'Remove the current goal?',
       md_goal_ok: 'Remove',
-      md_cancel: 'Cancel',
-      checklist_settings: '✅ Checklist Manager',
-      checklist_settings_sub: 'Edit, add, or remove items — auto-saved to your account',
-      checklist_new_ph: 'New item...',
-      save_checklist: '💾 Save Checklist',
-      reset_checklist: '↺ Reset to Default',
-      checklist_saved: '✅ Checklist saved',
-      checklist_reset: '✅ Checklist reset to default',
-      checklist_empty: 'No items yet — add one',
-      checklist_del_title: 'Delete Checklist Item',
-      checklist_del_msg: 'Remove this item?',
-      checklist_del_ok: 'Delete',
-      checklist_added: '➕ Item added',
-      checklist_deleted: '🗑️ Item deleted',
-      checklist_need_item: '❌ Enter item text',
-      checklist_cloud_ok: '☁️ Saved to your account',
-      checklist_cloud_synced: '☁️ Checklist loaded from your account',
-      theme_title: 'Theme',
-      theme_classic: 'Classic',
-      theme_neon: 'Neon',
-      theme_cyberpunk: 'Cyberpunk',
-      theme_light: 'Light Mode',
-      theme_dark: 'Dark Mode',
-      theme_applied: '🎨 {name} theme applied'
+      md_cancel: 'Cancel'
     }
   };
 
@@ -304,14 +255,6 @@
       tm = setTimeout(() => fn.apply(self, a), ms);
     };
   };
-  const hexToRgba = (hex, a) => {
-    if (!hex || hex[0] !== '#') return 'rgba(46,230,166,' + a + ')';
-    let h = hex.slice(1);
-    if (h.length === 3) h = h[0]+h[0]+h[1]+h[1]+h[2]+h[2];
-    const n = parseInt(h, 16);
-    if (isNaN(n)) return 'rgba(46,230,166,' + a + ')';
-    return 'rgba(' + ((n>>16)&255) + ',' + ((n>>8)&255) + ',' + (n&255) + ',' + a + ')';
-  };
 
   /* ============================ CONSTANTS ============================ */
   const EMOTIONS = {
@@ -324,75 +267,21 @@
   };
   const emoLabel = k => (EMOTIONS[k] || EMOTIONS.calm)[lang] || EMOTIONS.calm.fa;
 
-  const DEFAULT_CHECKLIST = [
-    { id: 'setup', text_fa: 'ستاپ تأیید شد',   text_en: 'Setup confirmed' },
-    { id: 'stop',  text_fa: 'حد ضرر مشخص شد',   text_en: 'Stop loss defined' },
-    { id: 'size',  text_fa: 'حجم مناسب بود',    text_en: 'Position size correct' },
-    { id: 'plan',  text_fa: 'طبق پلن پیش رفتم', text_en: 'Followed the plan' }
+  const DEFAULT_RULES = [
+    { id: 'setup', fa: 'ستاپ تأیید شد',   en: 'Setup confirmed' },
+    { id: 'stop',  fa: 'حد ضرر مشخص شد',   en: 'Stop loss defined' },
+    { id: 'size',  fa: 'حجم مناسب بود',    en: 'Position size correct' },
+    { id: 'plan',  fa: 'طبق پلن پیش رفتم', en: 'Followed the plan' }
   ];
-  const ruleText = r => {
-    if (!r) return '';
-    if (lang === 'en') return r.text_en || r.text_fa || r.text || '';
-    return r.text_fa || r.text || r.text_en || '';
-  };
+  const ruleText = r => r[lang] || r.fa;
 
   const MONTHS_FA = ['ژانویه','فوریه','مارس','آوریل','مه','ژوئن','جولای','اوت','سپتامبر','اکتبر','نوامبر','دسامبر'];
   const MONTHS_EN = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 
-  const PRESET_STRATEGIES = [
-    'Price Action','Breakout','London Breakout','New York Breakout',
-    'Mean Reversion','Trend Following','Counter Trend','Range Trading',
-    'Scalping','Day Trading','Swing Trading','Position Trading',
-    'Supply & Demand','Support & Resistance','Fibonacci Retracement',
-    'Elliott Wave','Harmonic Patterns','ICT / Smart Money','Order Block',
-    'Liquidity Grab','Fair Value Gap (FVG)','Break of Structure (BOS)',
-    'Change of Character (CHoCH)','VWAP','Volume Profile','Divergence',
-    'Momentum','Reversal','News Trading','Carry Trade','Grid Trading',
-    'Martingale','Pin Bar','Engulfing','Doji Setup','Inside Bar',
-    '3 Drives','Turtle Soup','Cup & Handle','Head & Shoulders',
-    'Triangle Breakout','Flag Pattern','Wedge Pattern','Double Top/Bottom',
-    'Triple Top/Bottom'
-  ];
-
-  const FOREX_PAIRS = [
-    'EURUSD','GBPUSD','USDJPY','USDCHF','USDCAD','AUDUSD','NZDUSD',
-    'EURGBP','EURJPY','EURCHF','EURCAD','EURAUD','EURNZD',
-    'GBPJPY','GBPCHF','GBPCAD','GBPAUD','GBPNZD',
-    'AUDJPY','AUDCHF','AUDCAD','AUDNZD',
-    'NZDJPY','NZDCHF','NZDCAD',
-    'CADJPY','CADCHF','CHFJPY',
-    'XAUUSD','XAGUSD','XPTUSD','XPDUSD',
-    'US30','NAS100','SPX500','GER40','UK100','JP225','HK50','AUS200',
-    'USOIL','UKOIL','NATGAS'
-  ];
-
-  const CRYPTO_SYMBOLS = [
-    'BTCUSD','ETHUSD','BNBUSD','SOLUSD','XRPUSD','ADAUSD','DOGEUSD','TRXUSD','TONUSD','DOTUSD',
-    'MATICUSD','LTCUSD','SHIBUSD','AVAXUSD','BCHUSD','LINKUSD','XLMUSD','UNIUSD','ATOMUSD','ETCUSD',
-    'XMRUSD','FILUSD','APTUSD','ARBUSD','OPUSD','NEARUSD','ICPUSD','INJUSD','IMXUSD','SUIUSD',
-    'SEIUSD','TIAUSD','RUNEUSD','HBARUSD','ALGOUSD','FTMUSD','SANDUSD','MANAUSD','AXSUSD','GALAUSD',
-    'EGLDUSD','FLOWUSD','KAVAUSD','ROSEUSD','ZECUSD','DASHUSD','EOSUSD','XTZUSD','THETAUSD','NEOUSD',
-    'IOTAUSD','QTUMUSD','WAVESUSD','ZILUSD','ONEUSD','CHZUSD','ENJUSD','BATUSD','CRVUSD','COMPUSD',
-    'MKRUSD','SNXUSD','YFIUSD','SUSHIUSD','1INCHUSD','LDOUSD','GRTUSD','RNDRUSD','FETUSD','OCEANUSD',
-    'ARUSD','STXUSD','CFXUSD','KASUSD','ORDIUSD','PEPEUSD','WIFUSD','BONKUSD','FLOKIUSD','JUPUSD',
-    'PYTHUSD','STRKUSD','DYMUSD','ALTUSD','ENAUSD','ZKUSD','BLASTUSD','ZROUSD','AAVEUSD','DYDXUSD',
-    'CAKEUSD','GMTUSD','APEUSD','ILVUSD','KSMUSD','GLMRUSD','MOVRUSD','AUDIOUSD','CELRUSD','CKBUSD',
-    'DUSKUSD','RENUSD','STORJUSD','ANKRUSD','COTIUSD','RSRUSD','BANDUSD','API3USD','OGNUSD','SXPUSD',
-    'WANUSD','YGGUSD','JASMYUSD','FIDAUSD','BICOUSD','ALPHAUSD','DENTUSD','HOTUSD','ARPAUSD','TLMUSD',
-    'VRAUSD','KNCUSD','ZRXUSD','LRCUSD','BALUSD','RPLUSD','METISUSD','OMGUSD','ELFUSD','ICXUSD',
-    'ARKUSD','STEEMUSD','HIVEUSD','LSKUSD','NANOUSD','VETUSD','RVNUSD','SCUSD','DGBUSD','FTTUSD',
-    'WOOUSD','BLURUSD','IDUSD','ARKMUSD','AGIXUSD','MASKUSD','ENSUSD','PENDLEUSD','MAGICUSD','HIGHUSD',
-    'RDNTUSD','HOOKUSD','ACHUSD','LQTYUSD','SSVUSD','RPLUSD','MULTIUSD','FLUXUSD','MINAUSD','ASTRUSD',
-    'GLMRUSD','IOTXUSD','ZENUSD','XEMUSD','ARRRUSD','DCRUSD','BTGUSD','XVGUSD','KMDUSD','NMCUSD'
-  ];
-
   /* ============================ STORAGE ============================ */
   const KEYS = {
     trades: 'po.v4.trades', theme: 'po.v4.theme',
-    preset: 'po.v4.preset',
-    goal: 'po.v4.goal', rules: 'po.v4.rules',
-    checklist: 'po.v4.checklist',
-    checklistUpdatedAt: 'po.v4.checklist.updatedAt'
+    goal: 'po.v4.goal', rules: 'po.v4.rules'
   };
   function loadJSON(key, fallback) {
     try {
@@ -410,23 +299,12 @@
   /* ============================ STATE ============================ */
   let trades = loadJSON(KEYS.trades, []);
   if (!Array.isArray(trades)) trades = [];
-
-  let checklistItems = loadJSON(KEYS.checklist, null);
-  if (!Array.isArray(checklistItems) || !checklistItems.length) {
-    checklistItems = DEFAULT_CHECKLIST.map(x => ({
-      id: x.id,
-      text_fa: x.text_fa,
-      text_en: x.text_en
-    }));
-  }
-
   let editingId = null;
   let range = '30';
   let calDate = new Date();
   let selectedEmotion = 'calm';
   let currentScreenshot = null;
   let theme = loadJSON(KEYS.theme, 'dark');
-  let preset = loadJSON(KEYS.preset, 'dark');
   let goal = loadJSON(KEYS.goal, null);
   let rules = loadJSON(KEYS.rules, {
     enabled: false, dailyLoss: 0, maxDD: 0, target: 0, balance: 10000
@@ -436,84 +314,6 @@
     emotion: 'all', side: 'all', from: '', to: ''
   };
   function saveTrades() { saveJSON(KEYS.trades, trades); }
-
-  /* ============================ THEME MANAGER ============================ */
-  function applyPreset(p) {
-    preset = p;
-    document.documentElement.dataset.preset = p;
-    try { localStorage.setItem(KEYS.preset, p); } catch(e){}
-    // نمودارها اگه بازن redraw
-    if (el.pageAnalysis && el.pageAnalysis.classList.contains('active')){
-      setTimeout(function(){ renderCharts(); }, 80);
-    }
-  }
-
-  function initThemeManager() {
-    // preset اولیه
-    document.documentElement.dataset.preset = preset;
-
-    var themeBtnEl = $('#theme-btn');
-    if (!themeBtnEl) return;
-
-    // ساخت dropdown اگه وجود نداره
-    if ($('#theme-menu')) return;
-
-    var menuWrap = document.createElement('div');
-    menuWrap.className = 'theme-menu-wrap';
-
-    // theme-btn رو ببریم داخل wrap جدید
-    themeBtnEl.parentNode.insertBefore(menuWrap, themeBtnEl);
-    menuWrap.appendChild(themeBtnEl);
-
-    var menu = document.createElement('div');
-    menu.className = 'theme-menu';
-    menu.id = 'theme-menu';
-    menu.innerHTML =
-      '<div class="theme-menu-title" data-i18n="theme_title">تم ظاهری</div>' +
-      '<button class="theme-opt" data-p="dark"><span class="tm-swatch" style="--sw1:#2ee6a6;--sw2:#5b8cff"></span><span data-i18n="theme_classic">کلاسیک</span></button>' +
-      '<button class="theme-opt" data-p="neon"><span class="tm-swatch" style="--sw1:#ff3c9c;--sw2:#00d9ff"></span><span data-i18n="theme_neon">نئون</span></button>' +
-      '<button class="theme-opt" data-p="cyberpunk"><span class="tm-swatch" style="--sw1:#f6ff00;--sw2:#ff00e5"></span><span data-i18n="theme_cyberpunk">سایبرپانک</span></button>' +
-      '<div class="theme-divider"></div>' +
-      '<button class="theme-opt" id="theme-mode-toggle"><span class="tm-swatch" style="--sw1:#fff;--sw2:#0a1226"></span><span id="theme-mode-label"></span></button>';
-    menuWrap.appendChild(menu);
-
-    function syncActive() {
-      $$('.theme-opt[data-p]', menu).forEach(function(b){
-        b.classList.toggle('active', b.dataset.p === preset);
-      });
-      var lbl = $('#theme-mode-label');
-      if (lbl) lbl.textContent = theme === 'light' ? t('theme_dark') : t('theme_light');
-      // آیکون theme-btn
-      var icon = themeBtnEl.querySelector('.theme-icon');
-      if (icon) icon.textContent = theme === 'light' ? '☀️' : '🌙';
-    }
-    syncActive();
-
-    themeBtnEl.addEventListener('click', function(e){
-      e.stopPropagation();
-      menu.classList.toggle('open');
-    });
-    document.addEventListener('click', function(e){
-      if (!menuWrap.contains(e.target)) menu.classList.remove('open');
-    });
-
-    $$('.theme-opt[data-p]', menu).forEach(function(b){
-      b.addEventListener('click', function(){
-        applyPreset(b.dataset.p);
-        syncActive();
-        toast(el.formMsg, fmt('theme_applied', { name: b.textContent.trim() }));
-      });
-    });
-
-    var toggleBtn = $('#theme-mode-toggle');
-    if (toggleBtn) {
-      toggleBtn.addEventListener('click', function(){
-        theme = theme === 'light' ? 'dark' : 'light';
-        applyTheme(theme);
-        syncActive();
-      });
-    }
-  }
 
   /* ============================ CALCULATIONS ============================ */
   const pnl = t => {
@@ -566,17 +366,11 @@
       const dd = peak - equity;
       if (dd > maxDD) maxDD = dd;
     }
-    let bestWin=0, bestLoss=0, curWin=0, curLoss=0;
-    for (const tr of sorted) {
-      if (tr.result === 'win'){ curWin++; curLoss=0; if (curWin>bestWin) bestWin=curWin; }
-      else if (tr.result === 'loss'){ curLoss++; curWin=0; if (curLoss>bestLoss) bestLoss=curLoss; }
-    }
     return {
       total: list.length, wins, losses, be, closed,
       net, grossProfit: gp, grossLoss: gl,
       winRate, profitFactor: pf, avgWin, avgLoss,
-      expectancy, maxDrawdown: maxDD, avgR, rCount,
-      sorted, bestWin, bestLoss, curWin, curLoss
+      expectancy, maxDrawdown: maxDD, avgR, rCount
     };
   }
 
@@ -652,19 +446,6 @@
     cutoff.setDate(cutoff.getDate() - (n - 1));
     const iso = toISO(cutoff);
     return list.filter(t => t.date >= iso);
-  }
-
-  function previousRange(list, days) {
-    if (days === 'all') return [];
-    const n = Number(days);
-    if (!n) return [];
-    const end = new Date();
-    end.setHours(0, 0, 0, 0);
-    end.setDate(end.getDate() - n);
-    const start = new Date(end);
-    start.setDate(end.getDate() - (n - 1));
-    const startISO = toISO(start), endISO = toISO(end);
-    return list.filter(t => t.date >= startISO && t.date <= endISO);
   }
 
   /* ============================ GOALS ============================ */
@@ -785,23 +566,19 @@
 
   function getChartColors() {
     const dark = document.documentElement.dataset.theme !== 'light';
-    const cs = getComputedStyle(document.documentElement);
-    const accent = cs.getPropertyValue('--accent').trim() || '#2ee6a6';
-    const accent2 = cs.getPropertyValue('--accent-2').trim() || '#5b8cff';
     return {
-      grid: dark ? 'rgba(120,150,200,.08)' : 'rgba(80,110,170,.1)',
-      gridZero: dark ? 'rgba(120,150,200,.22)' : 'rgba(80,110,170,.28)',
+      grid: dark ? 'rgba(120,150,200,.09)' : 'rgba(80,110,170,.12)',
+      gridZero: dark ? 'rgba(120,150,200,.24)' : 'rgba(80,110,170,.3)',
       axis: dark ? '#7d8fae' : '#6b7a99',
-      line: accent,
-      line2: accent2,
-      areaTop: hexToRgba(accent, 0.4),
-      areaMid: hexToRgba(accent, 0.12),
-      areaBot: hexToRgba(accent, 0),
+      line: '#2ee6a6',
+      areaTop: 'rgba(46,230,166,.35)',
+      areaMid: 'rgba(46,230,166,.10)',
+      areaBot: 'rgba(46,230,166,0)',
       posTop: 'rgba(120,255,210,1)', pos: 'rgba(46,230,166,.85)',
       negTop: 'rgba(255,140,160,1)', neg: 'rgba(255,86,116,.85)',
-      cross: dark ? 'rgba(150,175,215,.45)' : 'rgba(80,110,170,.5)',
-      tagBg: dark ? 'rgba(10,16,30,.98)' : 'rgba(255,255,255,.99)',
-      tagBd: dark ? 'rgba(120,150,200,.4)' : 'rgba(80,110,170,.25)',
+      cross: dark ? 'rgba(150,175,215,.4)' : 'rgba(80,110,170,.5)',
+      tagBg: dark ? 'rgba(11,18,33,.97)' : 'rgba(255,255,255,.98)',
+      tagBd: dark ? 'rgba(120,150,200,.35)' : 'rgba(80,110,170,.25)',
       text: dark ? '#eef3ff' : '#0f1830',
       muted: dark ? '#8697b8' : '#6b7a99'
     };
@@ -828,7 +605,7 @@
     if (min === max) { min -= 1; max += 1; }
     const range = max - min;
     const raw = range / ticks;
-    const mag = Math.pow(10, Math.floor(Math.log10(Math.max(raw, 1e-9))));
+    const mag = Math.pow(10, Math.floor(Math.log10(raw)));
     const norm = raw / mag;
     let step = norm <= 1 ? 1 : norm <= 2 ? 2 : norm <= 2.5 ? 2.5 : norm <= 5 ? 5 : 10;
     step *= mag;
@@ -926,19 +703,18 @@
     if (!data || !data.length) { st.geom = null; drawEmpty(ctx, w, h); return; }
 
     const compactMode = w < 400;
-    const pad = { t: 24, r: 12, b: 32, l: compactMode ? 44 : 58 };
+    const pad = { t: 18, r: 12, b: 28, l: compactMode ? 46 : 58 };
     const plotW = Math.max(10, w - pad.l - pad.r);
     const plotH = Math.max(10, h - pad.t - pad.b);
 
     let lo = 0, hi = 0;
     for (const d of data) { if (d.value < lo) lo = d.value; if (d.value > hi) hi = d.value; }
-    if (hi - lo < 1) { hi += 10; lo -= 10; }
     const scale = niceScale(lo, hi, 5);
     const yOf = v => pad.t + (scale.max - v) / (scale.max - scale.min) * plotH;
     const n = data.length;
     const xOf = i => n === 1 ? pad.l + plotW / 2 : pad.l + (i / (n - 1)) * plotW;
 
-    ctx.font = (compactMode ? '10px ' : '10.5px ') + FONT;
+    ctx.font = (compactMode ? '10px ' : '11px ') + FONT;
     ctx.textBaseline = 'middle'; ctx.textAlign = 'right';
     for (let v = scale.min; v <= scale.max + 1e-9; v += scale.step) {
       const y = Math.round(yOf(v)) + 0.5;
@@ -963,23 +739,18 @@
     ctx.fillStyle = grad; ctx.fill();
 
     const lineGrad = ctx.createLinearGradient(pad.l, 0, pad.l + plotW, 0);
-    lineGrad.addColorStop(0, COL.line);
-    lineGrad.addColorStop(0.5, COL.line2);
-    lineGrad.addColorStop(1, '#c78aff');
-    ctx.save();
-    ctx.shadowColor = COL.line;
-    ctx.shadowBlur = 12;
+    lineGrad.addColorStop(0, '#2ee6a6');
+    lineGrad.addColorStop(1, '#5b8cff');
     ctx.beginPath();
     ctx.moveTo(pts[0].x, pts[0].y);
     for (let i = 1; i < n; i++) ctx.lineTo(pts[i].x, pts[i].y);
     ctx.strokeStyle = lineGrad; ctx.lineWidth = 2.5;
     ctx.lineJoin = 'round'; ctx.lineCap = 'round'; ctx.stroke();
-    ctx.restore();
 
     if (n <= (compactMode ? 25 : 45)) {
       for (const p of pts) {
         ctx.beginPath();
-        ctx.arc(p.x, p.y, 2.6, 0, Math.PI * 2);
+        ctx.arc(p.x, p.y, 2.8, 0, Math.PI * 2);
         ctx.fillStyle = COL.line; ctx.fill();
         ctx.strokeStyle = COL.tagBg; ctx.lineWidth = 1.5; ctx.stroke();
       }
@@ -988,7 +759,7 @@
     const maxLabels = Math.max(2, Math.floor(plotW / (compactMode ? 60 : 88)));
     const stepI = Math.max(1, Math.ceil(n / maxLabels));
     ctx.fillStyle = COL.axis;
-    ctx.font = (compactMode ? '10px ' : '10.5px ') + FONT;
+    ctx.font = (compactMode ? '10px ' : '11px ') + FONT;
     ctx.textAlign = 'center'; ctx.textBaseline = 'top';
     for (let i = 0; i < n; i += stepI) {
       ctx.fillText(shortDate(data[i].label), xOf(i), pad.t + plotH + 8);
@@ -1030,7 +801,7 @@
     if (!data || !data.length) { st.geom = null; drawEmpty(ctx, w, h); return; }
 
     const compactMode = w < 400;
-    const pad = { t: 24, r: 12, b: 32, l: compactMode ? 44 : 58 };
+    const pad = { t: 18, r: 12, b: 28, l: compactMode ? 46 : 58 };
     const plotW = Math.max(10, w - pad.l - pad.r);
     const plotH = Math.max(10, h - pad.t - pad.b);
 
@@ -1042,10 +813,10 @@
     const yZero = yOf(0);
     const n = data.length;
     const slot = plotW / n;
-    const barW = Math.max(3, Math.min(slot * 0.62, compactMode ? 22 : 38));
+    const barW = Math.max(3, Math.min(slot * 0.62, compactMode ? 26 : 44));
     const xOf = i => pad.l + slot * i + slot / 2;
 
-    ctx.font = (compactMode ? '10px ' : '10.5px ') + FONT;
+    ctx.font = (compactMode ? '10px ' : '11px ') + FONT;
     ctx.textBaseline = 'middle'; ctx.textAlign = 'right';
     for (let v = scale.min; v <= scale.max + 1e-9; v += scale.step) {
       const y = Math.round(yOf(v)) + 0.5;
@@ -1062,20 +833,20 @@
       const x = xOf(i) - barW / 2;
       const y = yOf(v);
       const top = Math.min(y, yZero);
-      const bh = Math.max(Math.abs(y - yZero), v === 0 ? 2 : 3);
+      const bh = Math.max(Math.abs(y - yZero), v === 0 ? 1 : 2);
       const positive = v >= 0;
       bars.push({ x: xOf(i), y: y, top: top, h: bh, value: v, label: data[i].label });
 
+      if (st.hover === i) {
+        roundRect(ctx, x - 3, top - 3, barW + 6, bh + 6, 8);
+        ctx.fillStyle = positive ? 'rgba(46,230,166,.18)' : 'rgba(255,86,116,.18)';
+        ctx.fill();
+      }
       const bg = ctx.createLinearGradient(0, top, 0, top + bh);
       if (positive) { bg.addColorStop(0, COL.posTop); bg.addColorStop(1, COL.pos); }
       else { bg.addColorStop(0, COL.negTop); bg.addColorStop(1, COL.neg); }
-
-      ctx.save();
-      ctx.shadowColor = positive ? COL.pos : COL.neg;
-      ctx.shadowBlur = 6;
       roundRect(ctx, x, top, barW, bh, Math.min(5, barW / 2));
       ctx.fillStyle = bg; ctx.fill();
-      ctx.restore();
     }
 
     ctx.strokeStyle = COL.gridZero; ctx.lineWidth = 1;
@@ -1087,7 +858,7 @@
     const maxLabels = Math.max(2, Math.floor(plotW / (compactMode ? 60 : 88)));
     const stepI = Math.max(1, Math.ceil(n / maxLabels));
     ctx.fillStyle = COL.axis;
-    ctx.font = (compactMode ? '10px ' : '10.5px ') + FONT;
+    ctx.font = (compactMode ? '10px ' : '11px ') + FONT;
     ctx.textAlign = 'center'; ctx.textBaseline = 'top';
     for (let i = 0; i < n; i += stepI) {
       ctx.fillText(shortDate(data[i].label), xOf(i), pad.t + plotH + 8);
@@ -1172,16 +943,7 @@
     ruleMaxDD: $('#rule-maxdd'), ruleTarget: $('#rule-target'), ruleBalance: $('#rule-balance'),
     saveRules: $('#save-rules'), rulesMsg: $('#rules-msg'), rulesStatus: $('#rules-status'),
     demoBtn: $('#demo-btn'), exportBtn: $('#export-btn'),
-    importInput: $('#import-input'), clearBtn: $('#clear-btn'),
-    checklistManager: $('#checklist-manager'),
-    newChecklistInput: $('#new-checklist-input'),
-    addChecklistBtn: $('#add-checklist-btn'),
-    saveChecklistBtn: $('#save-checklist-btn'),
-    resetChecklistBtn: $('#reset-checklist-btn'),
-    checklistMsg: $('#checklist-msg'),
-    symbolsList: $('#symbols-list'),
-    strategiesList: $('#strategies-list'),
-    tagsList: $('#tags-list')
+    importInput: $('#import-input'), clearBtn: $('#clear-btn')
   };
 
   /* ============================ TOAST ============================ */
@@ -1192,7 +954,7 @@
     target.classList.toggle('err', !!isError);
     target.classList.add('show');
     clearTimeout(msgTimers.get(target));
-    msgTimers.set(target, setTimeout(() => target.classList.remove('show'), 2800));
+    msgTimers.set(target, setTimeout(() => target.classList.remove('show'), 2600));
   }
 
   /* ============================ CONFIRM MODAL ============================ */
@@ -1259,7 +1021,7 @@
       if (icon) icon.textContent = th === 'light' ? '☀️' : '🌙';
     }
     const meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.content = th === 'light' ? '#eef2f9' : '#03040a';
+    if (meta) meta.content = th === 'light' ? '#f3f6fc' : '#05070f';
     saveJSON(KEYS.theme, th);
     if (el.pageAnalysis && el.pageAnalysis.classList.contains('active')) renderCharts();
   }
@@ -1286,242 +1048,15 @@
       if (v) node.setAttribute('placeholder', v);
     });
     renderChecklistForm(getChecklistValues());
-    renderChecklistManager();
     renderAll();
-  }
-
-  /* ============================ AUTOCOMPLETE ============================ */
-  function updateAutocomplete() {
-    const symbolSet = new Set(FOREX_PAIRS.concat(CRYPTO_SYMBOLS));
-    const stratSet = new Set(PRESET_STRATEGIES);
-    const tagSet = new Set();
-
-    for (const tr of trades) {
-      if (tr.symbol) symbolSet.add(String(tr.symbol).toUpperCase());
-      if (tr.strategy) stratSet.add(tr.strategy);
-      for (const g of (tr.tags || [])) if (g) tagSet.add(g);
-    }
-
-    const symArr = Array.from(symbolSet).sort();
-    const strArr = Array.from(stratSet).sort();
-    const tagArr = Array.from(tagSet).sort();
-
-    if (el.symbolsList) {
-      el.symbolsList.innerHTML = symArr.map(s => '<option value="' + esc(s) + '"></option>').join('');
-    }
-    if (el.strategiesList) {
-      el.strategiesList.innerHTML = strArr.map(s => '<option value="' + esc(s) + '"></option>').join('');
-    }
-    if (el.tagsList) {
-      el.tagsList.innerHTML = tagArr.map(s => '<option value="' + esc(s) + '"></option>').join('');
-    }
-  }
-
-  /* ============================ CHECKLIST MANAGER ============================ */
-  function renderChecklistManager() {
-    if (!el.checklistManager) return;
-    if (!checklistItems.length) {
-      el.checklistManager.innerHTML = '<div class="cm-empty">' + t('checklist_empty') + '</div>';
-      return;
-    }
-    el.checklistManager.innerHTML = checklistItems.map((item, i) =>
-      '<div class="cm-item" data-id="' + esc(item.id) + '">' +
-        '<input type="text" class="cm-input" value="' + esc(ruleText(item)) + '" maxlength="80" ' +
-               'data-idx="' + i + '" placeholder="' + esc(t('checklist_new_ph')) + '" />' +
-        '<button type="button" class="cm-del" data-del="' + esc(item.id) + '" title="Delete">✕</button>' +
-      '</div>'
-    ).join('');
-  }
-
-  function commitChecklistFromInputs() {
-    if (!el.checklistManager) return;
-    const inputs = $$('.cm-input', el.checklistManager);
-    inputs.forEach(inp => {
-      const idx = Number(inp.dataset.idx);
-      const item = checklistItems[idx];
-      if (!item) return;
-      const v = inp.value.trim();
-      if (!v) return;
-      item.text_fa = v;
-      item.text_en = v;
-    });
-  }
-
-  async function removeChecklistItem(id) {
-    const ok = await confirmDialog({
-      variant: 'danger',
-      icon: '🗑️',
-      title: t('checklist_del_title'),
-      message: t('checklist_del_msg'),
-      okText: t('checklist_del_ok'),
-      cancelText: t('md_cancel')
-    });
-    if (!ok) return;
-    checklistItems = checklistItems.filter(x => x.id !== id);
-    saveChecklist();
-    renderChecklistManager();
-    renderChecklistForm({});
-    renderKPIs();
-    renderSettingsPage();
-    toast(el.checklistMsg, t('checklist_deleted'));
-  }
-
-  function addChecklistItem() {
-    const inp = el.newChecklistInput;
-    if (!inp) return;
-    const v = inp.value.trim();
-    if (!v) { toast(el.checklistMsg, t('checklist_need_item'), true); inp.focus(); return; }
-    const id = 'c_' + uid();
-    checklistItems.push({ id, text_fa: v, text_en: v });
-    inp.value = '';
-    saveChecklist();
-    renderChecklistManager();
-    renderChecklistForm({});
-    renderKPIs();
-    renderSettingsPage();
-    toast(el.checklistMsg, t('checklist_added'));
-    inp.focus();
-  }
-
-  function saveChecklistAll() {
-    commitChecklistFromInputs();
-    saveChecklist();
-    renderChecklistManager();
-    renderChecklistForm({});
-    renderKPIs();
-    toast(el.checklistMsg, t('checklist_saved'));
-  }
-
-  async function resetChecklistAll() {
-    const ok = await confirmDialog({
-      variant: 'warning',
-      icon: '↺',
-      title: t('reset_checklist'),
-      message: t('checklist_del_msg'),
-      okText: t('md_goal_ok'),
-      cancelText: t('md_cancel')
-    });
-    if (!ok) return;
-    checklistItems = DEFAULT_CHECKLIST.map(x => ({
-      id: x.id, text_fa: x.text_fa, text_en: x.text_en
-    }));
-    saveChecklist();
-    renderChecklistManager();
-    renderChecklistForm({});
-    renderKPIs();
-    toast(el.checklistMsg, t('checklist_reset'));
-  }
-
-  /* ============================ CLOUD CHECKLIST SYNC ============================ */
-  const CHECKLIST_CLOUD_ID = '__checklist_v1__';
-  let checklistCloudReady = false;
-  let checklistPushTimer = null;
-  let lastPushedItemsJson = '';
-
-  function getSbClient() { return window.__PT_SB || null; }
-  async function getCurrentUid() {
-    const sb = getSbClient();
-    if (!sb) return null;
-    try {
-      const s = await sb.auth.getSession();
-      return (s && s.data && s.data.session && s.data.session.user && s.data.session.user.id) || null;
-    } catch (e) { return null; }
-  }
-  async function loadChecklistFromCloud() {
-    const sb = getSbClient();
-    if (!sb) return null;
-    try {
-      const uid = await getCurrentUid();
-      if (!uid) return null;
-      const res = await sb.from('trades')
-        .select('data')
-        .eq('user_id', uid)
-        .eq('trade_id', CHECKLIST_CLOUD_ID)
-        .limit(1);
-      if (res.error) return null;
-      const row = res.data && res.data[0];
-      if (row && row.data && Array.isArray(row.data.items)) {
-        return { items: row.data.items, updatedAt: Number(row.data.updatedAt) || 0 };
-      }
-      return null;
-    } catch (e) { return null; }
-  }
-  async function pushChecklistToCloud(items) {
-    const sb = getSbClient();
-    if (!sb) return false;
-    try {
-      const uid = await getCurrentUid();
-      if (!uid) return false;
-      const itemsJson = JSON.stringify(items);
-      if (itemsJson === lastPushedItemsJson) return true;
-      await sb.from('trades')
-        .delete()
-        .eq('user_id', uid)
-        .eq('trade_id', CHECKLIST_CLOUD_ID);
-      const res = await sb.from('trades').insert({
-        user_id: uid,
-        trade_id: CHECKLIST_CLOUD_ID,
-        data: { _type: 'checklist', items: items, updatedAt: Date.now() }
-      });
-      if (res.error) return false;
-      lastPushedItemsJson = itemsJson;
-      return true;
-    } catch (e) { return false; }
-  }
-  function autoPushChecklist() {
-    if (!checklistCloudReady) return;
-    clearTimeout(checklistPushTimer);
-    checklistPushTimer = setTimeout(async () => {
-      const ok = await pushChecklistToCloud(checklistItems);
-      if (ok) {
-        try { localStorage.setItem(KEYS.checklistUpdatedAt, String(Date.now())); } catch (e) {}
-        if (el.checklistMsg) toast(el.checklistMsg, t('checklist_cloud_ok'));
-      }
-    }, 700);
-  }
-  function saveChecklist() {
-    saveJSON(KEYS.checklist, checklistItems);
-    try { localStorage.setItem(KEYS.checklistUpdatedAt, String(Date.now())); } catch (e) {}
-    if (checklistCloudReady) autoPushChecklist();
-  }
-  async function syncChecklistOnBoot() {
-    for (let i = 0; i < 30; i++) {
-      const uid = await getCurrentUid();
-      if (uid) break;
-      await new Promise(r => setTimeout(r, 150));
-    }
-    const cloud = await loadChecklistFromCloud();
-    const localUpdated = Number(localStorage.getItem(KEYS.checklistUpdatedAt) || 0);
-    if (cloud && cloud.items && cloud.items.length) {
-      if (cloud.updatedAt >= localUpdated) {
-        checklistItems = cloud.items;
-        saveJSON(KEYS.checklist, checklistItems);
-        try { localStorage.setItem(KEYS.checklistUpdatedAt, String(cloud.updatedAt)); } catch (e) {}
-        lastPushedItemsJson = JSON.stringify(checklistItems);
-        renderChecklistForm({});
-        renderChecklistManager();
-        renderKPIs();
-      } else {
-        await pushChecklistToCloud(checklistItems);
-        try { localStorage.setItem(KEYS.checklistUpdatedAt, String(Date.now())); } catch (e) {}
-      }
-    } else if (checklistItems && checklistItems.length) {
-      await pushChecklistToCloud(checklistItems);
-      try { localStorage.setItem(KEYS.checklistUpdatedAt, String(Date.now())); } catch (e) {}
-    }
-    checklistCloudReady = true;
   }
 
   /* ============================ FORM HELPERS ============================ */
   function renderChecklistForm(checked) {
     checked = checked || {};
-    if (!checklistItems.length) {
-      el.checklistWrap.innerHTML = '<div class="empty" style="padding:10px;font-size:12px">' + t('checklist_empty') + '</div>';
-      return;
-    }
-    el.checklistWrap.innerHTML = checklistItems.map(r =>
+    el.checklistWrap.innerHTML = DEFAULT_RULES.map(r =>
       '<label>' +
-        '<input type="checkbox" data-rule="' + esc(r.id) + '" ' + (checked[r.id] ? 'checked' : '') + ' />' +
+        '<input type="checkbox" data-rule="' + r.id + '" ' + (checked[r.id] ? 'checked' : '') + ' />' +
         '<span class="box">✓</span>' +
         '<span>' + esc(ruleText(r)) + '</span>' +
       '</label>'
@@ -1712,7 +1247,6 @@
     try { saveTrades(); }
     catch (err) { toast(el.formMsg, t('err_storage'), true); return; }
     resetForm();
-    updateAutocomplete();
     renderAll();
   }
 
@@ -1786,7 +1320,7 @@
     }
     let dcSum = 0, dcCount = 0;
     for (const tr of filtered) {
-      const dc = disciplineScore(tr, checklistItems);
+      const dc = disciplineScore(tr, DEFAULT_RULES);
       if (dc != null) { dcSum += dc; dcCount++; }
     }
     const avgDiscipline = dcCount ? Math.round(dcSum / dcCount) : 0;
@@ -2126,7 +1660,6 @@
     el.ruleTarget.value = rules.target || '';
     renderGoalsPreview();
     renderRulesStatus();
-    renderChecklistManager();
   }
 
   function renderGoalsPreview() {
@@ -2275,8 +1808,10 @@
         const amount = result === 'be' ? 0 : Math.round((40 + Math.random() * 260) * 100) / 100;
         const risk = result === 'be' ? 50 : Math.round((30 + Math.random() * 70) * 100) / 100;
         const emotion = emoKeys[Math.floor(Math.random() * emoKeys.length)];
-        const checklist = {};
-        for (const it of checklistItems) checklist[it.id] = Math.random() < 0.75;
+        const checklist = {
+          setup: Math.random() < 0.8, stop: Math.random() < 0.9,
+          size: Math.random() < 0.75, plan: Math.random() < 0.7
+        };
         const tags = [];
         while (tags.length < 2) {
           const x = tagPool[Math.floor(Math.random() * tagPool.length)];
@@ -2341,7 +1876,6 @@
           added++;
         }
         saveTrades();
-        updateAutocomplete();
         renderAll();
         toast(el.formMsg, fmt('ok_import', { n: added }));
       } catch (err) {
@@ -2353,7 +1887,8 @@
 
   /* ============================ EVENT BINDING ============================ */
   function bindEvents() {
-    if (el.langBtn) el.langBtn.addEventListener('click', () => applyLang(lang === 'fa' ? 'en' : 'fa'));
+    el.themeBtn.addEventListener('click', toggleTheme);
+    el.langBtn.addEventListener('click', () => applyLang(lang === 'fa' ? 'en' : 'fa'));
 
     el.tabs.addEventListener('click', e => {
       const tab = e.target.closest('.tab');
@@ -2393,9 +1928,7 @@
         });
         if (!ok) return;
         trades = trades.filter(tr => tr.id !== id);
-        saveTrades();
-        updateAutocomplete();
-        renderAll();
+        saveTrades(); renderAll();
         toast(el.formMsg, t('del_done'));
       }
     }
@@ -2432,9 +1965,7 @@
         if (!ok) return;
       }
       trades = trades.concat(demoData());
-      saveTrades();
-      updateAutocomplete();
-      renderAll();
+      saveTrades(); renderAll();
       switchView('analysis');
       toast(el.formMsg, t('ok_demo'));
     });
@@ -2535,36 +2066,6 @@
       toast(el.rulesMsg, t('ok_rules'));
     });
 
-    /* ===== CHECKLIST ===== */
-    if (el.addChecklistBtn) el.addChecklistBtn.addEventListener('click', addChecklistItem);
-    if (el.newChecklistInput) {
-      el.newChecklistInput.addEventListener('keydown', e => {
-        if (e.key === 'Enter') { e.preventDefault(); addChecklistItem(); }
-      });
-    }
-    if (el.checklistManager) {
-      el.checklistManager.addEventListener('click', e => {
-        const del = e.target.closest('[data-del]');
-        if (del) removeChecklistItem(del.dataset.del);
-      });
-      el.checklistManager.addEventListener('input', debounce(e => {
-        if (!e.target.matches('.cm-input')) return;
-        commitChecklistFromInputs();
-        saveChecklist();
-        renderChecklistForm({});
-        renderKPIs();
-      }, 600));
-      el.checklistManager.addEventListener('blur', e => {
-        if (!e.target.matches('.cm-input')) return;
-        commitChecklistFromInputs();
-        saveChecklist();
-        renderChecklistForm({});
-        renderKPIs();
-      }, true);
-    }
-    if (el.saveChecklistBtn) el.saveChecklistBtn.addEventListener('click', saveChecklistAll);
-    if (el.resetChecklistBtn) el.resetChecklistBtn.addEventListener('click', resetChecklistAll);
-
     window.addEventListener('resize', debounce(() => {
       if (el.pageAnalysis.classList.contains('active')) renderCharts();
     }, 160));
@@ -2617,7 +2118,6 @@
   /* ============================ INIT ============================ */
   function init() {
     applyTheme(theme);
-    document.documentElement.dataset.preset = preset;
     document.documentElement.setAttribute('lang', lang);
     document.documentElement.setAttribute('dir', lang === 'fa' ? 'rtl' : 'ltr');
     if (el.langLabel) el.langLabel.textContent = lang === 'fa' ? 'EN' : 'FA';
@@ -2643,37 +2143,10 @@
     el.fDate.value = todayISO();
     renderTagsPreview();
 
-    initThemeManager();
     bindEvents();
-    updateAutocomplete();
     renderAll();
-    renderChecklistManager();
 
     runLoader();
-    syncChecklistOnBoot();
-
-    window.addEventListener('focus', () => {
-      if (!checklistCloudReady) return;
-      loadChecklistFromCloud().then(cloud => {
-        if (!cloud || !cloud.items) return;
-        const localUpdated = Number(localStorage.getItem(KEYS.checklistUpdatedAt) || 0);
-        if (cloud.updatedAt > localUpdated + 1000) {
-          checklistItems = cloud.items;
-          saveJSON(KEYS.checklist, checklistItems);
-          try { localStorage.setItem(KEYS.checklistUpdatedAt, String(cloud.updatedAt)); } catch (e) {}
-          lastPushedItemsJson = JSON.stringify(checklistItems);
-          renderChecklistForm({});
-          renderChecklistManager();
-          renderKPIs();
-        }
-      });
-    });
-
-    window.addEventListener('beforeunload', () => {
-      if (!checklistCloudReady) return;
-      clearTimeout(checklistPushTimer);
-      pushChecklistToCloud(checklistItems);
-    });
   }
 
   if (document.readyState === 'loading') {
