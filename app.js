@@ -87,7 +87,6 @@
       rc_equity: 'موجودی فعلی', rc_net: 'سود خالص',
       rc_peak: 'اوج', rc_current_dd: 'افت فعلی',
       rc_remaining: 'باقی‌مانده', rc_used: 'مصرف‌شده',
-      // modal titles
       md_del_trade: 'حذف معامله',
       md_del_trade_msg: 'این معامله برای همیشه حذف می‌شود. مطمئنی؟',
       md_del_trade_ok: 'بله، حذف کن',
@@ -100,7 +99,20 @@
       md_goal_title: 'حذف هدف',
       md_goal_msg: 'هدف فعلی حذف شود؟',
       md_goal_ok: 'حذف کن',
-      md_cancel: 'انصراف'
+      md_cancel: 'انصراف',
+      /* Checklist manager */
+      checklist_settings: '✅ مدیریت چک‌لیست',
+      checklist_settings_sub: 'موارد رو اضافه، ویرایش یا حذف کن',
+      checklist_add_ph: 'مورد جدید...',
+      checklist_add: '➕ افزودن',
+      checklist_empty: 'هنوز موردی وجود ندارد',
+      checklist_added: '✅ مورد اضافه شد',
+      checklist_deleted: '🗑️ مورد حذف شد',
+      checklist_saved: '✅ ذخیره شد',
+      checklist_max: '❌ حداکثر ۱۲ مورد مجاز است',
+      checklist_del_title: 'حذف مورد چک‌لیست',
+      checklist_del_msg: 'این مورد از چک‌لیست حذف شود؟',
+      checklist_del_ok: 'حذف کن'
     },
     en: {
       title: 'PO-TRADE | Trade Journal',
@@ -192,7 +204,20 @@
       md_goal_title: 'Remove Goal',
       md_goal_msg: 'Remove the current goal?',
       md_goal_ok: 'Remove',
-      md_cancel: 'Cancel'
+      md_cancel: 'Cancel',
+      /* Checklist manager */
+      checklist_settings: '✅ Checklist Manager',
+      checklist_settings_sub: 'Add, edit or remove items',
+      checklist_add_ph: 'New item...',
+      checklist_add: '➕ Add',
+      checklist_empty: 'No items yet',
+      checklist_added: '✅ Item added',
+      checklist_deleted: '🗑️ Item removed',
+      checklist_saved: '✅ Saved',
+      checklist_max: '❌ Maximum 12 items',
+      checklist_del_title: 'Delete Checklist Item',
+      checklist_del_msg: 'Remove this item from the checklist?',
+      checklist_del_ok: 'Delete'
     }
   };
 
@@ -273,7 +298,68 @@
     { id: 'size',  fa: 'حجم مناسب بود',    en: 'Position size correct' },
     { id: 'plan',  fa: 'طبق پلن پیش رفتم', en: 'Followed the plan' }
   ];
-  const ruleText = r => r[lang] || r.fa;
+  const ruleText = r => r ? (r.text || r[lang] || r.fa || r.en || r.id) : '';
+
+  /* ============ AUTOCOMPLETE LISTS ============ */
+  const FOREX_SYMBOLS = [
+    'EURUSD','GBPUSD','USDJPY','USDCHF','USDCAD','AUDUSD','NZDUSD',
+    'EURGBP','EURJPY','EURCHF','EURCAD','EURAUD','EURNZD',
+    'GBPJPY','GBPCHF','GBPCAD','GBPAUD','GBPNZD',
+    'AUDJPY','AUDCHF','AUDCAD','AUDNZD',
+    'NZDJPY','NZDCHF','NZDCAD','CADJPY','CADCHF','CHFJPY',
+    'XAUUSD','XAGUSD','XPTUSD','XPDUSD','USOIL','UKOIL','NGAS',
+    'NAS100','SPX500','US30','GER40','UK100','JP225','HK50','AUS200','US2000',
+    'EURTRY','USDTRY','USDZAR','USDMXN','USDSEK','USDNOK','USDDKK','USDPLN','USDHUF','USDCZK',
+    'USDCNH','USDHKD','USDSGD','USDINR','USDTHB','USDKRW','USDBRL','USDARS'
+  ];
+
+  const CRYPTO_SYMBOLS = [
+    'BTCUSD','ETHUSD','BNBUSD','SOLUSD','XRPUSD','ADAUSD','DOGEUSD','AVAXUSD',
+    'DOTUSD','MATICUSD','LINKUSD','LTCUSD','BCHUSD','UNIUSD','ATOMUSD','XLMUSD',
+    'ETCUSD','FILUSD','APTUSD','ARBUSD','OPUSD','NEARUSD','INJUSD','SUIUSD',
+    'IMXUSD','HBARUSD','VETUSD','ALGOUSD','FTMUSD','SANDUSD','MANAUSD','AXSUSD',
+    'GRTUSD','AAVEUSD','MKRUSD','SNXUSD','CRVUSD','COMPUSD','SUSHIUSD','YFIUSD',
+    'ZECUSD','DASHUSD','XMRUSD','EOSUSD','NEOUSD','QTUMUSD','IOTAUSD','THETAUSD',
+    'EGLDUSD','FLOWUSD','CHZUSD','ENJUSD','BATUSD','ZILUSD','ONEUSD','HOTUSD',
+    'ANKRUSD','CELOUSD','KSMUSD','ICPUSD','RNDRUSD','RPLUSD','LDOUSD','GMXUSD',
+    'DYDXUSD','APEUSD','GALAUSD','KAVAUSD','ROSEUSD','OCEANUSD','BANDUSD','STORJUSD',
+    'KNCUSD','ZRXUSD','REPUSD','MLNUSD','BALUSD','RENUSD','LRCUSD','CTSIUSD',
+    'TRXUSD','TONUSD','SHIBUSD','PEPEUSD','FLOKIUSD','BONKUSD','WIFUSD','MEMEUSD',
+    'SEIUSD','TIAUSD','JUPUSD','PYTHUSD','STRKUSD','DYMUSD','ALTUSD','MANTAUSD',
+    'PIXELUSD','PORTALUSD','AEVOUSD','ETHFIUSD','ENAUSD','OMNIUSD','REZUSD',
+    'SAGAUSD','TNSRUSD','OMUSD','NOTUSD','IOUSD','ZKUSD','LISTAUSD','ZROUSD',
+    'BLASTUSD','TAIKOUSD','MOCAUSD','RENDERUSD','POLUSD','NEIROUSD','TURBOUSD',
+    'EIGENUSD','HAMSTERUSD','SCRUSD','MOVEUSD','MEUSD','USUALUSD','PENGUUSD',
+    'AI16ZUSD','GRASSUSD','VIRTUALUSD','SWARMSUSD','TRUMPUSD','ANIMEUSD','VINEUSD','BERAUSD',
+    'KAITOUSD','IPUSD','REDUSD','SHELLUSD','PLUMEUSD','BMTUSD','PARTIUSD','BABYUSD',
+    'WCTUSD','HYPERUSD','INITUSD','SIGNUSD','SXTUSD','MILKUSD','OBOLUSD','AEROUSD',
+    'ZKJUSD','HUMAUSD','RESOLVUSD','HOMEUSD','PUMPUSD','SAHARAUSD','NEWTUSD','SPKUSD'
+  ];
+
+  const ALL_SYMBOLS = FOREX_SYMBOLS.concat(CRYPTO_SYMBOLS);
+
+  const STRATEGIES = [
+    'London Breakout','NY Breakout','Asia Range','Mean Reversion','Trend Following',
+    'Structure Break','Price Action','Supply & Demand','Order Block','Liquidity Grab',
+    'Fibonacci Retracement','Support & Resistance','Scalping','Day Trading','Swing Trading',
+    'Range Trading','Momentum','Reversal','Pullback','Channel Trading',
+    'EMA Crossover','MA Ribbon','RSI Divergence','MACD Signal','Bollinger Bounce',
+    'VWAP','Ichimoku','Elliott Wave','Harmonic Pattern','Smart Money Concept',
+    'ICT Concepts','Break & Retest','Trendline Break','Gap Fill','News Trading',
+    'Carry Trade','Grid','Hedge','Cup & Handle','Head & Shoulders',
+    'Triangle','Wedge','Flag Pattern','Double Top','Double Bottom',
+    'Bat Pattern','Gartley Pattern','Butterfly Pattern','Crab Pattern','Shark Pattern'
+  ];
+
+  const TAGS = [
+    'Breakout','Pullback','Reversal','Trend','Range','Trendline',
+    'London','NY','Asia','M5','M15','M30','H1','H4','D1','W1',
+    'News','NFP','CPI','FOMC','ECB','BOE','BOJ',
+    'Stop Hunt','Liquidity','Order Block','FVG','BOS','CHoCH',
+    'Confluence','A+','B','C','Setup A','Setup B',
+    'Mistake','FOMO','Revenge','Overtrade','Discipline','Plan Followed',
+    'Scalp','Day','Swing','Position','Gold','Oil','Indices','Crypto','Forex'
+  ];
 
   const MONTHS_FA = ['ژانویه','فوریه','مارس','آوریل','مه','ژوئن','جولای','اوت','سپتامبر','اکتبر','نوامبر','دسامبر'];
   const MONTHS_EN = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -281,7 +367,8 @@
   /* ============================ STORAGE ============================ */
   const KEYS = {
     trades: 'po.v4.trades', theme: 'po.v4.theme',
-    goal: 'po.v4.goal', rules: 'po.v4.rules'
+    goal: 'po.v4.goal', rules: 'po.v4.rules',
+    checklist: 'po.v4.checklist'
   };
   function loadJSON(key, fallback) {
     try {
@@ -299,6 +386,20 @@
   /* ============================ STATE ============================ */
   let trades = loadJSON(KEYS.trades, []);
   if (!Array.isArray(trades)) trades = [];
+
+  // Checklist items (managed from settings)
+  let checklistItems = (function () {
+    const stored = loadJSON(KEYS.checklist, null);
+    if (Array.isArray(stored) && stored.length) {
+      const cleaned = stored
+        .filter(x => x && x.id && (x.text || x.fa || x.en))
+        .map(x => ({ id: x.id, text: x.text || x.fa || x.en }));
+      if (cleaned.length) return cleaned;
+    }
+    return DEFAULT_RULES.map(r => ({ id: r.id, text: r.fa || r.en }));
+  })();
+  let clEditingId = null;
+
   let editingId = null;
   let range = '30';
   let calDate = new Date();
@@ -943,7 +1044,12 @@
     ruleMaxDD: $('#rule-maxdd'), ruleTarget: $('#rule-target'), ruleBalance: $('#rule-balance'),
     saveRules: $('#save-rules'), rulesMsg: $('#rules-msg'), rulesStatus: $('#rules-status'),
     demoBtn: $('#demo-btn'), exportBtn: $('#export-btn'),
-    importInput: $('#import-input'), clearBtn: $('#clear-btn')
+    importInput: $('#import-input'), clearBtn: $('#clear-btn'),
+    /* Checklist manager */
+    clNewInput: $('#cl-new-input'),
+    clAddBtn: $('#cl-add-btn'),
+    clItems: $('#cl-items'),
+    clMsg: $('#cl-msg')
   };
 
   /* ============================ TOAST ============================ */
@@ -1048,15 +1154,21 @@
       if (v) node.setAttribute('placeholder', v);
     });
     renderChecklistForm(getChecklistValues());
+    renderChecklistManager();
     renderAll();
   }
 
   /* ============================ FORM HELPERS ============================ */
   function renderChecklistForm(checked) {
     checked = checked || {};
-    el.checklistWrap.innerHTML = DEFAULT_RULES.map(r =>
+    if (!el.checklistWrap) return;
+    if (!checklistItems.length) {
+      el.checklistWrap.innerHTML = '<div class="cl-empty" style="grid-column:1/-1">' + esc(t('checklist_empty')) + '</div>';
+      return;
+    }
+    el.checklistWrap.innerHTML = checklistItems.map(r =>
       '<label>' +
-        '<input type="checkbox" data-rule="' + r.id + '" ' + (checked[r.id] ? 'checked' : '') + ' />' +
+        '<input type="checkbox" data-rule="' + esc(r.id) + '" ' + (checked[r.id] ? 'checked' : '') + ' />' +
         '<span class="box">✓</span>' +
         '<span>' + esc(ruleText(r)) + '</span>' +
       '</label>'
@@ -1320,7 +1432,7 @@
     }
     let dcSum = 0, dcCount = 0;
     for (const tr of filtered) {
-      const dc = disciplineScore(tr, DEFAULT_RULES);
+      const dc = disciplineScore(tr, checklistItems);
       if (dc != null) { dcSum += dc; dcCount++; }
     }
     const avgDiscipline = dcCount ? Math.round(dcSum / dcCount) : 0;
@@ -1642,6 +1754,31 @@
     el.allTradesList.innerHTML = sorted.map(tr => renderTradeItem(tr)).join('');
   }
 
+  /* ============================ RENDER: CHECKLIST MANAGER ============================ */
+  function renderChecklistManager() {
+    if (!el.clItems) return;
+    if (!checklistItems.length) {
+      el.clItems.innerHTML = '<div class="cl-empty">' + esc(t('checklist_empty')) + '</div>';
+      return;
+    }
+    el.clItems.innerHTML = checklistItems.map((item, i) => {
+      const editing = clEditingId === item.id;
+      return '<div class="cl-item' + (editing ? ' editing' : '') + '" data-cid="' + esc(item.id) + '">' +
+        '<span class="cl-num">' + (i + 1) + '</span>' +
+        (editing
+          ? '<input type="text" class="cl-edit-input" value="' + esc(ruleText(item)) + '" maxlength="80" />'
+          : '<span class="cl-text">' + esc(ruleText(item)) + '</span>') +
+        '<div class="cl-actions">' +
+          (editing
+            ? '<button type="button" data-cact="save" title="Save">✓</button>' +
+              '<button type="button" data-cact="cancel" title="Cancel">✕</button>'
+            : '<button type="button" data-cact="edit" title="Edit">✏️</button>' +
+              '<button type="button" data-cact="del" title="Delete">🗑️</button>') +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
   /* ============================ RENDER: SETTINGS ============================ */
   function renderSettingsPage() {
     if (goal) {
@@ -1658,6 +1795,7 @@
     el.ruleDaily.value = rules.dailyLoss || '';
     el.ruleMaxDD.value = rules.maxDD || '';
     el.ruleTarget.value = rules.target || '';
+    renderChecklistManager();
     renderGoalsPreview();
     renderRulesStatus();
   }
@@ -1785,6 +1923,16 @@
     if (el.pageSettings.classList.contains('active')) renderSettingsPage();
   }
 
+  /* ============================ DATALISTS ============================ */
+  function populateDatalists() {
+    const dlS  = document.getElementById('dl-symbols');
+    const dlSt = document.getElementById('dl-strategies');
+    const dlT  = document.getElementById('dl-tags');
+    if (dlS)  dlS.innerHTML  = ALL_SYMBOLS.map(s => '<option value="' + esc(s) + '"></option>').join('');
+    if (dlSt) dlSt.innerHTML = STRATEGIES.map(s => '<option value="' + esc(s) + '"></option>').join('');
+    if (dlT)  dlT.innerHTML  = TAGS.map(s => '<option value="' + esc(s) + '"></option>').join('');
+  }
+
   /* ============================ DEMO DATA ============================ */
   function demoData() {
     const symbols = ['XAUUSD', 'EURUSD', 'BTCUSD', 'GBPJPY', 'NAS100'];
@@ -1808,10 +1956,8 @@
         const amount = result === 'be' ? 0 : Math.round((40 + Math.random() * 260) * 100) / 100;
         const risk = result === 'be' ? 50 : Math.round((30 + Math.random() * 70) * 100) / 100;
         const emotion = emoKeys[Math.floor(Math.random() * emoKeys.length)];
-        const checklist = {
-          setup: Math.random() < 0.8, stop: Math.random() < 0.9,
-          size: Math.random() < 0.75, plan: Math.random() < 0.7
-        };
+        const checklist = {};
+        for (const rItem of checklistItems) checklist[rItem.id] = Math.random() < 0.75;
         const tags = [];
         while (tags.length < 2) {
           const x = tagPool[Math.floor(Math.random() * tagPool.length)];
@@ -2066,6 +2212,86 @@
       toast(el.rulesMsg, t('ok_rules'));
     });
 
+    /* ===== CHECKLIST MANAGER ===== */
+    if (el.clAddBtn && el.clNewInput) {
+      el.clAddBtn.addEventListener('click', () => {
+        const v = el.clNewInput.value.trim();
+        if (!v) return;
+        if (checklistItems.length >= 12) { toast(el.clMsg, t('checklist_max'), true); return; }
+        checklistItems.push({ id: 'ci_' + uid(), text: v });
+        saveJSON(KEYS.checklist, checklistItems);
+        el.clNewInput.value = '';
+        renderChecklistManager();
+        renderChecklistForm(getChecklistValues());
+        renderAll();
+        toast(el.clMsg, t('checklist_added'));
+      });
+      el.clNewInput.addEventListener('keydown', e => {
+        if (e.key === 'Enter') { e.preventDefault(); el.clAddBtn.click(); }
+      });
+    }
+    if (el.clItems) {
+      el.clItems.addEventListener('click', async e => {
+        const btn = e.target.closest('button[data-cact]');
+        if (!btn) return;
+        const itemEl = btn.closest('.cl-item');
+        const id = itemEl.dataset.cid;
+        const act = btn.dataset.cact;
+
+        if (act === 'edit') {
+          clEditingId = id;
+          renderChecklistManager();
+          setTimeout(() => {
+            const inp = el.clItems.querySelector('.cl-item[data-cid="' + id + '"] .cl-edit-input');
+            if (inp) { inp.focus(); inp.select(); }
+          }, 30);
+        } else if (act === 'cancel') {
+          clEditingId = null;
+          renderChecklistManager();
+        } else if (act === 'save') {
+          const inp = itemEl.querySelector('.cl-edit-input');
+          const v = inp ? inp.value.trim() : '';
+          if (!v) return;
+          const item = checklistItems.find(x => x.id === id);
+          if (item) { item.text = v; delete item.fa; delete item.en; }
+          clEditingId = null;
+          saveJSON(KEYS.checklist, checklistItems);
+          renderChecklistManager();
+          renderChecklistForm(getChecklistValues());
+          renderAll();
+          toast(el.clMsg, t('checklist_saved'));
+        } else if (act === 'del') {
+          const ok = await confirmDialog({
+            variant: 'danger',
+            icon: '🗑️',
+            title: t('checklist_del_title'),
+            message: t('checklist_del_msg'),
+            okText: t('checklist_del_ok'),
+            cancelText: t('md_cancel')
+          });
+          if (!ok) return;
+          checklistItems = checklistItems.filter(x => x.id !== id);
+          saveJSON(KEYS.checklist, checklistItems);
+          renderChecklistManager();
+          renderChecklistForm({});
+          renderAll();
+          toast(el.clMsg, t('checklist_deleted'));
+        }
+      });
+      el.clItems.addEventListener('keydown', e => {
+        if (e.key === 'Enter' && e.target.classList.contains('cl-edit-input')) {
+          e.preventDefault();
+          const itemEl = e.target.closest('.cl-item');
+          const saveBtn = itemEl.querySelector('button[data-cact="save"]');
+          if (saveBtn) saveBtn.click();
+        } else if (e.key === 'Escape' && e.target.classList.contains('cl-edit-input')) {
+          const itemEl = e.target.closest('.cl-item');
+          const cancelBtn = itemEl.querySelector('button[data-cact="cancel"]');
+          if (cancelBtn) cancelBtn.click();
+        }
+      });
+    }
+
     window.addEventListener('resize', debounce(() => {
       if (el.pageAnalysis.classList.contains('active')) renderCharts();
     }, 160));
@@ -2142,6 +2368,7 @@
     renderChecklistForm({});
     el.fDate.value = todayISO();
     renderTagsPreview();
+    populateDatalists();
 
     bindEvents();
     renderAll();
