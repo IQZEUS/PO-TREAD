@@ -1096,11 +1096,11 @@
           </div>
           <div class="field">
             <label data-i18n="symbol">💱 نماد</label>
-            <input type="text" id="f-symbol" placeholder="XAUUSD" required />
+            <input type="text" id="f-symbol" list="dl-symbols" placeholder="XAUUSD" required autocomplete="off" />
           </div>
           <div class="field full">
             <label data-i18n="strategy">🎯 استراتژی</label>
-            <input type="text" id="f-strategy" data-i18n-ph="strategy_ph" placeholder="بریک‌اوت لندن" required />
+            <input type="text" id="f-strategy" list="dl-strategies" data-i18n-ph="strategy_ph" placeholder="بریک‌اوت لندن" required autocomplete="off" />
           </div>
           <div class="field">
             <label data-i18n="side">⚖️ جهت</label>
@@ -1127,7 +1127,7 @@
           </div>
           <div class="field full">
             <label><span data-i18n="tags">🏷️ تگ‌ها</span> <span class="hint" data-i18n="tags_hint">(با ویرگول جدا کن)</span></label>
-            <input type="text" id="f-tags" placeholder="بریک‌اوت, لندن, M5" />
+            <input type="text" id="f-tags" list="dl-tags" placeholder="بریک‌اوت, لندن, M5" autocomplete="off" />
             <div class="tags-preview" id="tags-preview"></div>
           </div>
           <div class="field full">
@@ -1421,9 +1421,31 @@
 
       <div class="rules-status" id="rules-status"></div>
     </div>
+
+    <!-- ========== NEW: CHECKLIST MANAGER ========== -->
+    <div class="card">
+      <div class="card-head">
+        <h2 data-i18n="checklist_settings">✅ مدیریت چک‌لیست</h2>
+        <span class="muted" data-i18n="checklist_settings_sub">موارد رو اضافه، ویرایش یا حذف کن</span>
+      </div>
+
+      <div class="cl-add-row">
+        <input type="text" id="cl-new-input" maxlength="80" data-i18n-ph="checklist_add_ph" placeholder="مورد جدید..." />
+        <button type="button" class="btn primary sm" id="cl-add-btn" data-i18n="checklist_add">➕ افزودن</button>
+      </div>
+
+      <div class="cl-items" id="cl-items"></div>
+      <span class="msg" id="cl-msg"></span>
+    </div>
+    <!-- ========== /CHECKLIST MANAGER ========== -->
   </section>
 
 </div>
+
+<!-- ========== DATALISTS (autocomplete) ========== -->
+<datalist id="dl-symbols"></datalist>
+<datalist id="dl-strategies"></datalist>
+<datalist id="dl-tags"></datalist>
 
 <!-- ========== CHANGE PASSWORD MODAL ========== -->
 <div class="cp-overlay" id="cpOverlay">
