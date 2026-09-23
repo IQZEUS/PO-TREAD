@@ -1,6 +1,9 @@
 /* =========================================================
-   PO-TRADE — Bilingual Trade Journal v7
-   + Checklist Cloud Sync
+   PO-TRADE — Bilingual Trade Journal v8
+   + Advanced Analytics (MA, R-Multiple, Drawdown Zones)
+   + Calendar Heatmap + Weekly/Monthly Stats
+   + Trade Templates & Quick Entry
+   + Advanced Settings (Risk Calculator, Notifications)
    + Symbol/Strategy/Tag Autocomplete
    + Theme Manager (Classic/Neon/Cyberpunk + Dark/Light)
    ========================================================= */
@@ -21,6 +24,8 @@
       strategy_ph: 'بریک‌اوت لندن', side: '⚖️ جهت', result: '🏁 نتیجه',
       buy: 'خرید', sell: 'فروش', win: 'سود', loss: 'ضرر', be: 'سربه‌سر',
       amount: '💰 مبلغ (دلار)', risk: '🎲 ریسک (اختیاری)',
+      entry: '📍 قیمت ورود', exit: '🎯 قیمت خروج', sl: '🛑 حد ضرر', tp: '✅ حد سود',
+      lot: '📦 حجم (لات)', rr: '⚖️ نسبت R:R (خودکار)',
       tags: '🏷️ تگ‌ها', tags_hint: '(با ویرگول جدا کن)', mood: '🧠 حالت روحی',
       emo_calm: 'آرام', emo_focused: 'متمرکز', emo_fear: 'ترس',
       emo_greed: 'طمع', emo_fomo: 'FOMO', emo_revenge: 'انتقام',
@@ -71,6 +76,9 @@
       kpi_disc: 'انضباط', kpi_gp: 'مجموع سودها', kpi_gl: 'مجموع ضررها',
       kpi_aw: 'میانگین سود', kpi_al: 'میانگین ضرر', kpi_mdd: 'حداکثر افت سرمایه',
       kpi_bd: 'بهترین روز', kpi_wd: 'بدترین روز',
+      kpi_sharpe: 'شارپ ریشو', kpi_sortino: 'سورتینو', kpi_calmar: 'کالمار',
+      kpi_streak: 'بهترین استریک', kpi_lstreak: 'بدترین استریک',
+      kpi_recovery: 'ریکاوری فاکتور', kpi_avgdur: 'میانگین مدت',
       th_strategy: 'استراتژی', th_count: 'تعداد', th_win: 'برد', th_loss: 'باخت',
       th_wr: 'وین‌ریت', th_net: 'خالص',
       th_date: 'تاریخ', th_trades: 'معاملات', th_profit: 'سود', th_loss2: 'ضرر',
@@ -119,14 +127,105 @@
       checklist_need_item: '❌ متن آیتم رو بنویس',
       checklist_cloud_ok: '☁️ روی حساب کاربری ذخیره شد',
       checklist_cloud_synced: '☁️ چک‌لیست از حسابت لود شد',
-      // Theme manager
       theme_title: 'تم ظاهری',
-      theme_classic: 'کلاسیک',
-      theme_neon: 'نئون',
-      theme_cyberpunk: 'سایبرپانک',
-      theme_light: 'حالت روشن',
-      theme_dark: 'حالت تاریک',
-      theme_applied: '🎨 تم {name} فعال شد'
+      theme_classic: 'کلاسیک', theme_neon: 'نئون', theme_cyberpunk: 'سایبرپانک',
+      theme_light: 'حالت روشن', theme_dark: 'حالت تاریک',
+      theme_applied: '🎨 تم {name} فعال شد',
+      // ===== NEW v8 =====
+      advanced_metrics: '📐 معیارهای پیشرفته',
+      advanced_metrics_sub: 'شارپ، سورتینو، کالمار، ریکاوری',
+      r_distribution: '📊 توزیع R-Multiple',
+      r_distribution_sub: 'چند معامله در هر بازه R',
+      weekly_pnl: '📅 سود هفتگی',
+      monthly_pnl: '📆 سود ماهانه',
+      symbol_perf: '💱 عملکرد نمادها',
+      side_analysis: '⚖️ تحلیل خرید/فروش',
+      hour_analysis: '⏰ تحلیل ساعتی',
+      duration_analysis: '⏱️ تحلیل مدت معامله',
+      streak_analysis: '🔥 تحلیل استریک',
+      heatmap: '🔥 نقشه حرارتی',
+      heatmap_sub: 'وین‌ریت به تفکیک روز و ساعت',
+      templates: '⚡ قالب‌های سریع',
+      save_template: '💾 ذخیره قالب',
+      apply_template: 'اعمال قالب',
+      delete_template: 'حذف قالب',
+      template_saved: '✅ قالب ذخیره شد',
+      template_applied: '⚡ قالب اعمال شد',
+      template_deleted: '🗑️ قالب حذف شد',
+      template_name: 'نام قالب',
+      template_name_ph: 'مثلاً: اسکالپ لندن',
+      no_templates: 'هنوز قالبی نداری',
+      risk_calculator: '🧮 ماشین‌حساب ریسک',
+      risk_calc_sub: 'محاسبه سریع حجم پوزیشن',
+      account_balance: '💰 موجودی حساب ($)',
+      risk_percent: '📊 درصد ریسک (%)',
+      stop_loss_pips: '🛑 فاصله حد ضرر (پیپ)',
+      pip_value: '💵 ارزش هر پیپ ($)',
+      calc_position: '🎯 محاسبه حجم',
+      calc_result: 'حجم پیشنهادی',
+      calc_risk_amount: 'مبلغ ریسک',
+      notifications: '🔔 اعلان‌ها',
+      notifications_sub: 'هشدار خودکار برای اهداف',
+      notif_enabled: 'فعال‌سازی اعلان‌ها',
+      notif_daily: 'یادآور ثبت روزانه',
+      notif_goal: 'اعلان رسیدن به هدف',
+      notif_rules: 'اعلان نقض قوانین',
+      notif_win: 'اعلان برد/باخت بزرگ',
+      big_win_threshold: 'حد برد بزرگ ($)',
+      big_loss_threshold: 'حد ضرر بزرگ ($)',
+      save_notif: '💾 ذخیره تنظیمات اعلان',
+      notif_saved: '✅ تنظیمات اعلان ذخیره شد',
+      quick_stats: '📈 آمار سریع',
+      best_trade: '🏆 بهترین معامله',
+      worst_trade: '💀 بدترین معامله',
+      best_hour: '⏰ بهترین ساعت',
+      best_day_week: '📅 بهترین روز هفته',
+      best_symbol: '💎 بهترین نماد',
+      avg_hold: '⏱️ میانگین نگهداری',
+      total_pips: '📏 مجموع پیپ',
+      avg_rr: '⚖️ میانگین R:R',
+      trade_duration: '⏱️ مدت معامله (دقیقه)',
+      entry_price: '📍 قیمت ورود',
+      exit_price: '🎯 قیمت خروج',
+      stop_loss: '🛑 حد ضرر',
+      take_profit: '✅ حد سود',
+      lot_size: '📦 حجم (لات)',
+      auto_rr: '⚖️ نسبت R:R (خودکار)',
+      auto_calc: '🤖 محاسبه خودکار',
+      advanced_fields: '⚙️ فیلدهای پیشرفته',
+      show_advanced: 'نمایش فیلدهای پیشرفته',
+      hide_advanced: 'پنهان کردن فیلدهای پیشرفته',
+      entry_exit_required: 'قیمت ورود و خروج الزامی نیست',
+      // Deep Analytics
+      deep_analytics: '🔬 آنالیز عمیق',
+      deep_analytics_sub: 'تحلیل الگوها و روندها',
+      drawdown_chart: '📉 نمودار افت سرمایه',
+      rolling_winrate: '📊 وین‌ریت متحرک',
+      expectancy_chart: '🎯 انتظار ریاضی متحرک',
+      cum_r_chart: '📐 R تجمعی',
+      day_of_week_perf: '📅 عملکرد روزهای هفته',
+      hour_of_day_perf: '⏰ عملکرد ساعت‌های روز',
+      symbol_heatmap: '💱 نقشه حرارتی نمادها',
+      strategy_radar: '🎯 رادار استراتژی‌ها',
+      comparison: '⚖️ مقایسه دوره‌ها',
+      period_current: 'دوره فعلی',
+      period_previous: 'دوره قبلی',
+      change: 'تغییر',
+      improved: 'بهبود',
+      declined: 'افت',
+      stable: 'پایدار',
+      goals_advanced: '🎯 اهداف پیشرفته',
+      add_goal: '➕ افزودن هدف',
+      multiple_goals: 'اهداف چندگانه',
+      goal_type: 'نوع هدف',
+      goal_type_pnl: 'سود کل',
+      goal_type_winrate: 'وین‌ریت',
+      goal_type_trades: 'تعداد معاملات',
+      goal_type_pf: 'ضریب سود',
+      goal_type_r: 'میانگین R',
+      goal_type_dd: 'حداکثر افت',
+      goal_type_discipline: 'انضباط',
+      goal_compare: 'مقایسه با دوره قبل'
     },
     en: {
       title: 'PO-TRADE | Trade Journal',
@@ -137,6 +236,8 @@
       strategy_ph: 'London Breakout', side: '⚖️ Side', result: '🏁 Result',
       buy: 'Buy', sell: 'Sell', win: 'Win', loss: 'Loss', be: 'Break-even',
       amount: '💰 Amount ($)', risk: '🎲 Risk (optional)',
+      entry: '📍 Entry Price', exit: '🎯 Exit Price', sl: '🛑 Stop Loss', tp: '✅ Take Profit',
+      lot: '📦 Lot Size', rr: '⚖️ R:R Ratio (auto)',
       tags: '🏷️ Tags', tags_hint: '(comma separated)', mood: '🧠 Mood',
       emo_calm: 'Calm', emo_focused: 'Focused', emo_fear: 'Fear',
       emo_greed: 'Greed', emo_fomo: 'FOMO', emo_revenge: 'Revenge',
@@ -187,6 +288,9 @@
       kpi_disc: 'Discipline', kpi_gp: 'Gross Profit', kpi_gl: 'Gross Loss',
       kpi_aw: 'Avg Win', kpi_al: 'Avg Loss', kpi_mdd: 'Max Drawdown',
       kpi_bd: 'Best Day', kpi_wd: 'Worst Day',
+      kpi_sharpe: 'Sharpe Ratio', kpi_sortino: 'Sortino', kpi_calmar: 'Calmar',
+      kpi_streak: 'Best Streak', kpi_lstreak: 'Worst Streak',
+      kpi_recovery: 'Recovery Factor', kpi_avgdur: 'Avg Duration',
       th_strategy: 'Strategy', th_count: 'Count', th_win: 'Wins', th_loss: 'Losses',
       th_wr: 'Win Rate', th_net: 'Net',
       th_date: 'Date', th_trades: 'Trades', th_profit: 'Profit', th_loss2: 'Loss',
@@ -236,12 +340,103 @@
       checklist_cloud_ok: '☁️ Saved to your account',
       checklist_cloud_synced: '☁️ Checklist loaded from your account',
       theme_title: 'Theme',
-      theme_classic: 'Classic',
-      theme_neon: 'Neon',
-      theme_cyberpunk: 'Cyberpunk',
-      theme_light: 'Light Mode',
-      theme_dark: 'Dark Mode',
-      theme_applied: '🎨 {name} theme applied'
+      theme_classic: 'Classic', theme_neon: 'Neon', theme_cyberpunk: 'Cyberpunk',
+      theme_light: 'Light Mode', theme_dark: 'Dark Mode',
+      theme_applied: '🎨 {name} theme applied',
+      // ===== NEW v8 =====
+      advanced_metrics: '📐 Advanced Metrics',
+      advanced_metrics_sub: 'Sharpe, Sortino, Calmar, Recovery',
+      r_distribution: '📊 R-Multiple Distribution',
+      r_distribution_sub: 'Trades per R bucket',
+      weekly_pnl: '📅 Weekly P/L',
+      monthly_pnl: '📆 Monthly P/L',
+      symbol_perf: '💱 Symbol Performance',
+      side_analysis: '⚖️ Buy/Sell Analysis',
+      hour_analysis: '⏰ Hour Analysis',
+      duration_analysis: '⏱️ Duration Analysis',
+      streak_analysis: '🔥 Streak Analysis',
+      heatmap: '🔥 Heatmap',
+      heatmap_sub: 'Win rate by day & hour',
+      templates: '⚡ Quick Templates',
+      save_template: '💾 Save Template',
+      apply_template: 'Apply Template',
+      delete_template: 'Delete Template',
+      template_saved: '✅ Template saved',
+      template_applied: '⚡ Template applied',
+      template_deleted: '🗑️ Template deleted',
+      template_name: 'Template name',
+      template_name_ph: 'e.g. London Scalp',
+      no_templates: 'No templates yet',
+      risk_calculator: '🧮 Risk Calculator',
+      risk_calc_sub: 'Quick position size calculator',
+      account_balance: '💰 Account Balance ($)',
+      risk_percent: '📊 Risk Percent (%)',
+      stop_loss_pips: '🛑 Stop Loss (pips)',
+      pip_value: '💵 Pip Value ($)',
+      calc_position: '🎯 Calculate Position',
+      calc_result: 'Suggested Lot Size',
+      calc_risk_amount: 'Risk Amount',
+      notifications: '🔔 Notifications',
+      notifications_sub: 'Auto alerts for goals',
+      notif_enabled: 'Enable notifications',
+      notif_daily: 'Daily log reminder',
+      notif_goal: 'Goal reached alert',
+      notif_rules: 'Rule breach alert',
+      notif_win: 'Big win/loss alert',
+      big_win_threshold: 'Big win threshold ($)',
+      big_loss_threshold: 'Big loss threshold ($)',
+      save_notif: '💾 Save Notification Settings',
+      notif_saved: '✅ Notification settings saved',
+      quick_stats: '📈 Quick Stats',
+      best_trade: '🏆 Best Trade',
+      worst_trade: '💀 Worst Trade',
+      best_hour: '⏰ Best Hour',
+      best_day_week: '📅 Best Weekday',
+      best_symbol: '💎 Best Symbol',
+      avg_hold: '⏱️ Avg Hold',
+      total_pips: '📏 Total Pips',
+      avg_rr: '⚖️ Avg R:R',
+      trade_duration: '⏱️ Trade Duration (min)',
+      entry_price: '📍 Entry Price',
+      exit_price: '🎯 Exit Price',
+      stop_loss: '🛑 Stop Loss',
+      take_profit: '✅ Take Profit',
+      lot_size: '📦 Lot Size',
+      auto_rr: '⚖️ R:R Ratio (auto)',
+      auto_calc: '🤖 Auto Calculate',
+      advanced_fields: '⚙️ Advanced Fields',
+      show_advanced: 'Show advanced fields',
+      hide_advanced: 'Hide advanced fields',
+      entry_exit_required: 'Entry/Exit prices are optional',
+      deep_analytics: '🔬 Deep Analytics',
+      deep_analytics_sub: 'Pattern & trend analysis',
+      drawdown_chart: '📉 Drawdown Chart',
+      rolling_winrate: '📊 Rolling Win Rate',
+      expectancy_chart: '🎯 Rolling Expectancy',
+      cum_r_chart: '📐 Cumulative R',
+      day_of_week_perf: '📅 Day-of-Week Performance',
+      hour_of_day_perf: '⏰ Hour-of-Day Performance',
+      symbol_heatmap: '💱 Symbol Heatmap',
+      strategy_radar: '🎯 Strategy Radar',
+      comparison: '⚖️ Period Comparison',
+      period_current: 'Current Period',
+      period_previous: 'Previous Period',
+      change: 'Change',
+      improved: 'Improved',
+      declined: 'Declined',
+      stable: 'Stable',
+      goals_advanced: '🎯 Advanced Goals',
+      add_goal: '➕ Add Goal',
+      multiple_goals: 'Multiple Goals',
+      goal_type: 'Goal Type',
+      goal_type_pnl: 'Total P/L',
+      goal_type_winrate: 'Win Rate',
+      goal_type_trades: 'Trade Count',
+      goal_type_pf: 'Profit Factor',
+      goal_type_r: 'Avg R',
+      goal_type_dd: 'Max Drawdown',
+      goal_type_discipline: 'Discipline',
+      goal_compare: 'Compare with previous period'
     }
   };
 
@@ -392,7 +587,10 @@
     preset: 'po.v4.preset',
     goal: 'po.v4.goal', rules: 'po.v4.rules',
     checklist: 'po.v4.checklist',
-    checklistUpdatedAt: 'po.v4.checklist.updatedAt'
+    checklistUpdatedAt: 'po.v4.checklist.updatedAt',
+    templates: 'po.v4.templates',       // NEW v8
+    notifications: 'po.v4.notifications', // NEW v8
+    goals: 'po.v4.goals'                 // NEW v8 - multiple goals
   };
   function loadJSON(key, fallback) {
     try {
@@ -414,11 +612,19 @@
   let checklistItems = loadJSON(KEYS.checklist, null);
   if (!Array.isArray(checklistItems) || !checklistItems.length) {
     checklistItems = DEFAULT_CHECKLIST.map(x => ({
-      id: x.id,
-      text_fa: x.text_fa,
-      text_en: x.text_en
+      id: x.id, text_fa: x.text_fa, text_en: x.text_en
     }));
   }
+
+  let templates = loadJSON(KEYS.templates, []);          // NEW v8
+  if (!Array.isArray(templates)) templates = [];
+  let notifications = loadJSON(KEYS.notifications, {     // NEW v8
+    enabled: false, daily: false, goal: true, rules: true, win: false,
+    bigWin: 500, bigLoss: 500
+  });
+  let multiGoals = loadJSON(KEYS.goals, []);             // NEW v8
+  if (!Array.isArray(multiGoals)) multiGoals = [];
+  let advancedFieldsVisible = false;
 
   let editingId = null;
   let range = '30';
@@ -442,26 +648,19 @@
     preset = p;
     document.documentElement.dataset.preset = p;
     try { localStorage.setItem(KEYS.preset, p); } catch(e){}
-    // نمودارها اگه بازن redraw
     if (el.pageAnalysis && el.pageAnalysis.classList.contains('active')){
-      setTimeout(function(){ renderCharts(); }, 80);
+      setTimeout(function(){ renderCharts(); renderDeepAnalytics(); }, 80);
     }
   }
 
   function initThemeManager() {
-    // preset اولیه
     document.documentElement.dataset.preset = preset;
-
     var themeBtnEl = $('#theme-btn');
     if (!themeBtnEl) return;
-
-    // ساخت dropdown اگه وجود نداره
     if ($('#theme-menu')) return;
 
     var menuWrap = document.createElement('div');
     menuWrap.className = 'theme-menu-wrap';
-
-    // theme-btn رو ببریم داخل wrap جدید
     themeBtnEl.parentNode.insertBefore(menuWrap, themeBtnEl);
     menuWrap.appendChild(themeBtnEl);
 
@@ -483,7 +682,6 @@
       });
       var lbl = $('#theme-mode-label');
       if (lbl) lbl.textContent = theme === 'light' ? t('theme_dark') : t('theme_light');
-      // آیکون theme-btn
       var icon = themeBtnEl.querySelector('.theme-icon');
       if (icon) icon.textContent = theme === 'light' ? '☀️' : '🌙';
     }
@@ -560,8 +758,10 @@
     const avgR = rCount ? rSum / rCount : 0;
     const sorted = sortAsc(list);
     let equity = 0, peak = 0, maxDD = 0;
+    const equityCurve = [];
     for (const t of sorted) {
       equity += pnl(t);
+      equityCurve.push(equity);
       if (equity > peak) peak = equity;
       const dd = peak - equity;
       if (dd > maxDD) maxDD = dd;
@@ -571,12 +771,27 @@
       if (tr.result === 'win'){ curWin++; curLoss=0; if (curWin>bestWin) bestWin=curWin; }
       else if (tr.result === 'loss'){ curLoss++; curWin=0; if (curLoss>bestLoss) bestLoss=curLoss; }
     }
+    // Advanced: Sharpe, Sortino, Calmar
+    const returns = sorted.map(t => pnl(t));
+    const meanRet = returns.length ? returns.reduce((a,b) => a+b, 0) / returns.length : 0;
+    const variance = returns.length ? returns.reduce((a,b) => a + Math.pow(b - meanRet, 2), 0) / returns.length : 0;
+    const stdDev = Math.sqrt(variance);
+    const sharpe = stdDev > 0 ? (meanRet / stdDev) * Math.sqrt(252) : 0;
+    const downsideReturns = returns.filter(r => r < 0);
+    const downsideVar = downsideReturns.length ? downsideReturns.reduce((a,b) => a + b*b, 0) / downsideReturns.length : 0;
+    const downsideDev = Math.sqrt(downsideVar);
+    const sortino = downsideDev > 0 ? (meanRet / downsideDev) * Math.sqrt(252) : 0;
+    const calmar = maxDD > 0 ? (net / maxDD) : 0;
+    const recovery = maxDD > 0 ? (net / maxDD) : 0;
     return {
       total: list.length, wins, losses, be, closed,
       net, grossProfit: gp, grossLoss: gl,
       winRate, profitFactor: pf, avgWin, avgLoss,
       expectancy, maxDrawdown: maxDD, avgR, rCount,
-      sorted, bestWin, bestLoss, curWin, curLoss
+      sorted, bestWin, bestLoss, curWin, curLoss,
+      sharpe: r2(sharpe), sortino: r2(sortino), calmar: r2(calmar),
+      recovery: r2(recovery), stdDev: r2(stdDev),
+      equityCurve
     };
   }
 
@@ -585,13 +800,15 @@
     for (const t of sortAsc(list)) {
       let d = map.get(t.date);
       if (!d) {
-        d = { date: t.date, net: 0, count: 0, wins: 0, losses: 0, profit: 0, loss: 0 };
+        d = { date: t.date, net: 0, count: 0, wins: 0, losses: 0, profit: 0, loss: 0, rSum: 0, rCount: 0 };
         map.set(t.date, d);
       }
       const p = pnl(t);
       d.net += p; d.count++;
       if (t.result === 'win')       { d.wins++;   d.profit += p; }
       else if (t.result === 'loss') { d.losses++; d.loss += Math.abs(p); }
+      const rm = rMultiple(t);
+      if (rm != null) { d.rSum += rm; d.rCount++; }
     }
     const arr = Array.from(map.values()).sort((a, b) => a.date < b.date ? -1 : 1);
     let cum = 0;
@@ -599,8 +816,44 @@
       cum += d.net;
       d.cum = r2(cum); d.net = r2(d.net);
       d.profit = r2(d.profit); d.loss = r2(d.loss);
+      d.avgR = d.rCount ? r2(d.rSum / d.rCount) : 0;
     }
     return arr;
+  }
+
+  function byWeek(list) {
+    const map = new Map();
+    for (const t of list) {
+      const d = new Date(t.date);
+      const dayOfWeek = d.getDay();
+      const daysSinceSat = (dayOfWeek + 1) % 7;
+      const sat = new Date(d);
+      sat.setDate(d.getDate() - daysSinceSat);
+      const key = toISO(sat);
+      let w = map.get(key);
+      if (!w) {
+        w = { weekStart: key, net: 0, count: 0, wins: 0, losses: 0, profit: 0, loss: 0 };
+        map.set(key, w);
+      }
+      const p = pnl(t);
+      w.net += p; w.count++;
+      if (t.result === 'win')       { w.wins++;   w.profit += p; }
+      else if (t.result === 'loss') { w.losses++; w.loss += Math.abs(p); }
+    }
+    return Array.from(map.values()).sort((a, b) => a.weekStart < b.weekStart ? -1 : 1);
+  }
+
+  function byMonth(list) {
+    const map = new Map();
+    for (const t of list) {
+      const key = t.date.slice(0, 7);
+      let m = map.get(key);
+      if (!m) { m = { month: key, net: 0, count: 0, wins: 0, losses: 0 }; map.set(key, m); }
+      m.net += pnl(t); m.count++;
+      if (t.result === 'win') m.wins++;
+      else if (t.result === 'loss') m.losses++;
+    }
+    return Array.from(map.values()).sort((a, b) => a.month < b.month ? -1 : 1);
   }
 
   function byStrategy(list) {
@@ -608,16 +861,19 @@
     for (const t of list) {
       const key = t.strategy || '—';
       let s = map.get(key);
-      if (!s) { s = { name: key, count: 0, wins: 0, losses: 0, net: 0 }; map.set(key, s); }
+      if (!s) { s = { name: key, count: 0, wins: 0, losses: 0, net: 0, rSum: 0, rCount: 0 }; map.set(key, s); }
       s.count++; s.net += pnl(t);
       if (t.result === 'win') s.wins++;
       else if (t.result === 'loss') s.losses++;
+      const rm = rMultiple(t);
+      if (rm != null) { s.rSum += rm; s.rCount++; }
     }
     const arr = Array.from(map.values());
     arr.forEach(s => {
       const c = s.wins + s.losses;
       s.winRate = c ? (s.wins / c) * 100 : 0;
       s.net = r2(s.net);
+      s.avgR = s.rCount ? r2(s.rSum / s.rCount) : 0;
     });
     arr.sort((a, b) => b.net - a.net);
     return arr;
@@ -641,6 +897,109 @@
     });
     arr.sort((a, b) => b.net - a.net);
     return arr;
+  }
+
+  function bySymbol(list) {  // NEW v8
+    const map = new Map();
+    for (const t of list) {
+      const key = t.symbol || '—';
+      let s = map.get(key);
+      if (!s) { s = { name: key, count: 0, wins: 0, losses: 0, net: 0 }; map.set(key, s); }
+      s.count++; s.net += pnl(t);
+      if (t.result === 'win') s.wins++;
+      else if (t.result === 'loss') s.losses++;
+    }
+    const arr = Array.from(map.values());
+    arr.forEach(s => {
+      const c = s.wins + s.losses;
+      s.winRate = c ? (s.wins / c) * 100 : 0;
+      s.net = r2(s.net);
+    });
+    arr.sort((a, b) => b.net - a.net);
+    return arr;
+  }
+
+  function bySide(list) {  // NEW v8
+    const map = new Map();
+    for (const t of list) {
+      const key = t.side || 'buy';
+      let s = map.get(key);
+      if (!s) { s = { key, count: 0, wins: 0, losses: 0, net: 0 }; map.set(key, s); }
+      s.count++; s.net += pnl(t);
+      if (t.result === 'win') s.wins++;
+      else if (t.result === 'loss') s.losses++;
+    }
+    const arr = Array.from(map.values());
+    arr.forEach(s => {
+      const c = s.wins + s.losses;
+      s.winRate = c ? (s.wins / c) * 100 : 0;
+      s.net = r2(s.net);
+    });
+    return arr;
+  }
+
+  function byHour(list) {  // NEW v8
+    const map = new Map();
+    for (let h = 0; h < 24; h++) map.set(h, { hour: h, count: 0, wins: 0, losses: 0, net: 0 });
+    for (const t of list) {
+      if (!t.hour && t.hour !== 0) continue;
+      const h = Number(t.hour);
+      if (isNaN(h) || h < 0 || h > 23) continue;
+      const s = map.get(h);
+      s.count++; s.net += pnl(t);
+      if (t.result === 'win') s.wins++;
+      else if (t.result === 'loss') s.losses++;
+    }
+    const arr = Array.from(map.values()).filter(x => x.count > 0);
+    arr.forEach(s => {
+      const c = s.wins + s.losses;
+      s.winRate = c ? (s.wins / c) * 100 : 0;
+      s.net = r2(s.net);
+    });
+    return arr;
+  }
+
+  function byWeekday(list) {  // NEW v8
+    const map = new Map();
+    for (let d = 0; d < 7; d++) map.set(d, { wd: d, count: 0, wins: 0, losses: 0, net: 0 });
+    for (const t of list) {
+      const d = new Date(t.date);
+      const wd = (d.getDay() + 1) % 7;
+      const s = map.get(wd);
+      s.count++; s.net += pnl(t);
+      if (t.result === 'win') s.wins++;
+      else if (t.result === 'loss') s.losses++;
+    }
+    const arr = Array.from(map.values()).filter(x => x.count > 0);
+    arr.forEach(s => {
+      const c = s.wins + s.losses;
+      s.winRate = c ? (s.wins / c) * 100 : 0;
+      s.net = r2(s.net);
+    });
+    return arr;
+  }
+
+  function rBuckets(list) {  // NEW v8
+    const buckets = [
+      { label: '≤ -3R', min: -Infinity, max: -3, count: 0, net: 0 },
+      { label: '-2R to -3R', min: -3, max: -2, count: 0, net: 0 },
+      { label: '-1R to -2R', min: -2, max: -1, count: 0, net: 0 },
+      { label: '0 to -1R', min: -1, max: 0, count: 0, net: 0 },
+      { label: '0 to +1R', min: 0, max: 1, count: 0, net: 0 },
+      { label: '+1R to +2R', min: 1, max: 2, count: 0, net: 0 },
+      { label: '+2R to +3R', min: 2, max: 3, count: 0, net: 0 },
+      { label: '≥ +3R', min: 3, max: Infinity, count: 0, net: 0 }
+    ];
+    for (const t of list) {
+      const rm = rMultiple(t);
+      if (rm == null) continue;
+      for (const b of buckets) {
+        if (rm >= b.min && rm < b.max) {
+          b.count++; b.net += pnl(t); break;
+        }
+      }
+    }
+    return buckets;
   }
 
   function inRange(list, days) {
@@ -1115,6 +1474,11 @@
     };
   }
 
+  function renderAreaChart(canvas, st) {
+    // Similar to line but with stronger area fill (for drawdown)
+    renderLine(canvas, st);
+  }
+
   function chartLine(canvas, data) {
     if (!canvas) return;
     let st = charts.get(canvas);
@@ -1143,6 +1507,8 @@
     form: $('#trade-form'),
     fDate: $('#f-date'), fSymbol: $('#f-symbol'), fStrategy: $('#f-strategy'),
     fAmount: $('#f-amount'), fRisk: $('#f-risk'), fTags: $('#f-tags'), fNote: $('#f-note'),
+    fEntry: $('#f-entry'), fExit: $('#f-exit'), fSL: $('#f-sl'), fTP: $('#f-tp'),
+    fLot: $('#f-lot'), fRR: $('#f-rr'), fHour: $('#f-hour'), fDuration: $('#f-duration'),
     sideSeg: $('#f-side'), resultSeg: $('#f-result'),
     emotionWrap: $('#f-emotion'), checklistWrap: $('#f-checklist'),
     tagsPreview: $('#tags-preview'),
@@ -1152,15 +1518,22 @@
     submitBtn: $('#submit-btn'), cancelEdit: $('#cancel-edit'), formMsg: $('#form-msg'),
     recentList: $('#recent-list'), recentCount: $('#recent-count'),
     rulesBanner: $('#rules-banner'),
-    rangeFilter: $('#range-filter'), kpis: $('#kpis'),
+    rangeFilter: $('#range-filter'), kpis: $('#kpis'), advKpis: $('#adv-kpis'),
     equityChart: $('#equity-chart'), dailyChart: $('#daily-chart'),
+    drawdownChart: $('#drawdown-chart'), rollingWrChart: $('#rolling-wr-chart'),
+    cumRChart: $('#cum-r-chart'), expectancyChart: $('#expectancy-chart'),
+    weekChart: $('#week-chart'), monthChart: $('#month-chart'),
     emotionsStats: $('#emotions-stats'),
     strategyTable: $('#strategy-table'), dailyTable: $('#daily-table'),
+    symbolTable: $('#symbol-table'), sideTable: $('#side-table'),
+    weekdayTable: $('#weekday-table'), hourTable: $('#hour-table'),
+    rDistribution: $('#r-distribution'),
     goalsMiniCard: $('#goals-mini-card'), goalsMini: $('#goals-mini'), goalsMiniPeriod: $('#goals-mini-period'),
     calTitle: $('#cal-title'), calGrid: $('#cal-grid'),
     calPrev: $('#cal-prev'), calNext: $('#cal-next'),
     calDetailCard: $('#cal-detail-card'), calDetailTitle: $('#cal-detail-title'),
     calDetailList: $('#cal-detail-list'), calDetailClose: $('#cal-detail-close'),
+    calWeekStats: $('#cal-week-stats'), calMonthStats: $('#cal-month-stats'),
     allCount: $('#all-count'), allTradesList: $('#all-trades-list'),
     fltSearch: $('#flt-search'), fltStrategy: $('#flt-strategy'), fltTag: $('#flt-tag'),
     fltResult: $('#flt-result'), fltEmotion: $('#flt-emotion'), fltSide: $('#flt-side'),
@@ -1181,7 +1554,38 @@
     checklistMsg: $('#checklist-msg'),
     symbolsList: $('#symbols-list'),
     strategiesList: $('#strategies-list'),
-    tagsList: $('#tags-list')
+    tagsList: $('#tags-list'),
+    // NEW v8
+    advancedToggle: $('#advanced-toggle'),
+    advancedFields: $('#advanced-fields'),
+    templateSelect: $('#template-select'),
+    saveTemplateBtn: $('#save-template-btn'),
+    applyTemplateBtn: $('#apply-template-btn'),
+    deleteTemplateBtn: $('#delete-template-btn'),
+    templateMsg: $('#template-msg'),
+    // Risk Calculator
+    riskBalance: $('#risk-balance'),
+    riskPercent: $('#risk-percent'),
+    riskPips: $('#risk-pips'),
+    riskPipValue: $('#risk-pip-value'),
+    calcRiskBtn: $('#calc-risk-btn'),
+    riskResult: $('#risk-result'),
+    // Notifications
+    notifEnabled: $('#notif-enabled'),
+    notifDaily: $('#notif-daily'),
+    notifGoal: $('#notif-goal'),
+    notifRules: $('#notif-rules'),
+    notifWin: $('#notif-win'),
+    bigWinThr: $('#big-win-thr'),
+    bigLossThr: $('#big-loss-thr'),
+    saveNotifBtn: $('#save-notif-btn'),
+    notifMsg: $('#notif-msg'),
+    // Comparison
+    comparisonTable: $('#comparison-table'),
+    // Multi-goals
+    multiGoalsList: $('#multi-goals-list'),
+    addGoalBtn: $('#add-goal-btn'),
+    multiGoalMsg: $('#multi-goal-msg')
   };
 
   /* ============================ TOAST ============================ */
@@ -1261,7 +1665,9 @@
     const meta = document.querySelector('meta[name="theme-color"]');
     if (meta) meta.content = th === 'light' ? '#eef2f9' : '#03040a';
     saveJSON(KEYS.theme, th);
-    if (el.pageAnalysis && el.pageAnalysis.classList.contains('active')) renderCharts();
+    if (el.pageAnalysis && el.pageAnalysis.classList.contains('active')) {
+      renderCharts(); renderDeepAnalytics();
+    }
   }
   function toggleTheme() { applyTheme(theme === 'dark' ? 'light' : 'dark'); }
 
@@ -1571,6 +1977,26 @@
     $$('button', el.emotionWrap).forEach(b => b.classList.toggle('active', b.dataset.e === val));
   }
 
+  /* ============================ AUTO R:R CALCULATION ============================ */
+  function calcAutoRR() {
+    if (!el.fEntry || !el.fExit || !el.fSL) return;
+    const entry = parseFloat(el.fEntry.value);
+    const exit = parseFloat(el.fExit.value);
+    const sl = parseFloat(el.fSL.value);
+    if (isNaN(entry) || isNaN(sl)) {
+      if (el.fRR) el.fRR.value = '';
+      return;
+    }
+    const risk = Math.abs(entry - sl);
+    const reward = !isNaN(exit) ? Math.abs(exit - entry) : 0;
+    if (risk > 0) {
+      const rr = (reward / risk).toFixed(2);
+      if (el.fRR) el.fRR.value = rr + ' : 1';
+    } else {
+      if (el.fRR) el.fRR.value = '';
+    }
+  }
+
   /* ============================ SCREENSHOT UI ============================ */
   function setScreenshot(base64) {
     currentScreenshot = base64 || null;
@@ -1627,10 +2053,81 @@
     el.pageCalendar.classList.toggle('active', name === 'calendar');
     el.pageTrades.classList.toggle('active', name === 'trades');
     el.pageSettings.classList.toggle('active', name === 'settings');
-    if (name === 'analysis') requestAnimationFrame(renderCharts);
+    if (name === 'analysis') requestAnimationFrame(() => { renderCharts(); renderDeepAnalytics(); });
     if (name === 'calendar') renderCalendar();
     if (name === 'trades') renderAllTrades();
     if (name === 'settings') renderSettingsPage();
+  }
+
+  /* ============================ TEMPLATES ============================ */
+  function renderTemplates() {
+    if (!el.templateSelect) return;
+    if (!templates.length) {
+      el.templateSelect.innerHTML = '<option value="">' + t('no_templates') + '</option>';
+      return;
+    }
+    el.templateSelect.innerHTML = '<option value="">— ' + t('templates') + ' —</option>' +
+      templates.map(tp => '<option value="' + esc(tp.id) + '">' + esc(tp.name) + '</option>').join('');
+  }
+
+  function saveCurrentAsTemplate() {
+    const name = prompt(t('template_name'), t('template_name_ph'));
+    if (!name || !name.trim()) return;
+    const symbol = el.fSymbol.value.trim();
+    const strategy = el.fStrategy.value.trim();
+    const amount = parseFloat(el.fAmount.value) || 0;
+    const risk = parseFloat(el.fRisk.value) || null;
+    const tags = parseTags(el.fTags.value);
+    const note = el.fNote.value.trim();
+    const side = el.sideSeg.dataset.value;
+    const emotion = selectedEmotion;
+    const checklist = getChecklistValues();
+    const tp = {
+      id: uid(),
+      name: name.trim(),
+      symbol, strategy, amount, risk, tags, note, side, emotion, checklist,
+      createdAt: Date.now()
+    };
+    templates.push(tp);
+    saveJSON(KEYS.templates, templates);
+    renderTemplates();
+    toast(el.templateMsg, t('template_saved'));
+  }
+
+  function applyTemplate() {
+    const id = el.templateSelect.value;
+    if (!id) return;
+    const tp = templates.find(x => x.id === id);
+    if (!tp) return;
+    if (tp.symbol) el.fSymbol.value = tp.symbol;
+    if (tp.strategy) el.fStrategy.value = tp.strategy;
+    if (tp.amount) el.fAmount.value = tp.amount;
+    if (tp.risk) el.fRisk.value = tp.risk;
+    if (tp.tags) el.fTags.value = tp.tags.join(', ');
+    if (tp.note) el.fNote.value = tp.note;
+    if (tp.side) setSeg(el.sideSeg, tp.side);
+    if (tp.emotion) setEmotion(tp.emotion);
+    if (tp.checklist) renderChecklistForm(tp.checklist);
+    renderTagsPreview();
+    toast(el.templateMsg, t('template_applied'));
+  }
+
+  async function deleteTemplate() {
+    const id = el.templateSelect.value;
+    if (!id) return;
+    const ok = await confirmDialog({
+      variant: 'danger',
+      icon: '🗑️',
+      title: t('delete_template'),
+      message: t('template_name') + '?',
+      okText: t('md_goal_ok'),
+      cancelText: t('md_cancel')
+    });
+    if (!ok) return;
+    templates = templates.filter(x => x.id !== id);
+    saveJSON(KEYS.templates, templates);
+    renderTemplates();
+    toast(el.templateMsg, t('template_deleted'));
   }
 
   /* ============================ FORM SUBMIT ============================ */
@@ -1646,6 +2143,7 @@
     renderChecklistForm({});
     renderTagsPreview();
     setScreenshot(null);
+    if (el.fRR) el.fRR.value = '';
   }
   function startEdit(id) {
     const tr = trades.find(x => x.id === id);
@@ -1658,6 +2156,14 @@
     el.fRisk.value = tr.risk || '';
     el.fTags.value = (tr.tags || []).join(', ');
     el.fNote.value = tr.note || '';
+    if (el.fEntry) el.fEntry.value = tr.entry || '';
+    if (el.fExit)  el.fExit.value  = tr.exit || '';
+    if (el.fSL)    el.fSL.value    = tr.sl || '';
+    if (el.fTP)    el.fTP.value    = tr.tp || '';
+    if (el.fLot)   el.fLot.value   = tr.lot || '';
+    if (el.fRR)    el.fRR.value    = tr.rr || '';
+    if (el.fHour)  el.fHour.value  = tr.hour != null ? tr.hour : '';
+    if (el.fDuration) el.fDuration.value = tr.duration || '';
     setSeg(el.sideSeg, tr.side);
     setSeg(el.resultSeg, tr.result);
     setEmotion(tr.emotion || 'calm');
@@ -1695,6 +2201,14 @@
       checklist: getChecklistValues(),
       screenshot: currentScreenshot || null,
       note: el.fNote.value.trim(),
+      entry: el.fEntry ? parseFloat(el.fEntry.value) || null : null,
+      exit:  el.fExit  ? parseFloat(el.fExit.value)  || null : null,
+      sl:    el.fSL    ? parseFloat(el.fSL.value)    || null : null,
+      tp:    el.fTP    ? parseFloat(el.fTP.value)    || null : null,
+      lot:   el.fLot   ? parseFloat(el.fLot.value)   || null : null,
+      rr:    el.fRR    ? el.fRR.value : null,
+      hour:  el.fHour  ? (el.fHour.value !== '' ? Number(el.fHour.value) : null) : null,
+      duration: el.fDuration ? parseFloat(el.fDuration.value) || null : null,
       createdAt: Date.now()
     };
 
@@ -1711,6 +2225,21 @@
     }
     try { saveTrades(); }
     catch (err) { toast(el.formMsg, t('err_storage'), true); return; }
+
+    // Notification check
+    if (notifications.enabled && notifications.win) {
+      const p = pnl(trade);
+      if (p >= notifications.bigWin) {
+        if (Notification.permission === 'granted') {
+          new Notification('🎉 ' + t('big_win_threshold'), { body: money(p) });
+        }
+      } else if (p <= -notifications.bigLoss) {
+        if (Notification.permission === 'granted') {
+          new Notification('💀 ' + t('big_loss_threshold'), { body: money(p) });
+        }
+      }
+    }
+
     resetForm();
     updateAutocomplete();
     renderAll();
@@ -1730,6 +2259,8 @@
     const thumb = tr.screenshot
       ? '<div class="ti-thumb" data-thumb="' + esc(tr.id) + '"><img src="' + tr.screenshot + '" alt="" loading="lazy" /></div>'
       : '';
+    const rrTxt = tr.rr ? '<span>⚖️ ' + esc(tr.rr) + '</span>' : '';
+    const hourTxt = (tr.hour != null) ? '<span>⏰ ' + String(tr.hour).padStart(2,'0') + ':00</span>' : '';
 
     return '' +
       '<div class="trade-item ' + (tr.side === 'sell' ? 'sell' : '') + '" data-id="' + esc(tr.id) + '">' +
@@ -1744,6 +2275,7 @@
             '<span>🎯 ' + esc(tr.strategy) + '</span>' +
             '<span>' + SIDE[tr.side] + ' · ' + fullDate(tr.date) + '</span>' +
             (rmTxt ? '<span>' + rmTxt + '</span>' : '') +
+            rrTxt + hourTxt +
           '</span>' +
           (tags.length ? '<div class="ti-tags">' + tags.map(g => '<span class="tag">' + esc(g) + '</span>').join('') + '</div>' : '') +
         '</div>' +
@@ -1813,6 +2345,25 @@
         '<span class="val">' + c.v + '</span>' +
       '</div>'
     ).join('');
+
+    // Advanced KPIs
+    if (el.advKpis) {
+      const advCards = [
+        { ico: '📊', l: t('kpi_sharpe'),    v: s.sharpe.toFixed(2),     c: s.sharpe > 1 ? 'pos' : s.sharpe < 0 ? 'neg' : '' },
+        { ico: '📉', l: t('kpi_sortino'),   v: s.sortino.toFixed(2),    c: s.sortino > 1 ? 'pos' : s.sortino < 0 ? 'neg' : '' },
+        { ico: '⚖️', l: t('kpi_calmar'),    v: s.calmar.toFixed(2),     c: s.calmar > 1 ? 'pos' : s.calmar < 0 ? 'neg' : '' },
+        { ico: '💪', l: t('kpi_recovery'),  v: s.recovery.toFixed(2),   c: s.recovery > 1 ? 'pos' : 'neg' },
+        { ico: '🔥', l: t('kpi_streak'),    v: num(s.bestWin),          c: 'pos' },
+        { ico: '❄️', l: t('kpi_lstreak'),   v: num(s.bestLoss),         c: 'neg' }
+      ];
+      el.advKpis.innerHTML = advCards.map((c, i) =>
+        '<div class="kpi adv ' + c.c + '" style="animation-delay:' + Math.min(i * 30, 400) + 'ms">' +
+          '<span class="ico">' + c.ico + '</span>' +
+          '<span class="lbl">' + esc(c.l) + '</span>' +
+          '<span class="val">' + c.v + '</span>' +
+        '</div>'
+      ).join('');
+    }
   }
 
   /* ============================ RENDER: CHARTS ============================ */
@@ -1821,6 +2372,229 @@
     const days = byDay(filtered);
     chartLine(el.equityChart, days.map(d => ({ label: d.date, value: d.cum })));
     chartBars(el.dailyChart,  days.map(d => ({ label: d.date, value: d.net })));
+  }
+
+  /* ============================ RENDER: DEEP ANALYTICS ============================ */
+  function renderDeepAnalytics() {
+    const filtered = inRange(trades, range);
+    const days = byDay(filtered);
+
+    // Drawdown chart
+    if (el.drawdownChart) {
+      let peak = 0, equity = 0;
+      const ddData = days.map(d => {
+        equity = d.cum;
+        if (equity > peak) peak = equity;
+        return { label: d.date, value: -(peak - equity) };
+      });
+      chartLine(el.drawdownChart, ddData);
+    }
+
+    // Rolling win rate (last 10 trades)
+    if (el.rollingWrChart) {
+      const sorted = sortAsc(filtered);
+      const windowSize = 10;
+      const data = [];
+      for (let i = windowSize - 1; i < sorted.length; i++) {
+        const slice = sorted.slice(i - windowSize + 1, i + 1);
+        let wins = 0, closed = 0;
+        for (const tr of slice) {
+          if (tr.result === 'win') { wins++; closed++; }
+          else if (tr.result === 'loss') closed++;
+        }
+        const wr = closed ? (wins / closed) * 100 : 0;
+        data.push({ label: sorted[i].date, value: r2(wr) });
+      }
+      chartLine(el.rollingWrChart, data);
+    }
+
+    // Cumulative R
+    if (el.cumRChart) {
+      let cumR = 0;
+      const data = [];
+      for (const tr of sortAsc(filtered)) {
+        const rm = rMultiple(tr);
+        if (rm == null) continue;
+        cumR += rm;
+        data.push({ label: tr.date, value: r2(cumR) });
+      }
+      chartLine(el.cumRChart, data);
+    }
+
+    // Rolling expectancy
+    if (el.expectancyChart) {
+      const sorted = sortAsc(filtered);
+      const windowSize = 10;
+      const data = [];
+      let cum = 0;
+      for (let i = 0; i < sorted.length; i++) {
+        cum += pnl(sorted[i]);
+        if (i >= windowSize - 1) {
+          const avg = cum / windowSize;
+          data.push({ label: sorted[i].date, value: r2(avg) });
+          cum -= pnl(sorted[i - windowSize + 1]);
+        }
+      }
+      chartLine(el.expectancyChart, data);
+    }
+
+    // Weekly bars
+    if (el.weekChart) {
+      const weeks = byWeek(filtered);
+      chartBars(el.weekChart, weeks.map(w => ({ label: w.weekStart, value: w.net })));
+    }
+
+    // Monthly bars
+    if (el.monthChart) {
+      const months = byMonth(filtered);
+      chartBars(el.monthChart, months.map(m => ({ label: m.month + '-01', value: m.net })));
+    }
+
+    // R distribution table
+    if (el.rDistribution) {
+      const buckets = rBuckets(filtered);
+      el.rDistribution.innerHTML =
+        '<table><thead><tr>' +
+          '<th>R</th><th>' + t('th_count') + '</th><th>' + t('th_net') + '</th>' +
+        '</tr></thead><tbody>' +
+        buckets.map(b => {
+          if (b.count === 0) return '';
+          const cls = b.net > 0 ? 'pos' : b.net < 0 ? 'neg' : 'dim';
+          return '<tr>' +
+            '<td>' + esc(b.label) + '</td>' +
+            '<td class="num dim">' + num(b.count) + '</td>' +
+            '<td class="num ' + cls + '">' + money(b.net) + '</td>' +
+          '</tr>';
+        }).join('') +
+        '</tbody></table>';
+    }
+
+    // Day of week table
+    if (el.weekdayTable) {
+      const wds = byWeekday(filtered);
+      const WD = lang === 'fa'
+        ? ['شنبه','یکشنبه','دوشنبه','سه‌شنبه','چهارشنبه','پنج‌شنبه','جمعه']
+        : ['Sat','Sun','Mon','Tue','Wed','Thu','Fri'];
+      el.weekdayTable.innerHTML =
+        '<table><thead><tr>' +
+          '<th>' + t('th_date') + '</th><th>' + t('th_count') + '</th>' +
+          '<th>' + t('th_wr') + '</th><th>' + t('th_net') + '</th>' +
+        '</tr></thead><tbody>' +
+        wds.map(w => {
+          const cls = w.net > 0 ? 'pos' : w.net < 0 ? 'neg' : 'dim';
+          return '<tr>' +
+            '<td>' + WD[w.wd] + '</td>' +
+            '<td class="num dim">' + num(w.count) + '</td>' +
+            '<td class="num">' + pct(w.winRate) + '</td>' +
+            '<td class="num ' + cls + '">' + money(w.net) + '</td>' +
+          '</tr>';
+        }).join('') +
+        '</tbody></table>';
+    }
+
+    // Hour table
+    if (el.hourTable) {
+      const hours = byHour(filtered);
+      if (!hours.length) {
+        el.hourTable.innerHTML = '<div class="empty">' + t('no_data_short') + '</div>';
+      } else {
+        el.hourTable.innerHTML =
+          '<table><thead><tr>' +
+            '<th>' + t('hour_analysis') + '</th><th>' + t('th_count') + '</th>' +
+            '<th>' + t('th_wr') + '</th><th>' + t('th_net') + '</th>' +
+          '</tr></thead><tbody>' +
+          hours.sort((a,b) => a.hour - b.hour).map(h => {
+            const cls = h.net > 0 ? 'pos' : h.net < 0 ? 'neg' : 'dim';
+            return '<tr>' +
+              '<td>' + String(h.hour).padStart(2,'0') + ':00</td>' +
+              '<td class="num dim">' + num(h.count) + '</td>' +
+              '<td class="num">' + pct(h.winRate) + '</td>' +
+              '<td class="num ' + cls + '">' + money(h.net) + '</td>' +
+            '</tr>';
+          }).join('') +
+          '</tbody></table>';
+      }
+    }
+
+    // Symbol table
+    if (el.symbolTable) {
+      const syms = bySymbol(filtered);
+      if (!syms.length) {
+        el.symbolTable.innerHTML = '<div class="empty">' + t('no_data_short') + '</div>';
+      } else {
+        el.symbolTable.innerHTML =
+          '<table><thead><tr>' +
+            '<th>' + t('symbol_perf') + '</th><th>' + t('th_count') + '</th>' +
+            '<th>' + t('th_wr') + '</th><th>' + t('th_net') + '</th>' +
+          '</tr></thead><tbody>' +
+          syms.map(s => {
+            const cls = s.net > 0 ? 'pos' : s.net < 0 ? 'neg' : 'dim';
+            return '<tr>' +
+              '<td>' + esc(s.name) + '</td>' +
+              '<td class="num dim">' + num(s.count) + '</td>' +
+              '<td class="num">' + pct(s.winRate) + '</td>' +
+              '<td class="num ' + cls + '">' + money(s.net) + '</td>' +
+            '</tr>';
+          }).join('') +
+          '</tbody></table>';
+      }
+    }
+
+    // Side table
+    if (el.sideTable) {
+      const sides = bySide(filtered);
+      el.sideTable.innerHTML =
+        '<table><thead><tr>' +
+          '<th>' + t('side_analysis') + '</th><th>' + t('th_count') + '</th>' +
+          '<th>' + t('th_wr') + '</th><th>' + t('th_net') + '</th>' +
+        '</tr></thead><tbody>' +
+        sides.map(s => {
+          const cls = s.net > 0 ? 'pos' : s.net < 0 ? 'neg' : 'dim';
+          const label = s.key === 'buy' ? '🟢 ' + t('buy') : '🔴 ' + t('sell');
+          return '<tr>' +
+            '<td>' + label + '</td>' +
+            '<td class="num dim">' + num(s.count) + '</td>' +
+            '<td class="num">' + pct(s.winRate) + '</td>' +
+            '<td class="num ' + cls + '">' + money(s.net) + '</td>' +
+          '</tr>';
+        }).join('') +
+        '</tbody></table>';
+    }
+
+    // Period comparison
+    if (el.comparisonTable && range !== 'all') {
+      const current = inRange(trades, range);
+      const prev = previousRange(trades, range);
+      const currStats = computeStats(current);
+      const prevStats = computeStats(prev);
+      const rows = [
+        { l: t('kpi_net'),      c: currStats.net,          p: prevStats.net,          fmt: money },
+        { l: t('kpi_winrate'),  c: currStats.winRate,      p: prevStats.winRate,      fmt: pct },
+        { l: t('kpi_total'),    c: currStats.total,        p: prevStats.total,        fmt: num },
+        { l: t('kpi_pf'),       c: currStats.profitFactor, p: prevStats.profitFactor, fmt: x => isFinite(x) ? x.toFixed(2) : '∞' },
+        { l: t('kpi_avgr'),     c: currStats.avgR,         p: prevStats.avgR,         fmt: x => x.toFixed(2) + 'R' }
+      ];
+      el.comparisonTable.innerHTML =
+        '<table><thead><tr>' +
+          '<th>' + t('goal_metric') + '</th>' +
+          '<th>' + t('period_current') + '</th>' +
+          '<th>' + t('period_previous') + '</th>' +
+          '<th>' + t('change') + '</th>' +
+        '</tr></thead><tbody>' +
+        rows.map(r => {
+          const diff = r.c - r.p;
+          const change = r.p !== 0 ? (diff / Math.abs(r.p)) * 100 : 0;
+          const cls = diff > 0 ? 'pos' : diff < 0 ? 'neg' : 'dim';
+          const arrow = diff > 0 ? '📈' : diff < 0 ? '📉' : '➡️';
+          return '<tr>' +
+            '<td>' + esc(r.l) + '</td>' +
+            '<td class="num dim">' + r.fmt(r.p) + '</td>' +
+            '<td class="num">' + r.fmt(r.c) + '</td>' +
+            '<td class="num ' + cls + '">' + arrow + ' ' + (change >= 0 ? '+' : '') + change.toFixed(1) + '%</td>' +
+          '</tr>';
+        }).join('') +
+        '</tbody></table>';
+    }
   }
 
   /* ============================ RENDER: EMOTIONS ============================ */
@@ -2034,7 +2808,46 @@
     }
     el.calGrid.innerHTML = html;
     el.calDetailCard.hidden = true;
+
+    // Week stats + month stats
+    renderCalWeekStats(year, month);
+    renderCalMonthStats(year, month);
   }
+
+  function renderCalWeekStats(year, month) {
+    if (!el.calWeekStats) return;
+    const now = new Date();
+    const dayOfWeek = now.getDay();
+    const daysSinceSat = (dayOfWeek + 1) % 7;
+    const start = new Date(now);
+    start.setDate(now.getDate() - daysSinceSat);
+    const end = new Date(start);
+    end.setDate(start.getDate() + 6);
+    const startISO = toISO(start), endISO = toISO(end);
+    const periodTrades = trades.filter(t => t.date >= startISO && t.date <= endISO);
+    const s = computeStats(periodTrades);
+    el.calWeekStats.innerHTML =
+      '<div class="cal-stat-box">' +
+        '<div class="csb-label">' + t('this_week') + '</div>' +
+        '<div class="csb-value ' + (s.net > 0 ? 'pos' : s.net < 0 ? 'neg' : '') + '">' + money(s.net) + '</div>' +
+        '<div class="csb-meta">' + num(s.total) + ' ' + t('trades_word') + ' · ' + pct(s.winRate) + '</div>' +
+      '</div>';
+  }
+
+  function renderCalMonthStats(year, month) {
+    if (!el.calMonthStats) return;
+    const startISO = year + '-' + String(month + 1).padStart(2, '0') + '-01';
+    const endISO = year + '-' + String(month + 1).padStart(2, '0') + '-' + String(new Date(year, month + 1, 0).getDate()).padStart(2, '0');
+    const periodTrades = trades.filter(t => t.date >= startISO && t.date <= endISO);
+    const s = computeStats(periodTrades);
+    el.calMonthStats.innerHTML =
+      '<div class="cal-stat-box">' +
+        '<div class="csb-label">' + t('this_month') + '</div>' +
+        '<div class="csb-value ' + (s.net > 0 ? 'pos' : s.net < 0 ? 'neg' : '') + '">' + money(s.net) + '</div>' +
+        '<div class="csb-meta">' + num(s.total) + ' ' + t('trades_word') + ' · ' + pct(s.winRate) + '</div>' +
+      '</div>';
+  }
+
   function showCalDetail(dateISO) {
     const dayTrades = trades.filter(tr => tr.date === dateISO);
     if (!dayTrades.length) return;
@@ -2127,6 +2940,19 @@
     renderGoalsPreview();
     renderRulesStatus();
     renderChecklistManager();
+    renderTemplates();
+    renderMultiGoals();
+
+    // Notifications
+    if (el.notifEnabled) {
+      el.notifEnabled.checked = !!notifications.enabled;
+      el.notifDaily.checked = !!notifications.daily;
+      el.notifGoal.checked = !!notifications.goal;
+      el.notifRules.checked = !!notifications.rules;
+      el.notifWin.checked = !!notifications.win;
+      el.bigWinThr.value = notifications.bigWin || '';
+      el.bigLossThr.value = notifications.bigLoss || '';
+    }
   }
 
   function renderGoalsPreview() {
@@ -2237,6 +3063,62 @@
     el.rulesStatus.innerHTML = html || '<div class="empty" style="padding:14px;font-size:12px">' + t('no_rule') + '</div>';
   }
 
+  /* ============================ MULTI GOALS (NEW v8) ============================ */
+  function renderMultiGoals() {
+    if (!el.multiGoalsList) return;
+    if (!multiGoals.length) {
+      el.multiGoalsList.innerHTML = '<div class="empty" style="padding:14px;font-size:12px">' + t('no_goal') + '</div>';
+      return;
+    }
+    el.multiGoalsList.innerHTML = multiGoals.map((g, i) => {
+      let current = 0;
+      const stats = computeStats(inRange(trades, '30'));
+      if (g.type === 'pnl') current = stats.net;
+      else if (g.type === 'winrate') current = stats.winRate;
+      else if (g.type === 'trades') current = stats.total;
+      else if (g.type === 'pf') current = stats.profitFactor;
+      else if (g.type === 'r') current = stats.avgR;
+      else if (g.type === 'dd') current = -stats.maxDrawdown;
+      const progress = g.target > 0 ? Math.min(100, Math.max(0, (current / g.target) * 100)) : 0;
+      const typeLabel = {
+        pnl: t('goal_type_pnl'), winrate: t('goal_type_winrate'),
+        trades: t('goal_type_trades'), pf: t('goal_type_pf'),
+        r: t('goal_type_r'), dd: t('goal_type_dd'),
+        discipline: t('goal_type_discipline')
+      }[g.type] || g.type;
+      return '<div class="goal-box">' +
+        '<div class="goal-ico">' + (g.type === 'dd' ? '⚠️' : g.type === 'pf' ? '⚖️' : g.type === 'r' ? '📐' : '🎯') + '</div>' +
+        '<div class="goal-info">' +
+          '<div class="goal-label">' + esc(typeLabel) + '</div>' +
+          '<div class="goal-vals">' +
+            '<span class="cur">' + (g.type === 'pnl' ? money(current) : g.type === 'winrate' ? pct(current) : g.type === 'r' ? current.toFixed(2) + 'R' : g.type === 'pf' ? current.toFixed(2) : num(current)) + '</span>' +
+            '<span class="sep">/</span>' +
+            '<span class="tgt">' + (g.type === 'pnl' ? money(g.target, false) : g.type === 'winrate' ? pct(g.target) : g.type === 'r' ? g.target + 'R' : g.type === 'pf' ? g.target : num(g.target)) + '</span>' +
+          '</div>' +
+          '<div class="goal-progress"><div class="goal-progress-fill" style="width:' + progress + '%"></div></div>' +
+        '</div>' +
+        '<button class="btn ghost sm" data-del-goal="' + g.id + '" title="Delete">🗑️</button>' +
+      '</div>';
+    }).join('');
+  }
+
+  async function addMultiGoal() {
+    const type = prompt(t('goal_type') + ' (pnl / winrate / trades / pf / r):', 'pnl');
+    if (!type) return;
+    const target = parseFloat(prompt(t('goal_target') + ':', '100'));
+    if (!target || isNaN(target)) return;
+    multiGoals.push({ id: uid(), type, target });
+    saveJSON(KEYS.goals, multiGoals);
+    renderMultiGoals();
+    toast(el.multiGoalMsg, t('ok_goal'));
+  }
+
+  async function removeMultiGoal(id) {
+    multiGoals = multiGoals.filter(g => g.id !== id);
+    saveJSON(KEYS.goals, multiGoals);
+    renderMultiGoals();
+  }
+
   /* ============================ RENDER ALL ============================ */
   function renderAll() {
     renderRecent();
@@ -2247,9 +3129,40 @@
     renderDailyTable();
     renderGoalsMini();
     renderRulesBanner();
+    if (el.pageAnalysis.classList.contains('active')) {
+      renderDeepAnalytics();
+    }
     if (el.pageCalendar.classList.contains('active')) renderCalendar();
     if (el.pageTrades.classList.contains('active')) renderAllTrades();
     if (el.pageSettings.classList.contains('active')) renderSettingsPage();
+  }
+
+  /* ============================ RISK CALCULATOR (NEW v8) ============================ */
+  function calculateRiskPosition() {
+    const balance = parseFloat(el.riskBalance.value) || 0;
+    const riskPercent = parseFloat(el.riskPercent.value) || 0;
+    const pips = parseFloat(el.riskPips.value) || 0;
+    const pipValue = parseFloat(el.riskPipValue.value) || 10;
+
+    if (!balance || !riskPercent || !pips) {
+      el.riskResult.innerHTML = '<div class="empty" style="padding:14px;font-size:12px">' + t('no_data_short') + '</div>';
+      return;
+    }
+
+    const riskAmount = (balance * riskPercent) / 100;
+    const lotSize = riskAmount / (pips * pipValue);
+
+    el.riskResult.innerHTML =
+      '<div class="calc-result-box">' +
+        '<div class="crb-row">' +
+          '<span class="crb-label">' + t('calc_risk_amount') + '</span>' +
+          '<span class="crb-value">' + money(riskAmount, false) + '</span>' +
+        '</div>' +
+        '<div class="crb-row highlight">' +
+          '<span class="crb-label">' + t('calc_result') + '</span>' +
+          '<span class="crb-value">' + lotSize.toFixed(3) + ' lots</span>' +
+        '</div>' +
+      '</div>';
   }
 
   /* ============================ DEMO DATA ============================ */
@@ -2289,6 +3202,8 @@
           side: Math.random() < 0.5 ? 'buy' : 'sell',
           result, amount, risk, tags, emotion, checklist,
           screenshot: null, note: '',
+          hour: Math.floor(Math.random() * 24),
+          duration: Math.floor(5 + Math.random() * 240),
           createdAt: now - i * 86400000 + j * 60000
         });
       }
@@ -2335,6 +3250,14 @@
             checklist: raw.checklist && typeof raw.checklist === 'object' ? raw.checklist : {},
             screenshot: typeof raw.screenshot === 'string' ? raw.screenshot : null,
             note: String(raw.note || '').slice(0, 500),
+            entry: raw.entry != null ? Number(raw.entry) : null,
+            exit: raw.exit != null ? Number(raw.exit) : null,
+            sl: raw.sl != null ? Number(raw.sl) : null,
+            tp: raw.tp != null ? Number(raw.tp) : null,
+            lot: raw.lot != null ? Number(raw.lot) : null,
+            rr: raw.rr || null,
+            hour: raw.hour != null ? Number(raw.hour) : null,
+            duration: raw.duration != null ? Number(raw.duration) : null,
             createdAt: Number(raw.createdAt) || Date.now()
           });
           existing.add(id);
@@ -2366,6 +3289,25 @@
       toast(el.formMsg, t('cancel_edit'));
     });
     el.fTags.addEventListener('input', renderTagsPreview);
+
+    // Auto R:R
+    if (el.fEntry) el.fEntry.addEventListener('input', calcAutoRR);
+    if (el.fExit)  el.fExit.addEventListener('input', calcAutoRR);
+    if (el.fSL)    el.fSL.addEventListener('input', calcAutoRR);
+
+    // Advanced fields toggle
+    if (el.advancedToggle && el.advancedFields) {
+      el.advancedToggle.addEventListener('click', () => {
+        advancedFieldsVisible = !advancedFieldsVisible;
+        el.advancedFields.hidden = !advancedFieldsVisible;
+        el.advancedToggle.textContent = advancedFieldsVisible ? '⚙️ ' + t('hide_advanced') : '⚙️ ' + t('show_advanced');
+      });
+    }
+
+    // Templates
+    if (el.saveTemplateBtn) el.saveTemplateBtn.addEventListener('click', saveCurrentAsTemplate);
+    if (el.applyTemplateBtn) el.applyTemplateBtn.addEventListener('click', applyTemplate);
+    if (el.deleteTemplateBtn) el.deleteTemplateBtn.addEventListener('click', deleteTemplate);
 
     async function handleListClick(e) {
       const thumb = e.target.closest('.ti-thumb');
@@ -2417,6 +3359,7 @@
       range = btn.dataset.r;
       renderKPIs(); renderCharts(); renderEmotions();
       renderStrategyTable(); renderDailyTable(); renderGoalsMini();
+      renderDeepAnalytics();
     });
 
     el.demoBtn.addEventListener('click', async () => {
@@ -2565,12 +3508,44 @@
     if (el.saveChecklistBtn) el.saveChecklistBtn.addEventListener('click', saveChecklistAll);
     if (el.resetChecklistBtn) el.resetChecklistBtn.addEventListener('click', resetChecklistAll);
 
+    /* ===== RISK CALCULATOR ===== */
+    if (el.calcRiskBtn) el.calcRiskBtn.addEventListener('click', calculateRiskPosition);
+
+    /* ===== NOTIFICATIONS ===== */
+    if (el.saveNotifBtn) {
+      el.saveNotifBtn.addEventListener('click', async () => {
+        notifications = {
+          enabled: !!el.notifEnabled.checked,
+          daily: !!el.notifDaily.checked,
+          goal: !!el.notifGoal.checked,
+          rules: !!el.notifRules.checked,
+          win: !!el.notifWin.checked,
+          bigWin: parseFloat(el.bigWinThr.value) || 500,
+          bigLoss: parseFloat(el.bigLossThr.value) || 500
+        };
+        saveJSON(KEYS.notifications, notifications);
+        if (notifications.enabled && 'Notification' in window && Notification.permission === 'default') {
+          try { await Notification.requestPermission(); } catch(e){}
+        }
+        toast(el.notifMsg, t('notif_saved'));
+      });
+    }
+
+    /* ===== MULTI GOALS ===== */
+    if (el.addGoalBtn) el.addGoalBtn.addEventListener('click', addMultiGoal);
+    if (el.multiGoalsList) {
+      el.multiGoalsList.addEventListener('click', e => {
+        const del = e.target.closest('[data-del-goal]');
+        if (del) removeMultiGoal(del.dataset.delGoal);
+      });
+    }
+
     window.addEventListener('resize', debounce(() => {
-      if (el.pageAnalysis.classList.contains('active')) renderCharts();
+      if (el.pageAnalysis.classList.contains('active')) { renderCharts(); renderDeepAnalytics(); }
     }, 160));
     window.addEventListener('orientationchange', () => {
       setTimeout(() => {
-        if (el.pageAnalysis.classList.contains('active')) renderCharts();
+        if (el.pageAnalysis.classList.contains('active')) { renderCharts(); renderDeepAnalytics(); }
       }, 250);
     });
 
@@ -2646,6 +3621,7 @@
     initThemeManager();
     bindEvents();
     updateAutocomplete();
+    renderTemplates();
     renderAll();
     renderChecklistManager();
 
