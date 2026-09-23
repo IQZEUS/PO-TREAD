@@ -963,114 +963,6 @@
     .cp-actions{grid-template-columns:1fr}
     .cp-btn{padding:15px 16px}
   }
-
-  /* ============================================================
-     CHECKLIST MANAGER (Settings) — NEW
-     ============================================================ */
-  .checklist-manager {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin-bottom: 12px;
-  }
-  .cm-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .cm-item .cm-input {
-    flex: 1 1 auto;
-    min-width: 0;
-    background: var(--card-2);
-    border: 1px solid var(--line-2);
-    color: var(--text);
-    font: inherit;
-    font-size: 13.5px;
-    padding: 11px 14px;
-    border-radius: 11px;
-    outline: none;
-    transition: all .2s ease;
-  }
-  .cm-item .cm-input:focus {
-    border-color: var(--blue);
-    box-shadow: 0 0 0 4px rgba(91,140,255,.14);
-  }
-  .cm-item .cm-del {
-    flex: 0 0 42px;
-    width: 42px; height: 42px;
-    border-radius: 11px;
-    border: 1px solid rgba(255,86,116,.35);
-    background: rgba(255,86,116,.08);
-    color: var(--red);
-    font-size: 16px;
-    font-weight: 800;
-    cursor: pointer;
-    display: grid;
-    place-items: center;
-    transition: all .2s ease;
-    font-family: inherit;
-  }
-  .cm-item .cm-del:hover {
-    background: rgba(255,86,116,.2);
-    border-color: rgba(255,86,116,.6);
-  }
-  .cm-item .cm-del:active { transform: scale(.94); }
-  .cm-add-row {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 12px;
-  }
-  .cm-add-row input {
-    flex: 1 1 auto;
-    min-width: 0;
-    background: var(--card-2);
-    border: 1px solid var(--line-2);
-    color: var(--text);
-    font: inherit;
-    font-size: 13.5px;
-    padding: 11px 14px;
-    border-radius: 11px;
-    outline: none;
-  }
-  .cm-add-row input:focus {
-    border-color: var(--blue);
-    box-shadow: 0 0 0 4px rgba(91,140,255,.14);
-  }
-  .cm-add-row .cm-add-btn {
-    flex: 0 0 48px;
-    width: 48px; height: 44px;
-    border-radius: 11px;
-    border: 1px solid transparent;
-    background: linear-gradient(135deg, #2ee6a6 0%, #12b57f 100%);
-    color: #04170f;
-    font-size: 20px;
-    font-weight: 900;
-    cursor: pointer;
-    display: grid;
-    place-items: center;
-    transition: all .2s ease;
-    box-shadow: 0 10px 22px -10px rgba(46,230,166,.7);
-    font-family: inherit;
-  }
-  .cm-add-row .cm-add-btn:active { transform: scale(.94); }
-  .cm-add-row .cm-add-btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 14px 26px -10px rgba(46,230,166,.9);
-  }
-  .cm-empty {
-    text-align: center;
-    color: var(--muted);
-    font-size: 12px;
-    padding: 14px;
-    background: var(--card-2);
-    border-radius: 11px;
-    border: 1px dashed var(--line-2);
-    margin-bottom: 10px;
-  }
-  @media (max-width: 640px) {
-    .cm-item .cm-input { font-size: 15px; padding: 12px 13px; }
-    .cm-add-row input { font-size: 15px; padding: 12px 13px; }
-  }
 </style>
 </head>
 <body>
@@ -1204,11 +1096,11 @@
           </div>
           <div class="field">
             <label data-i18n="symbol">💱 نماد</label>
-            <input type="text" id="f-symbol" list="symbols-list" placeholder="XAUUSD / BTCUSD" autocomplete="off" required />
+            <input type="text" id="f-symbol" placeholder="XAUUSD" required />
           </div>
           <div class="field full">
             <label data-i18n="strategy">🎯 استراتژی</label>
-            <input type="text" id="f-strategy" list="strategies-list" data-i18n-ph="strategy_ph" placeholder="بریک‌اوت لندن / Price Action" autocomplete="off" required />
+            <input type="text" id="f-strategy" data-i18n-ph="strategy_ph" placeholder="بریک‌اوت لندن" required />
           </div>
           <div class="field">
             <label data-i18n="side">⚖️ جهت</label>
@@ -1235,7 +1127,7 @@
           </div>
           <div class="field full">
             <label><span data-i18n="tags">🏷️ تگ‌ها</span> <span class="hint" data-i18n="tags_hint">(با ویرگول جدا کن)</span></label>
-            <input type="text" id="f-tags" list="tags-list" placeholder="بریک‌اوت, لندن, M5" autocomplete="off" />
+            <input type="text" id="f-tags" placeholder="بریک‌اوت, لندن, M5" />
             <div class="tags-preview" id="tags-preview"></div>
           </div>
           <div class="field full">
@@ -1529,29 +1421,6 @@
 
       <div class="rules-status" id="rules-status"></div>
     </div>
-
-    <!-- ============================================================
-         CHECKLIST MANAGER CARD
-         ============================================================ -->
-    <div class="card">
-      <div class="card-head">
-        <h2 data-i18n="checklist_settings">✅ مدیریت چک‌لیست</h2>
-        <span class="muted" data-i18n="checklist_settings_sub">آیتم‌ها رو ویرایش، اضافه یا حذف کن</span>
-      </div>
-
-      <div class="checklist-manager" id="checklist-manager"></div>
-
-      <div class="cm-add-row">
-        <input type="text" id="new-checklist-input" data-i18n-ph="checklist_new_ph" placeholder="آیتم جدید..." maxlength="80" />
-        <button type="button" class="cm-add-btn" id="add-checklist-btn" title="Add">+</button>
-      </div>
-
-      <div class="form-actions">
-        <button type="button" class="btn primary" id="save-checklist-btn" data-i18n="save_checklist">💾 ذخیره چک‌لیست</button>
-        <button type="button" class="btn ghost" id="reset-checklist-btn" data-i18n="reset_checklist">↺ بازگردانی پیش‌فرض</button>
-        <span class="msg" id="checklist-msg"></span>
-      </div>
-    </div>
   </section>
 
 </div>
@@ -1618,11 +1487,6 @@
     </div>
   </div>
 </div>
-
-<!-- ========== AUTOCOMPLETE DATALISTS ========== -->
-<datalist id="symbols-list"></datalist>
-<datalist id="strategies-list"></datalist>
-<datalist id="tags-list"></datalist>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -2376,6 +2240,5 @@
   else { init(); }
 })();
 </script>
-
 </body>
 </html>
