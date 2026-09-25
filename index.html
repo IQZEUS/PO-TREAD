@@ -1184,82 +1184,140 @@
 
   <section class="page" id="page-analysis">
     <div id="rules-banner"></div>
-<!-- ===== STORM ANALYSIS ===== -->
-<div class="storm-hero">
-  <div class="storm-gauge-card">
-    <div class="storm-gauge">
-      <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <circle cx="100" cy="100" r="80"
-                fill="none" stroke="rgba(120,150,200,.15)" stroke-width="14"/>
-        <circle id="stormGaugeFill" cx="100" cy="100" r="80"
-                fill="none" stroke="#2ee6a6" stroke-width="14" stroke-linecap="round"
-                transform="rotate(-90 100 100)"/>
-      </svg>
-      <div class="storm-gauge-center">
-        <div class="storm-gauge-value" id="stormGaugeValue">0%</div>
-        <div class="storm-gauge-label">وین ریت</div>
-      </div>
-    </div>
-    <div class="storm-gauge-meta">
-      <div class="storm-meta-item">
-        <div class="storm-meta-val pos" id="stormWins">0</div>
-        <div class="storm-meta-lbl">برد</div>
-      </div>
-      <div class="storm-meta-item">
-        <div class="storm-meta-val neg" id="stormLosses">0</div>
-        <div class="storm-meta-lbl">باخت</div>
-      </div>
-    </div>
+<!-- ============ STORM ANALYTICS ============ -->
+<div class="sa-wrap" id="saWrap">
+
+  <div class="sa-header">
+    <div class="sa-header-title">Performance Analytics</div>
+    <div class="sa-header-time" id="saUpdated">—</div>
   </div>
 
-  <div class="storm-right">
-    <div class="storm-card">
-      <div class="storm-card-head">
-        <div class="storm-card-title"><span class="ico">🔥</span><span>استریک فعلی</span></div>
+  <!-- Top KPI Strip -->
+  <div class="sa-kpi-row" id="saKpiRow"></div>
+
+  <!-- Main grid: Donut + Right column -->
+  <div class="sa-main">
+
+    <!-- Donut -->
+    <div class="sa-card">
+      <div class="sa-card-head">
+        <div class="sa-card-title">Win Rate</div>
+        <div class="sa-card-tag" id="saDonutRange">ALL</div>
       </div>
-      <div class="storm-streak-main neutral" id="stormStreakMain">
-        <span class="icon">⚡</span>
-        <div class="storm-streak-info">
-          <div class="storm-streak-val" id="stormStreakVal">—</div>
-          <div class="storm-streak-lbl" id="stormStreakLbl">در انتظار معامله</div>
+      <div class="sa-donut-wrap">
+        <div class="sa-donut">
+          <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <circle class="sa-donut-track" cx="100" cy="100" r="80"
+                    fill="none" stroke="rgba(120,150,200,.1)" stroke-width="16"/>
+            <circle id="saDonutFill" cx="100" cy="100" r="80"
+                    fill="none" stroke="#2ee6a6" stroke-width="16" stroke-linecap="round"
+                    transform="rotate(-90 100 100)"/>
+          </svg>
+          <div class="sa-donut-center">
+            <div class="sa-donut-val" id="saDonutVal">0%</div>
+            <div class="sa-donut-lbl">Win Rate</div>
+          </div>
+        </div>
+        <div class="sa-donut-stats">
+          <div class="sa-donut-stat">
+            <div class="sa-donut-stat-val pos" id="saDonutWins">0</div>
+            <div class="sa-donut-stat-lbl">Wins</div>
+          </div>
+          <div class="sa-donut-stat">
+            <div class="sa-donut-stat-val neg" id="saDonutLosses">0</div>
+            <div class="sa-donut-stat-lbl">Losses</div>
+          </div>
+          <div class="sa-donut-stat">
+            <div class="sa-donut-stat-val" id="saDonutBE">0</div>
+            <div class="sa-donut-stat-lbl">B/E</div>
+          </div>
         </div>
       </div>
     </div>
 
-    <div class="storm-card">
-      <div class="storm-card-head">
-        <div class="storm-card-title"><span class="ico">📊</span><span>آخرین ۲۰ معامله</span></div>
-      </div>
-      <div class="storm-ribbon" id="stormRibbon"></div>
-    </div>
+    <!-- Right column -->
+    <div class="sa-right">
 
-    <div class="storm-card storm-full">
-      <div class="storm-card-head">
-        <div class="storm-card-title"><span class="ico">📅</span><span>عملکرد روزهای هفته</span></div>
+      <!-- Sparkline P/L -->
+      <div class="sa-card">
+        <div class="sa-card-head">
+          <div class="sa-card-title">Net P/L</div>
+          <div class="sa-card-tag">30D</div>
+        </div>
+        <div class="sa-spark">
+          <div class="sa-spark-head">
+            <div class="sa-spark-value" id="saSparkVal">$0</div>
+            <div class="sa-spark-trend flat" id="saSparkTrend">—</div>
+          </div>
+          <div class="sa-spark-canvas">
+            <canvas id="saSparkCanvas"></canvas>
+          </div>
+        </div>
       </div>
-      <div class="storm-dow" id="stormDow"></div>
-    </div>
 
-    <div class="storm-card storm-full">
-      <div class="storm-card-head">
-        <div class="storm-card-title"><span class="ico">📈</span><span>وین ریت غلتان</span></div>
-        <span style="font-size:10.5px;color:var(--muted)">۲۰ معامله اخیر</span>
+      <!-- Sparkline Win Rate Rolling -->
+      <div class="sa-card">
+        <div class="sa-card-head">
+          <div class="sa-card-title">Rolling WR</div>
+          <div class="sa-card-tag">20T</div>
+        </div>
+        <div class="sa-spark">
+          <div class="sa-spark-head">
+            <div class="sa-spark-value" id="saRollVal">0%</div>
+            <div class="sa-spark-trend flat" id="saRollTrend">—</div>
+          </div>
+          <div class="sa-spark-canvas">
+            <canvas id="saRollCanvas"></canvas>
+          </div>
+        </div>
       </div>
-      <div class="storm-rolling"><canvas id="stormRolling"></canvas></div>
-    </div>
 
-    <div class="storm-card storm-full">
-      <div class="storm-card-head">
-        <div class="storm-card-title"><span class="ico">⚖️</span><span>مقایسه دوره‌ای</span></div>
+      <!-- Streak -->
+      <div class="sa-card sa-right-full">
+        <div class="sa-card-head">
+          <div class="sa-card-title">Current Streak</div>
+        </div>
+        <div class="sa-streak" id="saStreak">
+          <div class="sa-streak-badge" id="saStreakIcon">—</div>
+          <div class="sa-streak-body">
+            <div class="sa-streak-val" id="saStreakVal">No streak</div>
+            <div class="sa-streak-sub" id="saStreakSub">Log a trade to start tracking</div>
+          </div>
+        </div>
       </div>
-      <div class="storm-compare" id="stormCompare"></div>
+
+      <!-- Days Heatmap -->
+      <div class="sa-card sa-right-full">
+        <div class="sa-card-head">
+          <div class="sa-card-title">Day of Week</div>
+          <div class="sa-card-tag">ALL</div>
+        </div>
+        <div class="sa-heat" id="saHeat"></div>
+      </div>
+
+      <!-- Ribbon -->
+      <div class="sa-card sa-right-full">
+        <div class="sa-card-head">
+          <div class="sa-card-title">Last 20 Trades</div>
+          <div class="sa-card-tag">SEQUENCE</div>
+        </div>
+        <div class="sa-ribbon" id="saRibbon"></div>
+      </div>
+
     </div>
   </div>
-</div>
 
-<div class="storm-insight" id="stormInsight">
-  <span class="icon">💡</span>
-  <div class="storm-insight-text" id="stormInsightText">در حال تحلیل…</div>
+  <!-- Period Comparison -->
+  <div class="sa-card">
+    <div class="sa-card-head">
+      <div class="sa-card-title">Period Comparison</div>
+    </div>
+    <div class="sa-compare" id="saCompare"></div>
+  </div>
+
+  <!-- Insights -->
+  <div class="sa-insights" id="saInsights"></div>
+
 </div>
     <div class="card toolbar">
       <div class="seg" id="range-filter">
