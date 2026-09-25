@@ -1305,89 +1305,109 @@ html[dir="ltr"] .switch input:checked + .switch-track .switch-thumb {
   .ti-actions button { padding: 4px 5px; font-size: 11px; }
 }
 /* ============================================================
-   STORM ANALYSIS v1 — Enhanced Analysis Page
+   STORM ANALYSIS v2 — BULLETPROOF
    ============================================================ */
-.storm-hero{display:grid;grid-template-columns:340px 1fr;gap:16px;margin-bottom:16px}
+.storm-hero{display:grid;grid-template-columns:320px minmax(0,1fr);gap:16px;margin-bottom:16px}
+
+/* --- Gauge Card --- */
 .storm-gauge-card{
-  background:var(--card);border:1px solid var(--line);border-radius:22px;padding:24px;
-  backdrop-filter:blur(20px) saturate(140%);-webkit-backdrop-filter:blur(20px) saturate(140%);
-  box-shadow:var(--shadow-lg);position:relative;overflow:hidden;
-  display:flex;flex-direction:column;align-items:center;gap:20px;
+  background:var(--card);border:1px solid var(--line);border-radius:22px;
+  padding:24px;display:flex;flex-direction:column;align-items:center;gap:18px;
+  position:relative;overflow:hidden;
 }
 .storm-gauge-card::before{
   content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;
-  background:conic-gradient(from 0deg,transparent 0deg,rgba(46,230,166,.12) 90deg,transparent 180deg,rgba(91,140,255,.12) 270deg,transparent 360deg);
-  animation:stormSpin 14s linear infinite;pointer-events:none;opacity:.55;
+  background:radial-gradient(circle at 30% 30%,rgba(46,230,166,.10),transparent 45%),
+             radial-gradient(circle at 70% 70%,rgba(91,140,255,.10),transparent 45%);
+  pointer-events:none;opacity:.7;
 }
-@keyframes stormSpin{to{transform:rotate(360deg)}}
-.storm-gauge{position:relative;width:220px;height:220px;z-index:1}
-.storm-gauge svg{width:100%;height:100%;transform:rotate(-90deg)}
-.storm-gauge .gauge-track{fill:none;stroke:rgba(120,150,200,.12);stroke-width:14}
+.storm-gauge{
+  position:relative;width:200px;height:200px;flex:0 0 200px;
+  display:flex;align-items:center;justify-content:center;
+}
+.storm-gauge svg{
+  position:absolute;top:0;left:0;width:200px;height:200px;display:block;
+  overflow:visible;
+}
+.storm-gauge .gauge-track{fill:none;stroke:rgba(120,150,200,.15);stroke-width:14}
 .storm-gauge .gauge-fill{
-  fill:none;stroke:url(#stormGaugeGrad);stroke-width:14;stroke-linecap:round;
-  transition:stroke-dashoffset 1.2s cubic-bezier(.2,.9,.3,1);
-  filter:drop-shadow(0 0 10px rgba(46,230,166,.55));
+  fill:none;stroke-width:14;stroke-linecap:round;
+  transition:stroke-dashoffset 1.1s cubic-bezier(.2,.9,.3,1);
+  filter:drop-shadow(0 0 8px rgba(46,230,166,.4));
 }
-.storm-gauge-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;pointer-events:none}
+.storm-gauge-center{
+  position:relative;z-index:2;text-align:center;pointer-events:none;
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+}
 .storm-gauge-value{
-  font-size:44px;font-weight:900;direction:ltr;line-height:1;
-  font-variant-numeric:tabular-nums;
-  background:linear-gradient(135deg,#2ee6a6 0%,#5b8cff 50%,#c78aff 100%);
-  background-size:200% auto;-webkit-background-clip:text;background-clip:text;
-  -webkit-text-fill-color:transparent;animation:stormShine 3s linear infinite;
+  font-size:40px;font-weight:900;line-height:1;
+  font-variant-numeric:tabular-nums;direction:ltr;color:#2ee6a6;
 }
-@keyframes stormShine{to{background-position:200% center}}
-.storm-gauge-label{font-size:11px;color:var(--muted);font-weight:800;letter-spacing:2px;text-transform:uppercase;margin-top:8px}
-.storm-gauge-meta{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;z-index:1}
+.storm-gauge-label{
+  font-size:10.5px;color:var(--muted);font-weight:800;
+  letter-spacing:2px;text-transform:uppercase;
+}
+.storm-gauge-meta{
+  display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;z-index:2;position:relative;
+}
 .storm-meta-item{
-  padding:12px;background:rgba(120,150,200,.06);border:1px solid var(--line-2);
-  border-radius:12px;text-align:center;transition:all .3s;
+  padding:11px;background:rgba(120,150,200,.06);border:1px solid var(--line-2);
+  border-radius:12px;text-align:center;
 }
-.storm-meta-item:hover{border-color:var(--green);background:rgba(46,230,166,.08);transform:translateY(-2px)}
-.storm-meta-val{font-size:20px;font-weight:900;color:var(--text);direction:ltr;font-variant-numeric:tabular-nums;line-height:1.2}
-.storm-meta-val.pos{color:var(--green)}.storm-meta-val.neg{color:var(--red)}
+.storm-meta-val{
+  font-size:19px;font-weight:900;color:var(--text);
+  direction:ltr;font-variant-numeric:tabular-nums;line-height:1.2;
+}
+.storm-meta-val.pos{color:#2ee6a6}
+.storm-meta-val.neg{color:#ff5674}
 .storm-meta-lbl{font-size:10.5px;color:var(--muted);font-weight:700;margin-top:3px}
+
+/* --- Right column --- */
 .storm-right{display:grid;grid-template-columns:1fr 1fr;gap:16px;min-width:0}
 .storm-card{
   background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;
-  backdrop-filter:blur(20px) saturate(140%);-webkit-backdrop-filter:blur(20px) saturate(140%);
-  box-shadow:var(--shadow-lg);position:relative;overflow:hidden;min-width:0;
+  position:relative;min-width:0;
 }
 .storm-card-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
 .storm-card-title{font-size:12.5px;font-weight:800;color:var(--text-2);display:flex;align-items:center;gap:8px}
-.storm-card-title .ico{font-size:16px}
-.storm-streak{display:flex;flex-direction:column;gap:12px}
+.storm-card-title .ico{font-size:15px;line-height:1}
+.storm-full{grid-column:1 / -1}
+
+/* --- Streak --- */
 .storm-streak-main{
   display:flex;align-items:center;gap:14px;padding:14px;border-radius:14px;
-  background:linear-gradient(135deg,rgba(46,230,166,.1),rgba(91,140,255,.06));
-  border:1px solid rgba(46,230,166,.25);position:relative;overflow:hidden;
+  background:linear-gradient(135deg,rgba(46,230,166,.1),rgba(91,140,255,.05));
+  border:1px solid rgba(46,230,166,.25);
 }
-.storm-streak-main.loss{background:linear-gradient(135deg,rgba(255,86,116,.12),rgba(255,95,162,.06));border-color:rgba(255,86,116,.35)}
-.storm-streak-main .icon{font-size:32px;animation:stormPulse 1.8s ease-in-out infinite}
-@keyframes stormPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
+.storm-streak-main.loss{background:linear-gradient(135deg,rgba(255,86,116,.1),rgba(255,95,162,.05));border-color:rgba(255,86,116,.3)}
+.storm-streak-main.neutral{background:rgba(120,150,200,.06);border-color:var(--line-2)}
+.storm-streak-main .icon{font-size:30px;line-height:1}
 .storm-streak-info{flex:1;min-width:0}
-.storm-streak-val{font-size:24px;font-weight:900;color:var(--text);line-height:1;direction:ltr;font-variant-numeric:tabular-nums}
-.storm-streak-lbl{font-size:11px;color:var(--muted);font-weight:700;margin-top:4px}
-.storm-ribbon{display:flex;gap:5px;flex-wrap:wrap;padding:10px;background:rgba(120,150,200,.05);border-radius:10px;border:1px solid var(--line)}
+.storm-streak-val{font-size:20px;font-weight:900;color:var(--text);line-height:1.1;direction:ltr}
+.storm-streak-lbl{font-size:11px;color:var(--muted);font-weight:700;margin-top:5px;line-height:1.5}
+
+/* --- Ribbon --- */
+.storm-ribbon{
+  display:flex;gap:5px;flex-wrap:wrap;padding:10px;
+  background:rgba(120,150,200,.05);border-radius:10px;border:1px solid var(--line);
+}
 .storm-dot{
   width:18px;height:18px;border-radius:6px;display:grid;place-items:center;
-  font-size:9px;font-weight:900;color:#04170f;transition:transform .2s;cursor:help;
-  animation:stormDotIn .35s cubic-bezier(.2,.9,.3,1.2) backwards;
+  font-size:9px;font-weight:900;color:#04170f;cursor:help;
 }
-@keyframes stormDotIn{from{opacity:0;transform:scale(0) rotate(-180deg)}to{opacity:1;transform:none}}
-.storm-dot.win{background:linear-gradient(135deg,#2ee6a6,#7bffd0);box-shadow:0 2px 8px -2px rgba(46,230,166,.6)}
-.storm-dot.loss{background:linear-gradient(135deg,#ff5674,#ff8fa3);color:#fff;box-shadow:0 2px 8px -2px rgba(255,86,116,.6)}
-.storm-dot.be{background:rgba(120,150,200,.2);color:var(--muted);border:1px solid var(--line-2)}
-.storm-dot:hover{transform:scale(1.25);z-index:2}
+.storm-dot.win{background:#2ee6a6}
+.storm-dot.loss{background:#ff5674;color:#fff}
+.storm-dot.be{background:rgba(120,150,200,.25);color:var(--muted)}
+
+/* --- Day of Week --- */
 .storm-dow{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
 .storm-dow-cell{
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   padding:10px 4px;background:rgba(120,150,200,.05);border:1px solid var(--line);
-  border-radius:10px;gap:3px;transition:all .25s;cursor:default;min-height:72px;
+  border-radius:10px;gap:3px;min-height:72px;
 }
-.storm-dow-cell:hover{transform:translateY(-3px);border-color:var(--line-2);box-shadow:0 8px 20px -8px rgba(0,0,0,.4)}
-.storm-dow-day{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase}
-.storm-dow-val{font-size:12px;font-weight:900;direction:ltr;font-variant-numeric:tabular-nums;line-height:1}
+.storm-dow-day{font-size:10px;font-weight:700;color:var(--muted)}
+.storm-dow-val{font-size:12px;font-weight:900;direction:ltr;font-variant-numeric:tabular-nums;line-height:1;color:var(--text-2)}
 .storm-dow-count{font-size:9px;color:var(--muted);font-weight:600;margin-top:2px}
 .storm-dow-cell.pos-1{background:rgba(46,230,166,.12);border-color:rgba(46,230,166,.25)}
 .storm-dow-cell.pos-2{background:rgba(46,230,166,.22);border-color:rgba(46,230,166,.4)}
@@ -1395,46 +1415,50 @@ html[dir="ltr"] .switch input:checked + .switch-track .switch-thumb {
 .storm-dow-cell.neg-1{background:rgba(255,86,116,.12);border-color:rgba(255,86,116,.25)}
 .storm-dow-cell.neg-2{background:rgba(255,86,116,.22);border-color:rgba(255,86,116,.4)}
 .storm-dow-cell.neg-3{background:rgba(255,86,116,.35);border-color:rgba(255,86,116,.55)}
-.storm-dow-cell.pos-1 .storm-dow-val,.storm-dow-cell.pos-2 .storm-dow-val,.storm-dow-cell.pos-3 .storm-dow-val{color:var(--green)}
-.storm-dow-cell.neg-1 .storm-dow-val,.storm-dow-cell.neg-2 .storm-dow-val,.storm-dow-cell.neg-3 .storm-dow-val{color:var(--red)}
-.storm-rolling{position:relative;height:100px;margin-top:4px}
+.storm-dow-cell.pos-1 .storm-dow-val,
+.storm-dow-cell.pos-2 .storm-dow-val,
+.storm-dow-cell.pos-3 .storm-dow-val{color:#2ee6a6}
+.storm-dow-cell.neg-1 .storm-dow-val,
+.storm-dow-cell.neg-2 .storm-dow-val,
+.storm-dow-cell.neg-3 .storm-dow-val{color:#ff5674}
+
+/* --- Rolling chart --- */
+.storm-rolling{position:relative;height:110px}
 .storm-rolling canvas{width:100%;height:100%;display:block}
+
+/* --- Compare --- */
 .storm-compare{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .storm-compare-item{
   padding:14px;border-radius:14px;background:rgba(120,150,200,.05);
-  border:1px solid var(--line);position:relative;overflow:hidden;transition:all .3s;
+  border:1px solid var(--line);
 }
-.storm-compare-item:hover{transform:translateY(-2px);border-color:var(--line-2)}
 .storm-compare-lbl{font-size:10.5px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
 .storm-compare-val{font-size:19px;font-weight:900;color:var(--text);direction:ltr;font-variant-numeric:tabular-nums;line-height:1.1}
 .storm-compare-delta{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:800;margin-top:6px;padding:3px 8px;border-radius:999px;direction:ltr}
-.storm-compare-delta.up{background:rgba(46,230,166,.15);color:var(--green)}
-.storm-compare-delta.down{background:rgba(255,86,116,.15);color:var(--red)}
+.storm-compare-delta.up{background:rgba(46,230,166,.15);color:#2ee6a6}
+.storm-compare-delta.down{background:rgba(255,86,116,.15);color:#ff5674}
 .storm-compare-delta.same{background:rgba(120,150,200,.15);color:var(--muted)}
-.storm-full{grid-column:1 / -1}
+
+/* --- Insight --- */
 .storm-insight{
   display:flex;align-items:center;gap:14px;padding:16px 18px;
-  background:linear-gradient(135deg,rgba(199,138,255,.1),rgba(255,95,162,.06));
-  border:1px solid rgba(199,138,255,.3);border-radius:16px;margin-bottom:16px;
-  position:relative;overflow:hidden;
-  animation:stormSlideIn .5s cubic-bezier(.2,.9,.3,1.2);
+  background:linear-gradient(135deg,rgba(199,138,255,.08),rgba(255,95,162,.05));
+  border:1px solid rgba(199,138,255,.25);border-radius:16px;margin-bottom:16px;
 }
-@keyframes stormSlideIn{from{opacity:0;transform:translateX(-20px)}to{opacity:1;transform:none}}
-.storm-insight .icon{font-size:28px;flex:0 0 auto;animation:stormPulse 2s ease-in-out infinite}
-.storm-insight-text{flex:1;font-size:12.5px;font-weight:700;color:var(--text);line-height:1.75}
-.storm-insight-text strong{
-  background:linear-gradient(90deg,#c78aff,#ff5fa2,#c78aff);background-size:200% auto;
-  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
-  animation:stormShine 3s linear infinite;font-weight:900;
-}
+.storm-insight .icon{font-size:26px;flex:0 0 auto;line-height:1}
+.storm-insight-text{flex:1;font-size:12.5px;font-weight:700;color:var(--text);line-height:1.8}
+.storm-insight-text strong{color:#c78aff;font-weight:900}
+
+/* --- Responsive --- */
 @media (max-width:900px){
   .storm-hero{grid-template-columns:1fr}
   .storm-right{grid-template-columns:1fr}
 }
 @media (max-width:640px){
-  .storm-gauge{width:180px;height:180px}
-  .storm-gauge-value{font-size:36px}
-  .storm-gauge-card{padding:18px;border-radius:18px;gap:16px}
+  .storm-gauge-card{padding:18px;border-radius:18px;gap:14px}
+  .storm-gauge{width:170px;height:170px;flex:0 0 170px}
+  .storm-gauge svg{width:170px;height:170px}
+  .storm-gauge-value{font-size:34px}
   .storm-right{gap:12px}
   .storm-card{padding:14px;border-radius:16px}
   .storm-dow{gap:4px}
@@ -1443,15 +1467,17 @@ html[dir="ltr"] .switch input:checked + .switch-track .switch-thumb {
   .storm-dow-val{font-size:10.5px}
   .storm-dow-count{font-size:8px}
   .storm-dot{width:15px;height:15px;font-size:8px}
-  .storm-streak-val{font-size:20px}
-  .storm-streak-main .icon{font-size:26px;padding:0 4px}
+  .storm-streak-val{font-size:18px}
+  .storm-streak-main .icon{font-size:24px}
   .storm-compare{grid-template-columns:1fr}
   .storm-insight{padding:13px 14px;gap:10px}
   .storm-insight .icon{font-size:22px}
   .storm-insight-text{font-size:11.5px}
+  .storm-rolling{height:90px}
 }
 @media (max-width:380px){
-  .storm-gauge{width:150px;height:150px}
-  .storm-gauge-value{font-size:30px}
+  .storm-gauge{width:150px;height:150px;flex:0 0 150px}
+  .storm-gauge svg{width:150px;height:150px}
+  .storm-gauge-value{font-size:28px}
   .storm-dot{width:13px;height:13px;font-size:7px}
 }
