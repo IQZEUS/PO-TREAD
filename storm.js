@@ -1,18 +1,21 @@
 /* ============================================================
-   STORM ANALYSIS v2 — Bulletproof
+   STORM ANALYTICS v3 — Professional Grade
    ============================================================ */
 (function(){
   'use strict';
 
   var $ = function(id){ return document.getElementById(id); };
+
   var lang = 'fa';
   try { lang = localStorage.getItem('po.lang') || 'fa'; } catch(e){}
   var isFa = lang === 'fa';
 
   var DAYS = isFa
+    ? ['ش','ی','د','س','چ','پ','ج']
+    : ['S','M','T','W','T','F','S'];
+  var DAYS_FULL = isFa
     ? ['شنبه','یکشنبه','دوشنبه','سه‌شنبه','چهارشنبه','پنج‌شنبه','جمعه']
     : ['Sat','Sun','Mon','Tue','Wed','Thu','Fri'];
-
   var EMO = {
     calm:    isFa?'آرام':'Calm',
     focused: isFa?'متمرکز':'Focused',
@@ -22,6 +25,7 @@
     revenge: isFa?'انتقام':'Revenge'
   };
 
+  /* ================= Helpers ================= */
   function loadTrades(){
     try {
       var a = JSON.parse(localStorage.getItem('po.v4.trades') || '[]');
@@ -45,17 +49,22 @@
     if (n < 0) return '-$' + s;
     return '$' + s;
   }
-  function compact(v){
+  function moneyShort(v){
     var n = Number(v) || 0, a = Math.abs(n);
     var sign = n < 0 ? '-' : (n > 0 ? '+' : '');
-    if (a >= 1e6) return sign + (a / 1e6).toFixed(1).replace(/\.0$/, '') + 'M';
-    if (a >= 1e3) return sign + (a / 1e3).toFixed(1).replace(/\.0$/, '') + 'K';
-    return sign + Math.round(a);
+    if (a >= 1e6) return sign + '$' + (a/1e6).toFixed(1).replace(/\.0$/,'') + 'M';
+    if (a >= 1e3) return sign + '$' + (a/1e3).toFixed(1).replace(/\.0$/,'') + 'K';
+    return sign + '$' + Math.round(a);
   }
   function faNum(n){
     if (!isFa) return String(n);
     try { return Number(n).toLocaleString('fa-IR'); }
     catch(e){ return String(n); }
+  }
+  function esc(s){
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){
+      return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c];
+    });
   }
   function getDow(iso){
     var p = String(iso).split('-');
@@ -75,78 +84,303 @@
       return (a.createdAt || 0) - (b.createdAt || 0);
     });
   }
-  function escapeHTML(s){
-    return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){
-      return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c];
-    });
-  }
+  function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
 
-  /* ---------- Gauge ---------- */
-  var gaugeAnimRAF = null;
-  function renderGauge(trades){
-    var fill = $('stormGaugeFill');
-    var val  = $('stormGaugeValue');
-    var wEl  = $('stormWins');
-    var lEl  = $('stormLosses');
-    if (!fill || !val) return;
+  /* ================= Donut ================= */
+  function renderDonut(trades){
+    var fill = $('saDonutFill');
+    var valEl = $('saDonutVal');
+    var wEl = $('saDonutWins');
+    var lEl = $('saDonutLosses');
+    var bEl = $('saDonutBE');
+    if (!fill || !valEl) return;
 
-    var wins = 0, losses = 0;
+    var wins = 0, losses = 0, be = 0;
     for (var i = 0; i < trades.length; i++){
-      if (trades[i].result === 'win') wins++;
-      else if (trades[i].result === 'loss') losses++;
+      var r = trades[i].result;
+      if (r === 'win') wins++;
+      else if (r === 'loss') losses++;
+      else be++;
     }
     var closed = wins + losses;
     var wr = closed ? (wins / closed) * 100 : 0;
 
     var r = 80;
     var circ = 2 * Math.PI * r;
-    var arcLen = circ * 0.75;
-    var offset = arcLen * (1 - wr / 100);
+    var arc = circ * 0.75;
+    var off = arc * (1 - wr / 100);
 
-    fill.style.strokeDasharray = arcLen + ' ' + circ;
-    fill.style.strokeDashoffset = arcLen;
+    fill.style.strokeDasharray = arc + ' ' + circ;
+    fill.style.strokeDashoffset = arc;
 
-    if (gaugeAnimRAF) cancelAnimationFrame(gaugeAnimRAF);
-    gaugeAnimRAF = requestAnimationFrame(function(){
-      gaugeAnimRAF = requestAnimationFrame(function(){
-        fill.style.strokeDashoffset = offset;
+    // color based on WR
+    var color = wr >= 60 ? '#2ee6a6' : wr >= 45 ? '#5b8cff' : wr >= 30 ? '#ffb020' : '#ff5674';
+    fill.setAttribute('stroke', color);
+
+    requestAnimationFrame(function(){
+      requestAnimationFrame(function(){
+        fill.style.strokeDashoffset = off;
       });
     });
 
-    animateNumber(val, wr, '%');
+    animateNumber(valEl, wr, '%', 0);
     if (wEl) wEl.textContent = faNum(wins);
     if (lEl) lEl.textContent = faNum(losses);
+    if (bEl) bEl.textContent = faNum(be);
   }
-  function animateNumber(el, target, suffix){
-    if (el.__animRAF) cancelAnimationFrame(el.__animRAF);
+  function animateNumber(el, target, suffix, decimals){
+    if (el.__raf) cancelAnimationFrame(el.__raf);
     var start = performance.now();
-    var dur = 1000;
+    var dur = 900;
+    decimals = decimals || 0;
     function step(now){
-      var p = Math.min(1, (now - start) / dur);
+      var p = clamp((now - start) / dur, 0, 1);
       var eased = 1 - Math.pow(1 - p, 3);
-      el.textContent = (target * eased).toFixed(0) + (suffix || '');
-      if (p < 1) el.__animRAF = requestAnimationFrame(step);
-      else el.__animRAF = null;
+      el.textContent = (target * eased).toFixed(decimals) + (suffix || '');
+      if (p < 1) el.__raf = requestAnimationFrame(step);
+      else el.__raf = null;
     }
-    el.__animRAF = requestAnimationFrame(step);
+    el.__raf = requestAnimationFrame(step);
   }
 
-  /* ---------- Streak ---------- */
-  function renderStreak(trades){
-    var main = $('stormStreakMain');
-    var vEl  = $('stormStreakVal');
-    var lEl  = $('stormStreakLbl');
-    if (!main || !vEl || !lEl) return;
+  /* ================= KPI Strip ================= */
+  function renderKpiRow(trades){
+    var el = $('saKpiRow');
+    if (!el) return;
+
+    // current 30d vs prev 30d
+    var now = new Date();
+    var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    function rangeStats(fromISO, toISO){
+      var net = 0, wins = 0, losses = 0, gp = 0, gl = 0, rSum = 0, rCnt = 0;
+      for (var i = 0; i < trades.length; i++){
+        var t = trades[i];
+        if (t.date < fromISO || t.date > toISO) continue;
+        var p = pnl(t);
+        net += p;
+        if (t.result === 'win'){ wins++; gp += p; }
+        else if (t.result === 'loss'){ losses++; gl += Math.abs(p); }
+        var risk = Math.abs(Number(t.risk) || 0);
+        if (risk > 0){ rSum += p / risk; rCnt++; }
+      }
+      var closed = wins + losses;
+      return {
+        net: net,
+        wins: wins,
+        losses: losses,
+        count: wins + losses,
+        winRate: closed ? (wins/closed) * 100 : 0,
+        pf: gl > 0 ? gp / gl : (gp > 0 ? Infinity : 0),
+        avgR: rCnt ? rSum / rCnt : 0
+      };
+    }
+
+    var c30f = new Date(today); c30f.setDate(c30f.getDate() - 29);
+    var p30t = new Date(c30f); p30t.setDate(p30t.getDate() - 1);
+    var p30f = new Date(p30t); p30f.setDate(p30t.getDate() - 29);
+
+    var cur = rangeStats(isoDate(c30f), isoDate(today));
+    var prev = rangeStats(isoDate(p30f), isoDate(p30t));
+
+    function deltaPct(c, p){
+      if (p === 0 && c === 0) return { cls:'', txt:'0%' };
+      if (p === 0) return { cls: c > 0 ? 'up' : 'down', txt: c > 0 ? '↑ NEW' : '↓ NEW' };
+      var pct = ((c - p) / Math.abs(p)) * 100;
+      if (Math.abs(pct) < 1) return { cls:'', txt:'≈ 0%' };
+      return {
+        cls: pct > 0 ? 'up' : 'down',
+        txt: (pct > 0 ? '↑ ' : '↓ ') + Math.abs(pct).toFixed(0) + '%'
+      };
+    }
+
+    var items = [
+      { label: 'Net P/L · 30D', value: moneyShort(cur.net), cls: cur.net > 0 ? 'pos' : cur.net < 0 ? 'neg' : '', delta: deltaPct(cur.net, prev.net) },
+      { label: 'Win Rate · 30D', value: cur.winRate.toFixed(1) + '%', cls: cur.winRate >= 50 ? 'pos' : 'neg', delta: deltaPct(cur.winRate, prev.winRate) },
+      { label: 'Profit Factor', value: isFinite(cur.pf) ? cur.pf.toFixed(2) : '∞', cls: cur.pf >= 1 ? 'pos' : 'neg', delta: deltaPct(cur.pf, prev.pf) },
+      { label: 'Avg R · 30D', value: cur.avgR ? ((cur.avgR > 0 ? '+' : '') + cur.avgR.toFixed(2)) : '—', cls: cur.avgR > 0 ? 'pos' : cur.avgR < 0 ? 'neg' : '', delta: deltaPct(cur.avgR, prev.avgR) }
+    ];
+
+    var html = '';
+    for (var i = 0; i < items.length; i++){
+      var it = items[i];
+      html += '<div class="sa-kpi">' +
+        '<div class="sa-kpi-label">' + esc(it.label) + '</div>' +
+        '<div class="sa-kpi-value ' + it.cls + '">' + esc(it.value) + '</div>' +
+        '<div class="sa-kpi-delta ' + it.delta.cls + '">' + esc(it.delta.txt) + '</div>' +
+      '</div>';
+    }
+    el.innerHTML = html;
+  }
+
+  /* ================= Sparkline Canvas ================= */
+  function drawSpark(canvas, values, color){
+    if (!canvas) return;
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    var rect = canvas.getBoundingClientRect();
+    var w = Math.max(rect.width, 10);
+    var h = Math.max(rect.height, 10);
+    canvas.width = Math.round(w * dpr);
+    canvas.height = Math.round(h * dpr);
+    var ctx = canvas.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+
+    if (!values || values.length < 2){
+      ctx.strokeStyle = 'rgba(120,150,200,.15)';
+      ctx.setLineDash([3, 3]);
+      ctx.beginPath();
+      ctx.moveTo(0, h/2);
+      ctx.lineTo(w, h/2);
+      ctx.stroke();
+      return;
+    }
+
+    var pad = 3;
+    var pw = w - pad * 2;
+    var ph = h - pad * 2;
+
+    var lo = values[0], hi = values[0];
+    for (var i = 1; i < values.length; i++){
+      if (values[i] < lo) lo = values[i];
+      if (values[i] > hi) hi = values[i];
+    }
+    if (hi === lo){ hi += 1; lo -= 1; }
+    var span = hi - lo;
+
+    function xOf(i){ return pad + (i / (values.length - 1)) * pw; }
+    function yOf(v){ return pad + (1 - (v - lo) / span) * ph; }
+
+    // Area
+    var grad = ctx.createLinearGradient(0, 0, 0, h);
+    grad.addColorStop(0, color + '55');
+    grad.addColorStop(1, color + '00');
+    ctx.beginPath();
+    ctx.moveTo(xOf(0), h - pad);
+    for (var a = 0; a < values.length; a++) ctx.lineTo(xOf(a), yOf(values[a]));
+    ctx.lineTo(xOf(values.length - 1), h - pad);
+    ctx.closePath();
+    ctx.fillStyle = grad;
+    ctx.fill();
+
+    // Line
+    ctx.beginPath();
+    for (var b = 0; b < values.length; b++){
+      if (b === 0) ctx.moveTo(xOf(b), yOf(values[b]));
+      else ctx.lineTo(xOf(b), yOf(values[b]));
+    }
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+    ctx.stroke();
+
+    // End dot
+    var lastI = values.length - 1;
+    ctx.beginPath();
+    ctx.arc(xOf(lastI), yOf(values[lastI]), 3, 0, Math.PI * 2);
+    ctx.fillStyle = color;
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,.7)';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+  }
+
+  /* ================= Spark Cards ================= */
+  function renderSparkPL(trades){
+    var valEl = $('saSparkVal');
+    var trendEl = $('saSparkTrend');
+    var canvas = $('saSparkCanvas');
+    if (!valEl || !canvas) return;
+
+    var now = new Date();
+    var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    var byDay = {};
+    for (var i = 29; i >= 0; i--){
+      var d = new Date(today); d.setDate(d.getDate() - i);
+      byDay[isoDate(d)] = 0;
+    }
+    for (var j = 0; j < trades.length; j++){
+      if (byDay[trades[j].date] !== undefined) byDay[trades[j].date] += pnl(trades[j]);
+    }
+    var days = Object.keys(byDay).sort();
+    var cum = [], run = 0;
+    for (var k = 0; k < days.length; k++){
+      run += byDay[days[k]];
+      cum.push(run);
+    }
+
+    var total = cum.length ? cum[cum.length - 1] : 0;
+    var firstHalf = cum.slice(0, 15).reduce(function(a,b){return a+b;},0);
+    var secondHalf = cum.slice(15).reduce(function(a,b){return a+b;},0);
+    var trendCls = 'flat';
+    var trendTxt = '—';
+    if (Math.abs(secondHalf) > 0.01 || Math.abs(firstHalf) > 0.01){
+      if (secondHalf > firstHalf + 1) { trendCls = 'up'; trendTxt = '↑ UP'; }
+      else if (secondHalf < firstHalf - 1) { trendCls = 'down'; trendTxt = '↓ DOWN'; }
+      else { trendTxt = '≈ FLAT'; }
+    }
+
+    valEl.textContent = money(total);
+    valEl.className = 'sa-spark-value ' + (total > 0 ? 'pos' : total < 0 ? 'neg' : '');
+    if (trendEl){
+      trendEl.className = 'sa-spark-trend ' + trendCls;
+      trendEl.textContent = trendTxt;
+    }
+    drawSpark(canvas, cum, total >= 0 ? '#2ee6a6' : '#ff5674');
+  }
+
+  function renderSparkRolling(trades){
+    var valEl = $('saRollVal');
+    var trendEl = $('saRollTrend');
+    var canvas = $('saRollCanvas');
+    if (!valEl || !canvas) return;
 
     var sorted = sortAsc(trades);
-    var current = 0, currentType = null;
+    var WIN = 20;
+    var series = [];
+    for (var i = 0; i < sorted.length; i++){
+      var start = Math.max(0, i - WIN + 1);
+      var wins = 0, closed = 0;
+      for (var k = start; k <= i; k++){
+        if (sorted[k].result === 'win'){ wins++; closed++; }
+        else if (sorted[k].result === 'loss'){ closed++; }
+      }
+      if (closed >= 5) series.push((wins / closed) * 100);
+    }
+
+    var current = series.length ? series[series.length - 1] : 0;
+    var prev = series.length > 5 ? series[series.length - 6] : current;
+    var diff = current - prev;
+
+    valEl.textContent = current.toFixed(1) + '%';
+    valEl.className = 'sa-spark-value ' + (current >= 50 ? 'pos' : current > 0 ? 'neg' : '');
+
+    if (trendEl){
+      if (Math.abs(diff) < 0.5){ trendEl.className = 'sa-spark-trend flat'; trendEl.textContent = '≈ FLAT'; }
+      else if (diff > 0){ trendEl.className = 'sa-spark-trend up'; trendEl.textContent = '↑ ' + diff.toFixed(0) + '%'; }
+      else { trendEl.className = 'sa-spark-trend down'; trendEl.textContent = '↓ ' + Math.abs(diff).toFixed(0) + '%'; }
+    }
+    drawSpark(canvas, series, current >= 50 ? '#2ee6a6' : '#ffb020');
+  }
+
+  /* ================= Streak ================= */
+  function renderStreak(trades){
+    var wrap = $('saStreak');
+    var iconEl = $('saStreakIcon');
+    var valEl = $('saStreakVal');
+    var subEl = $('saStreakSub');
+    if (!wrap || !valEl) return;
+
+    var sorted = sortAsc(trades);
+    var current = 0, type = null;
     for (var i = sorted.length - 1; i >= 0; i--){
       var t = sorted[i];
       if (t.result === 'be') continue;
-      if (currentType === null){ currentType = t.result; current = 1; }
-      else if (t.result === currentType) current++;
+      if (type === null){ type = t.result; current = 1; }
+      else if (t.result === type) current++;
       else break;
     }
+
     var bestW = 0, bestL = 0, w = 0, l = 0;
     for (var j = 0; j < sorted.length; j++){
       var x = sorted[j];
@@ -155,48 +389,30 @@
       else { w = 0; l = 0; }
     }
 
-    var icon = main.querySelector('.icon');
-    if (!current || !currentType){
-      vEl.textContent = '—';
-      lEl.textContent = isFa ? 'در انتظار معامله' : 'Waiting for trade';
-      main.className = 'storm-streak-main neutral';
-      if (icon) icon.textContent = '⚡';
+    if (!type){
+      wrap.className = 'sa-streak';
+      if (iconEl) iconEl.textContent = '—';
+      valEl.textContent = isFa ? 'بدون استریک' : 'No streak';
+      if (subEl) subEl.textContent = isFa ? 'اولین معامله رو ثبت کن' : 'Log your first trade';
       return;
     }
-    var isWin = currentType === 'win';
-    main.className = 'storm-streak-main' + (isWin ? '' : ' loss');
-    if (icon) icon.textContent = isWin ? '🔥' : '❄️';
-    vEl.textContent = faNum(current) + (isFa ? ' معامله' : ' trades');
-    lEl.textContent = isWin
-      ? (isFa ? ('برد پشت‌سرهم · بهترین: ' + faNum(bestW)) : ('Win streak · Best: ' + bestW))
-      : (isFa ? ('باخت پشت‌سرهم · بدترین: ' + faNum(bestL)) : ('Loss streak · Worst: ' + bestL));
+
+    var isWin = type === 'win';
+    wrap.className = 'sa-streak ' + (isWin ? 'win' : 'loss');
+    if (iconEl) iconEl.textContent = isWin ? '🔥' : '❄️';
+    valEl.innerHTML = faNum(current) + ' <span>' + (isFa ? (isWin ? 'برد پشت‌سرهم' : 'باخت پشت‌سرهم') : (isWin ? 'wins in a row' : 'losses in a row')) + '</span>';
+    if (subEl){
+      subEl.textContent = isWin
+        ? (isFa ? ('بهترین رکورد: ' + faNum(bestW) + ' برد') : ('Best: ' + bestW + ' wins'))
+        : (isFa ? ('بدترین رکورد: ' + faNum(bestL) + ' باخت') : ('Worst: ' + bestL + ' losses'));
+    }
   }
 
-  /* ---------- Ribbon ---------- */
-  function renderRibbon(trades){
-    var el = $('stormRibbon');
+  /* ================= Heatmap ================= */
+  function renderHeat(trades){
+    var el = $('saHeat');
     if (!el) return;
-    var sorted = sortAsc(trades).reverse().slice(0, 20);
-    if (!sorted.length){
-      el.innerHTML = '<span style="color:var(--muted);font-size:12px">' +
-        (isFa ? 'داده‌ای موجود نیست' : 'No data') + '</span>';
-      return;
-    }
-    var html = '';
-    for (var i = 0; i < sorted.length; i++){
-      var t = sorted[i];
-      var cls = t.result === 'win' ? 'win' : t.result === 'loss' ? 'loss' : 'be';
-      var letter = t.result === 'win' ? 'W' : t.result === 'loss' ? 'L' : 'B';
-      var tip = escapeHTML((t.symbol || '') + ' · ' + money(pnl(t)) + ' · ' + t.date);
-      html += '<span class="storm-dot ' + cls + '" title="' + tip + '">' + letter + '</span>';
-    }
-    el.innerHTML = html;
-  }
 
-  /* ---------- Day of Week ---------- */
-  function renderDow(trades){
-    var el = $('stormDow');
-    if (!el) return;
     var buckets = [];
     for (var i = 0; i < 7; i++) buckets.push({ net: 0, count: 0 });
     for (var j = 0; j < trades.length; j++){
@@ -216,120 +432,52 @@
       if (r < 0.67) return 2;
       return 3;
     }
+
     var html = '';
     for (var m = 0; m < 7; m++){
       var b = buckets[m];
       var inten = intensity(b.net);
       var cls = b.net > 0 ? ('pos-' + inten) : b.net < 0 ? ('neg-' + inten) : '';
-      var pnlTxt = b.count === 0 ? '—' : compact(b.net);
-      html += '<div class="storm-dow-cell ' + cls + '">' +
-        '<span class="storm-dow-day">' + DAYS[m] + '</span>' +
-        '<span class="storm-dow-val">' + pnlTxt + '</span>' +
-        '<span class="storm-dow-count">' + faNum(b.count) + (isFa ? ' معامله' : '') + '</span>' +
+      var val = b.count === 0 ? '—' : moneyShort(b.net);
+      html += '<div class="sa-heat-cell ' + cls + '" title="' + DAYS_FULL[m] + '">' +
+        '<span class="sa-heat-day">' + DAYS[m] + '</span>' +
+        '<span class="sa-heat-val">' + val + '</span>' +
+        '<span class="sa-heat-count">' + faNum(b.count) + '</span>' +
       '</div>';
     }
     el.innerHTML = html;
   }
 
-  /* ---------- Rolling Winrate ---------- */
-  function renderRolling(trades){
-    var canvas = $('stormRolling');
-    if (!canvas) return;
+  /* ================= Ribbon ================= */
+  function renderRibbon(trades){
+    var el = $('saRibbon');
+    if (!el) return;
 
-    var sorted = sortAsc(trades);
-    var WINDOW = 20;
-    var points = [];
-    for (var i = 0; i < sorted.length; i++){
-      var start = Math.max(0, i - WINDOW + 1);
-      var slice = sorted.slice(start, i + 1);
-      var wins = 0, closed = 0;
-      for (var k = 0; k < slice.length; k++){
-        if (slice[k].result === 'win'){ wins++; closed++; }
-        else if (slice[k].result === 'loss'){ closed++; }
-      }
-      if (closed >= 5) points.push((wins / closed) * 100);
-    }
-
-    var dpr = Math.min(window.devicePixelRatio || 1, 2);
-    var rect = canvas.getBoundingClientRect();
-    var w = Math.max(rect.width, 10);
-    var h = Math.max(rect.height, 10);
-    canvas.width  = Math.round(w * dpr);
-    canvas.height = Math.round(h * dpr);
-    var ctx = canvas.getContext('2d');
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.clearRect(0, 0, w, h);
-
-    if (points.length < 2){
-      ctx.fillStyle = 'rgba(134,151,184,.65)';
-      ctx.font = '12px Vazirmatn, Inter, sans-serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(isFa ? 'داده کافی نیست' : 'Not enough data', w / 2, h / 2);
+    var sorted = sortAsc(trades).reverse().slice(0, 20);
+    if (!sorted.length){
+      el.innerHTML = '<div class="sa-ribbon-empty">' + (isFa ? 'داده‌ای موجود نیست' : 'No data') + '</div>';
       return;
     }
-
-    var pad = { t: 10, r: 10, b: 10, l: 10 };
-    var pw = w - pad.l - pad.r;
-    var ph = h - pad.t - pad.b;
-
-    // 50% line
-    var y50 = pad.t + ph * 0.5;
-    ctx.strokeStyle = 'rgba(120,150,200,.22)';
-    ctx.setLineDash([3, 3]);
-    ctx.beginPath();
-    ctx.moveTo(pad.l, y50);
-    ctx.lineTo(pad.l + pw, y50);
-    ctx.stroke();
-    ctx.setLineDash([]);
-
-    function xOf(i){ return pad.l + (i / (points.length - 1)) * pw; }
-    function yOf(v){ return pad.t + (1 - v / 100) * ph; }
-
-    // Area fill
-    var g = ctx.createLinearGradient(0, pad.t, 0, pad.t + ph);
-    g.addColorStop(0, 'rgba(46,230,166,.3)');
-    g.addColorStop(1, 'rgba(46,230,166,0)');
-    ctx.beginPath();
-    ctx.moveTo(xOf(0), pad.t + ph);
-    for (var a = 0; a < points.length; a++) ctx.lineTo(xOf(a), yOf(points[a]));
-    ctx.lineTo(xOf(points.length - 1), pad.t + ph);
-    ctx.closePath();
-    ctx.fillStyle = g;
-    ctx.fill();
-
-    // Line
-    ctx.beginPath();
-    for (var b = 0; b < points.length; b++){
-      if (b === 0) ctx.moveTo(xOf(b), yOf(points[b]));
-      else ctx.lineTo(xOf(b), yOf(points[b]));
+    var html = '';
+    for (var i = 0; i < sorted.length; i++){
+      var t = sorted[i];
+      var cls = t.result === 'win' ? 'win' : t.result === 'loss' ? 'loss' : 'be';
+      var letter = t.result === 'win' ? 'W' : t.result === 'loss' ? 'L' : 'B';
+      var tip = (t.symbol || '') + ' · ' + money(pnl(t)) + ' · ' + t.date;
+      html += '<span class="sa-ribbon-dot ' + cls + '" title="' + esc(tip) + '">' + letter + '</span>';
     }
-    ctx.strokeStyle = '#2ee6a6';
-    ctx.lineWidth = 2.5;
-    ctx.lineJoin = 'round';
-    ctx.lineCap = 'round';
-    ctx.stroke();
-
-    // Last dot
-    var lastI = points.length - 1;
-    ctx.beginPath();
-    ctx.arc(xOf(lastI), yOf(points[lastI]), 4.5, 0, Math.PI * 2);
-    ctx.fillStyle = '#2ee6a6';
-    ctx.fill();
-    ctx.strokeStyle = 'rgba(255,255,255,.9)';
-    ctx.lineWidth = 2;
-    ctx.stroke();
+    el.innerHTML = html;
   }
 
-  /* ---------- Comparison ---------- */
+  /* ================= Compare ================= */
   function renderCompare(trades){
-    var el = $('stormCompare');
+    var el = $('saCompare');
     if (!el) return;
 
     var now = new Date();
     var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
-    function statsRange(fromISO, toISO){
+    function statsFor(fromISO, toISO){
       var net = 0, wins = 0, losses = 0, count = 0;
       for (var i = 0; i < trades.length; i++){
         var t = trades[i];
@@ -341,140 +489,187 @@
         }
       }
       var closed = wins + losses;
-      return { net: net, count: count, winRate: closed ? (wins / closed) * 100 : 0 };
+      return { net: net, count: count, wr: closed ? (wins/closed)*100 : 0 };
     }
 
+    function delta(c, p){
+      if (p === 0 && c === 0) return { cls:'flat', txt:'—' };
+      if (p === 0) return { cls: c > 0 ? 'up' : 'down', txt: c > 0 ? '↑ NEW' : '↓ NEW' };
+      var pct = ((c - p) / Math.abs(p)) * 100;
+      if (Math.abs(pct) < 1) return { cls:'flat', txt:'≈ 0%' };
+      return {
+        cls: pct > 0 ? 'up' : 'down',
+        txt: (pct > 0 ? '↑ ' : '↓ ') + Math.abs(pct).toFixed(0) + '%'
+      };
+    }
+
+    // 7d
     var c7f = new Date(today); c7f.setDate(c7f.getDate() - 6);
-    var cur7 = statsRange(isoDate(c7f), isoDate(today));
-
     var p7t = new Date(c7f); p7t.setDate(p7t.getDate() - 1);
-    var p7f = new Date(p7t); p7f.setDate(p7f.getDate() - 6);
-    var prev7 = statsRange(isoDate(p7f), isoDate(p7t));
+    var p7f = new Date(p7t); p7f.setDate(p7t.getDate() - 6);
+    var cur7 = statsFor(isoDate(c7f), isoDate(today));
+    var prev7 = statsFor(isoDate(p7f), isoDate(p7t));
 
+    // 30d
     var c30f = new Date(today); c30f.setDate(c30f.getDate() - 29);
-    var cur30 = statsRange(isoDate(c30f), isoDate(today));
-
     var p30t = new Date(c30f); p30t.setDate(p30t.getDate() - 1);
-    var p30f = new Date(p30t); p30f.setDate(p30f.getDate() - 29);
-    var prev30 = statsRange(isoDate(p30f), isoDate(p30t));
-
-    function delta(cur, prev){
-      if (prev === 0 && cur === 0) return { cls: 'same', txt: '—' };
-      if (prev === 0) return { cls: cur > 0 ? 'up' : 'down', txt: (cur > 0 ? '↑ ' : '↓ ') + (isFa ? 'جدید' : 'new') };
-      var pct = ((cur - prev) / Math.abs(prev)) * 100;
-      if (Math.abs(pct) < 1) return { cls: 'same', txt: '≈ 0%' };
-      return { cls: pct > 0 ? 'up' : 'down', txt: (pct > 0 ? '↑ ' : '↓ ') + Math.abs(pct).toFixed(0) + '%' };
-    }
+    var p30f = new Date(p30t); p30f.setDate(p30t.getDate() - 29);
+    var cur30 = statsFor(isoDate(c30f), isoDate(today));
+    var prev30 = statsFor(isoDate(p30f), isoDate(p30t));
 
     var items = [
-      { lbl: isFa ? 'سود ۷ روزه' : '7-day P/L',     cur: cur7.net,      prev: prev7.net },
-      { lbl: isFa ? 'وین ریت ۷ روزه' : '7-day WR',  cur: cur7.winRate,  prev: prev7.winRate,  isPct: true },
-      { lbl: isFa ? 'سود ۳۰ روزه' : '30-day P/L',   cur: cur30.net,     prev: prev30.net },
-      { lbl: isFa ? 'وین ریت ۳۰ روزه' : '30-day WR', cur: cur30.winRate, prev: prev30.winRate, isPct: true }
+      { label: 'Net · 7D',  value: moneyShort(cur7.net), cls: cur7.net > 0 ? 'pos' : cur7.net < 0 ? 'neg' : '', delta: delta(cur7.net, prev7.net) },
+      { label: 'WR · 7D',   value: cur7.wr.toFixed(1) + '%', cls: cur7.wr >= 50 ? 'pos' : 'neg', delta: delta(cur7.wr, prev7.wr) },
+      { label: 'Net · 30D', value: moneyShort(cur30.net), cls: cur30.net > 0 ? 'pos' : cur30.net < 0 ? 'neg' : '', delta: delta(cur30.net, prev30.net) },
+      { label: 'WR · 30D',  value: cur30.wr.toFixed(1) + '%', cls: cur30.wr >= 50 ? 'pos' : 'neg', delta: delta(cur30.wr, prev30.wr) }
     ];
 
     var html = '';
     for (var i = 0; i < items.length; i++){
       var it = items[i];
-      var d = delta(it.cur, it.prev);
-      var v = it.isPct ? (it.cur.toFixed(1) + '%') : money(it.cur);
-      html += '<div class="storm-compare-item">' +
-        '<div class="storm-compare-lbl">' + it.lbl + '</div>' +
-        '<div class="storm-compare-val">' + v + '</div>' +
-        '<span class="storm-compare-delta ' + d.cls + '">' + d.txt + '</span>' +
+      html += '<div class="sa-cmp">' +
+        '<div class="sa-cmp-label">' + it.label + '</div>' +
+        '<div class="sa-cmp-value ' + it.cls + '">' + it.value + '</div>' +
+        '<span class="sa-cmp-delta ' + it.delta.cls + '">' + it.delta.txt + '</span>' +
       '</div>';
     }
     el.innerHTML = html;
   }
 
-  /* ---------- Insight ---------- */
-  function renderInsight(trades){
-    var el = $('stormInsightText');
+  /* ================= Insights ================= */
+  function renderInsights(trades){
+    var el = $('saInsights');
     if (!el) return;
 
-    if (!trades.length){
-      el.textContent = isFa
-        ? 'هنوز معامله‌ای ثبت نکردی — وقتشه شروع کنی! 🚀'
-        : 'No trades yet — get started! 🚀';
-      return;
-    }
-    var closedCount = 0;
-    for (var c = 0; c < trades.length; c++){
-      if (trades[c].result === 'win' || trades[c].result === 'loss') closedCount++;
-    }
-    if (closedCount < 3){
-      el.textContent = isFa
-        ? 'برای تحلیل دقیق‌تر، حداقل ۳ معامله‌ی بسته‌شده لازمه.'
-        : 'Log at least 3 closed trades for insights.';
+    if (trades.length < 3){
+      el.innerHTML = '<div class="sa-insight"><div class="sa-insight-icon">💡</div>' +
+        '<div class="sa-insight-body">' +
+          '<div class="sa-insight-label">Insight</div>' +
+          '<div class="sa-insight-text">' +
+            (isFa ? 'حداقل <strong>۳ معامله</strong> ثبت کن تا تحلیل شخصی‌سازی‌شده ببینی.' : 'Log at least <strong>3 trades</strong> for personalized insights.') +
+          '</div>' +
+        '</div></div>';
       return;
     }
 
-    var buckets = [];
-    for (var i = 0; i < 7; i++) buckets.push({ net: 0, count: 0 });
+    var insights = [];
+
+    // Best day
+    var dayNet = [0,0,0,0,0,0,0], dayCount = [0,0,0,0,0,0,0];
+    for (var i = 0; i < trades.length; i++){
+      var d = getDow(trades[i].date);
+      dayNet[d] += pnl(trades[i]);
+      dayCount[d]++;
+    }
+    var bestDay = -1, bestDayNet = -Infinity;
+    for (var a = 0; a < 7; a++){
+      if (dayCount[a] >= 2 && dayNet[a] > bestDayNet){ bestDayNet = dayNet[a]; bestDay = a; }
+    }
+    if (bestDay !== -1 && bestDayNet > 0){
+      insights.push({
+        ico: '🏆', cls: 'good', label: 'Best Day',
+        text: isFa
+          ? 'روز <strong>' + DAYS_FULL[bestDay] + '</strong> سودآورترین روزته با <strong>' + money(bestDayNet) + '</strong>'
+          : '<strong>' + DAYS_FULL[bestDay] + '</strong> is your best day at <strong>' + money(bestDayNet) + '</strong>'
+      });
+    }
+
+    // Best strategy
+    var st = {};
     for (var j = 0; j < trades.length; j++){
-      var d = getDow(trades[j].date);
-      buckets[d].net += pnl(trades[j]);
-      buckets[d].count++;
+      var key = trades[j].strategy || '—';
+      if (!st[key]) st[key] = { net: 0, count: 0 };
+      st[key].net += pnl(trades[j]);
+      st[key].count++;
     }
-    var bestDow = -1;
-    for (var k = 0; k < 7; k++){
-      if (buckets[k].count === 0) continue;
-      if (bestDow === -1 || buckets[k].net > buckets[bestDow].net) bestDow = k;
+    var bestS = null, bestSNet = -Infinity;
+    for (var k in st){
+      if (st[k].count >= 2 && st[k].net > bestSNet){ bestSNet = st[k].net; bestS = k; }
     }
-
-    var strats = {};
-    for (var s = 0; s < trades.length; s++){
-      var key = trades[s].strategy || '—';
-      if (!strats[key]) strats[key] = { net: 0, count: 0 };
-      strats[key].net += pnl(trades[s]);
-      strats[key].count++;
-    }
-    var bestStratName = null, bestNet = -Infinity;
-    for (var sn in strats){
-      if (strats[sn].count >= 2 && strats[sn].net > bestNet){
-        bestNet = strats[sn].net;
-        bestStratName = sn;
-      }
+    if (bestS && bestSNet > 0){
+      insights.push({
+        ico: '🎯', cls: 'good', label: 'Top Strategy',
+        text: isFa
+          ? 'استراتژی <strong>' + esc(bestS) + '</strong> بهترین عملکردت رو داره (<strong>' + money(bestSNet) + '</strong>)'
+          : '<strong>' + esc(bestS) + '</strong> is your best setup (<strong>' + money(bestSNet) + '</strong>)'
+      });
     }
 
+    // Worst emotion
     var emo = {};
-    for (var e = 0; e < trades.length; e++){
-      var ek = trades[e].emotion || 'calm';
+    for (var m = 0; m < trades.length; m++){
+      var ek = trades[m].emotion || 'calm';
       if (!emo[ek]) emo[ek] = { net: 0, count: 0 };
-      emo[ek].net += pnl(trades[e]);
+      emo[ek].net += pnl(trades[m]);
       emo[ek].count++;
     }
-    var worstEmoKey = null, worstNet = Infinity;
-    for (var e2 in emo){
-      if (emo[e2].count >= 2 && emo[e2].net < worstNet){
-        worstNet = emo[e2].net;
-        worstEmoKey = e2;
-      }
+    var worstE = null, worstENet = Infinity;
+    for (var e in emo){
+      if (emo[e].count >= 2 && emo[e].net < worstENet){ worstENet = emo[e].net; worstE = e; }
+    }
+    if (worstE && worstENet < 0){
+      insights.push({
+        ico: '⚠️', cls: 'bad', label: 'Emotional Leak',
+        text: isFa
+          ? 'حالت <strong>' + (EMO[worstE] || worstE) + '</strong> برات ضرر زده (<strong>' + money(worstENet) + '</strong>)'
+          : '<strong>' + (EMO[worstE] || worstE) + '</strong> is costing you (<strong>' + money(worstENet) + '</strong>)'
+      });
     }
 
-    var parts = [];
-    if (bestDow !== -1 && buckets[bestDow].net > 0){
-      parts.push(isFa
-        ? 'بهترین روزت <strong>' + DAYS[bestDow] + '</strong> با سود ' + money(buckets[bestDow].net) + ' بوده'
-        : 'Best day: <strong>' + DAYS[bestDow] + '</strong> with ' + money(buckets[bestDow].net));
+    // Discipline (checklist)
+    var discSum = 0, discCnt = 0;
+    for (var p = 0; p < trades.length; p++){
+      var chk = trades[p].checklist || {};
+      var keys = Object.keys(chk);
+      if (keys.length === 0) continue;
+      var on = 0;
+      for (var q = 0; q < keys.length; q++) if (chk[keys[q]]) on++;
+      discSum += (on / keys.length) * 100;
+      discCnt++;
     }
-    if (bestStratName){
-      parts.push(isFa
-        ? 'استراتژی طلاییت: <strong>' + escapeHTML(bestStratName) + '</strong> (' + money(bestNet) + ')'
-        : 'Top strategy: <strong>' + escapeHTML(bestStratName) + '</strong> (' + money(bestNet) + ')');
-    }
-    if (worstEmoKey && worstNet < 0){
-      parts.push(isFa
-        ? 'حالت <strong>' + (EMO[worstEmoKey] || worstEmoKey) + '</strong> برات گرون تموم شده (' + money(worstNet) + ')'
-        : '<strong>' + (EMO[worstEmoKey] || worstEmoKey) + '</strong> costs you (' + money(worstNet) + ')');
+    if (discCnt >= 2){
+      var avg = discSum / discCnt;
+      var cls = avg >= 75 ? 'good' : avg >= 50 ? 'warn' : 'bad';
+      insights.push({
+        ico: '✅', cls: cls, label: 'Discipline',
+        text: isFa
+          ? 'میانگین پایبندی به چک‌لیست: <strong>' + avg.toFixed(0) + '%</strong>'
+          : 'Checklist adherence: <strong>' + avg.toFixed(0) + '%</strong>'
+      });
     }
 
-    el.innerHTML = parts.length
-      ? parts.join(' &nbsp;<span style="color:var(--muted)">·</span>&nbsp; ')
-      : (isFa ? 'داده‌ی کافی برای تحلیل نیست' : 'Not enough data');
+    if (!insights.length){
+      insights.push({
+        ico: '📊', cls: '', label: 'Insight',
+        text: isFa ? 'برای دیدن بینش‌های دقیق‌تر، معاملات بیشتری ثبت کن.' : 'Log more trades to unlock insights.'
+      });
+    }
+
+    var html = '';
+    for (var s = 0; s < insights.length; s++){
+      var ins = insights[s];
+      html += '<div class="sa-insight ' + ins.cls + '">' +
+        '<div class="sa-insight-icon">' + ins.ico + '</div>' +
+        '<div class="sa-insight-body">' +
+          '<div class="sa-insight-label">' + esc(ins.label) + '</div>' +
+          '<div class="sa-insight-text">' + ins.text + '</div>' +
+        '</div>' +
+      '</div>';
+    }
+    el.innerHTML = html;
   }
 
-  /* ---------- Render All ---------- */
+  /* ================= Update timestamp ================= */
+  function updateTime(){
+    var el = $('saUpdated');
+    if (!el) return;
+    var d = new Date();
+    var hh = String(d.getHours()).padStart(2, '0');
+    var mm = String(d.getMinutes()).padStart(2, '0');
+    el.textContent = hh + ':' + mm;
+  }
+
+  /* ================= Render All ================= */
   var scheduled = false;
   function renderAll(){
     if (scheduled) return;
@@ -483,27 +678,31 @@
       scheduled = false;
       try {
         var trades = loadTrades();
-        renderGauge(trades);
+        renderDonut(trades);
+        renderKpiRow(trades);
+        renderSparkPL(trades);
+        renderSparkRolling(trades);
         renderStreak(trades);
+        renderHeat(trades);
         renderRibbon(trades);
-        renderDow(trades);
-        renderRolling(trades);
         renderCompare(trades);
-        renderInsight(trades);
+        renderInsights(trades);
+        updateTime();
       } catch(err){
         console.error('[Storm]', err);
       }
     });
   }
 
-  /* ---------- Triggers ---------- */
+  /* ================= Triggers ================= */
   window.addEventListener('storage', function(e){
     if (e.key === 'po.v4.trades') renderAll();
   });
 
   document.addEventListener('click', function(e){
-    var tab = e.target && e.target.closest && e.target.closest('.tab[data-view="analysis"]');
-    if (tab) setTimeout(renderAll, 80);
+    if (e.target && e.target.closest && e.target.closest('.tab[data-view="analysis"]')){
+      setTimeout(renderAll, 80);
+    }
   }, true);
 
   setInterval(function(){
