@@ -1184,20 +1184,16 @@
 
   <section class="page" id="page-analysis">
     <div id="rules-banner"></div>
-<!-- ===== STORM ANALYSIS HERO ===== -->
+<!-- ===== STORM ANALYSIS ===== -->
 <div class="storm-hero">
   <div class="storm-gauge-card">
     <div class="storm-gauge">
-      <svg viewBox="0 0 200 200" aria-hidden="true">
-        <defs>
-          <linearGradient id="stormGaugeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#2ee6a6"/>
-            <stop offset="50%" stop-color="#5b8cff"/>
-            <stop offset="100%" stop-color="#c78aff"/>
-          </linearGradient>
-        </defs>
-        <circle class="gauge-track" cx="100" cy="100" r="80"/>
-        <circle class="gauge-fill" id="stormGaugeFill" cx="100" cy="100" r="80"/>
+      <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <circle cx="100" cy="100" r="80"
+                fill="none" stroke="rgba(120,150,200,.15)" stroke-width="14"/>
+        <circle id="stormGaugeFill" cx="100" cy="100" r="80"
+                fill="none" stroke="#2ee6a6" stroke-width="14" stroke-linecap="round"
+                transform="rotate(-90 100 100)"/>
       </svg>
       <div class="storm-gauge-center">
         <div class="storm-gauge-value" id="stormGaugeValue">0%</div>
@@ -1221,13 +1217,11 @@
       <div class="storm-card-head">
         <div class="storm-card-title"><span class="ico">🔥</span><span>استریک فعلی</span></div>
       </div>
-      <div class="storm-streak">
-        <div class="storm-streak-main" id="stormStreakMain">
-          <span class="icon">⚡</span>
-          <div class="storm-streak-info">
-            <div class="storm-streak-val" id="stormStreakVal">—</div>
-            <div class="storm-streak-lbl" id="stormStreakLbl">در انتظار معامله</div>
-          </div>
+      <div class="storm-streak-main neutral" id="stormStreakMain">
+        <span class="icon">⚡</span>
+        <div class="storm-streak-info">
+          <div class="storm-streak-val" id="stormStreakVal">—</div>
+          <div class="storm-streak-lbl" id="stormStreakLbl">در انتظار معامله</div>
         </div>
       </div>
     </div>
@@ -1249,7 +1243,7 @@
     <div class="storm-card storm-full">
       <div class="storm-card-head">
         <div class="storm-card-title"><span class="ico">📈</span><span>وین ریت غلتان</span></div>
-        <span class="muted" style="font-size:10.5px">۲۰ معامله اخیر</span>
+        <span style="font-size:10.5px;color:var(--muted)">۲۰ معامله اخیر</span>
       </div>
       <div class="storm-rolling"><canvas id="stormRolling"></canvas></div>
     </div>
@@ -1263,10 +1257,9 @@
   </div>
 </div>
 
-<!-- ===== STORM INSIGHT ===== -->
 <div class="storm-insight" id="stormInsight">
   <span class="icon">💡</span>
-  <div class="storm-insight-text" id="stormInsightText">در حال تحلیل...</div>
+  <div class="storm-insight-text" id="stormInsightText">در حال تحلیل…</div>
 </div>
     <div class="card toolbar">
       <div class="seg" id="range-filter">
