@@ -1,5 +1,13 @@
 /* ============================================================
-   PO-TRADE Assistant + Goals + Share
+   PO-TRADE Assistant v3.0 — PRO EDITION
+   ✅ Analysis Assistant
+   ✅ Goals Banner (Epic)
+   ✅ Share Panel (Beautiful PNG)
+   ✅ Market Clock
+   ✅ Streak Badge
+   ✅ Confetti
+   ✅ Command Palette
+   ✅ Theme Switcher (in dropdown)
    ============================================================ */
 (function() {
   'use strict';
@@ -7,27 +15,62 @@
   var $ = function(s, r) { return (r || document).querySelector(s); };
   var $$ = function(s, r) { return Array.from((r || document).querySelectorAll(s)); };
 
+  function getLS(key, fallback) {
+    try {
+      var v = localStorage.getItem(key);
+      if (v === null) return fallback;
+      return JSON.parse(v);
+    } catch(e) { return fallback; }
+  }
+
   /* ============================================================
-     1) ANALYSIS ASSISTANT
+     1) ANALYSIS ASSISTANT — تحلیل حرفه‌ای
      ============================================================ */
-  function analyzePerformance(trades, goal, rules) {
+  function analyzePerformance(trades) {
     if (!trades || !trades.length) {
       return {
         mood: 'neutral',
-        title: '🚀 آماده‌ای برای شروع؟',
-        text: 'هنوز معامله‌ای ثبت نکردی. اولین معامله رو ثبت کن تا آنالیز دقیق بگیری.',
+        icon: '🤖',
+        title: '👋 خوش آمدی!',
+        text: 'هنوز معامله‌ای ثبت نکردی. اولین معامله رو ثبت کن تا <strong>تحلیل هوشمند</strong> بگیری.',
         badges: []
       };
     }
 
-    var wins = 0, losses = 0, net = 0, grossProfit = 0, grossLoss = 0;
+    var wins = 0, losses = 0, be = 0, net = 0, gp = 0, gl = 0;
     var byStrategy = {};
-    trades.forEach(function(t) {
+    var bestTrade = null, worstTrade = null;
+    var currentStreak = 0;
+    var maxStreak = 0;
+    var lossStreak = 0, maxLossStreak = 0;
+
+    var sorted = trades.slice().sort(function(a, b) {
+      return (a.createdAt || 0) - (b.createdAt || 0);
+    });
+
+    sorted.forEach(function(t) {
       var p = t.result === 'win' ? Math.abs(+t.amount || 0) :
               t.result === 'loss' ? -Math.abs(+t.amount || 0) : 0;
       net += p;
-      if (t.result === 'win') { wins++; grossProfit += p; }
-      else if (t.result === 'loss') { losses++; grossLoss += Math.abs(p); }
+
+      if (t.result === 'win') {
+        wins++; gp += p;
+        currentStreak++;
+        lossStreak = 0;
+        if (currentStreak > maxStreak) maxStreak = currentStreak;
+        if (!bestTrade || p > (bestTrade.pnl || 0)) {
+          bestTrade = { trade: t, pnl: p };
+        }
+      } else if (t.result === 'loss') {
+        losses++; gl += Math.abs(p);
+        lossStreak++;
+        if (lossStreak > maxLossStreak) maxLossStreak = lossStreak;
+        currentStreak = 0;
+        if (!worstTrade || p < (worstTrade.pnl || 0)) {
+          worstTrade = { trade: t, pnl: p };
+        }
+      } else be++;
+
       var s = t.strategy || '—';
       if (!byStrategy[s]) byStrategy[s] = { w: 0, l: 0, net: 0, count: 0 };
       byStrategy[s].count++;
@@ -38,7 +81,7 @@
 
     var closed = wins + losses;
     var winRate = closed ? (wins / closed) * 100 : 0;
-    var pf = grossLoss > 0 ? grossProfit / grossLoss : (grossProfit > 0 ? Infinity : 0);
+    var pf = gl > 0 ? gp / gl : (gp > 0 ? Infinity : 0);
 
     var strategies = Object.keys(byStrategy).map(function(k) {
       var s = byStrategy[k];
@@ -46,70 +89,89 @@
       return { name: k, net: s.net, count: s.count, winRate: c ? (s.w / c) * 100 : 0 };
     }).sort(function(a, b) { return b.net - a.net; });
 
-    var best = strategies[0];
-    var worst = strategies[strategies.length - 1];
+    var bestStrategy = strategies[0];
+    var worstStrategy = strategies[strategies.length - 1];
     var profitable = net > 0;
     var mood = profitable ? 'good' : net < 0 ? 'bad' : 'neutral';
 
-    // ساخت متن
-    var title, text;
+    // تحلیل دقیق
+    var title, text, icon;
     if (profitable) {
+      icon = '🏆';
       title = '🎉 عملکردت سودده بوده!';
       text = 'خالص سودت <strong>' + formatMoney(net) + '</strong> بوده. ';
-      if (best) {
-        text += 'بهترین استراتژی‌ت <em>' + best.name + '</em> با <strong>' +
-                formatMoney(best.net) + '</strong> سوده. ';
+      if (bestStrategy && bestStrategy.net > 0) {
+        text += 'بهترین استراتژی‌ت <em>' + bestStrategy.name + '</em> با سود <strong>' +
+                formatMoney(bestStrategy.net) + '</strong> سوده. ';
       }
-      if (winRate >= 60) {
-        text += 'وین‌ریت <strong>' + winRate.toFixed(1) + '٪</strong> نشان می‌دهد تصمیم‌گیری‌هایت دقیق است.';
-      } else if (winRate < 40) {
-        text += 'ولی وین‌ریت <strong>' + winRate.toFixed(1) + '٪</strong> پایین است — دقت ورودت را بالا ببر.';
+      if (winRate >= 65) {
+        text += 'وین‌ریت <strong>' + winRate.toFixed(1) + '٪</strong> یعنی دقت ورودت فوق‌العاده‌ست! 🔥';
+      } else if (winRate >= 50) {
+        text += 'وین‌ریت <strong>' + winRate.toFixed(1) + '٪</strong> بالای ۵۰٪ — عملکرد متعادل و حرفه‌ای. ✅';
+      } else if (winRate >= 40) {
+        text += 'وین‌ریت <strong>' + winRate.toFixed(1) + '٪</strong> پایین‌تر از میانه، ولی مدیریت ریسکت خوبه.';
       } else {
-        text += 'وین‌ریت <strong>' + winRate.toFixed(1) + '٪</strong> در محدوده متعادل قرار دارد.';
+        text += 'وین‌ریت <strong>' + winRate.toFixed(1) + '٪</strong> کمه — دقت ورودت رو افزایش بده.';
       }
     } else if (net < 0) {
+      icon = '🎯';
       title = '⚠️ عملکردت در ضرر بوده';
       text = 'خالص ضررت <strong>' + formatMoney(net) + '</strong> بوده. ';
-      if (worst && worst.net < 0) {
-        text += 'بیشترین ضرر از <em>' + worst.name + '</em> با <strong>' +
-                formatMoney(worst.net) + '</strong> آمده — این استراتژی را بازبینی کن. ';
+      if (worstStrategy && worstStrategy.net < 0) {
+        text += 'بیشترین ضرر از <em>' + worstStrategy.name + '</em> با <strong>' +
+                formatMoney(worstStrategy.net) + '</strong> آمده. ';
       }
       if (winRate < 40) {
-        text += 'وین‌ریت <strong>' + winRate.toFixed(1) + '٪</strong> هم نشان می‌دهد ورودی‌ها ضعیف هستند.';
+        text += 'وین‌ریت <strong>' + winRate.toFixed(1) + '٪</strong> ضعیفه — دقت ورود رو بازبینی کن.';
+      } else if (winRate >= 50) {
+        text += 'وین‌ریت <strong>' + winRate.toFixed(1) + '٪</strong> مناسبه، پس مشکل از مدیریت ریسک یا اندازه حجمه.';
       } else {
-        text += 'وین‌ریت <strong>' + winRate.toFixed(1) + '٪</strong> قابل قبول است، ولی مدیریت ریسکت را بهتر کن.';
+        text += 'وین‌ریت <strong>' + winRate.toFixed(1) + '٪</strong> قابل قبول، ولی نسبت سود به ضرر رو بهتر کن.';
+      }
+      if (maxLossStreak >= 3) {
+        text += ' 🔴 <strong>' + maxLossStreak + ' ضرر پشت‌سرهم</strong> داشتی — چک‌لیستت رو جدی بگیر.';
       }
     } else {
+      icon = '📊';
       title = '📊 عملکردت سربه‌سر است';
-      text = 'نه سود کرده‌ای و نه ضرر. وقت آن است که استراتژی‌ات را بازبینی کنی.';
+      text = 'نه سود کرده‌ای، نه ضرر. ';
+      if (bestStrategy) {
+        text += 'ولی <em>' + bestStrategy.name + '</em> پتانسیل داره — روش کار کن.';
+      }
     }
 
     // Badges
     var badges = [];
-    if (best) {
+    if (bestStrategy && bestStrategy.net > 0) {
       badges.push({
-        label: '🏆 بهترین: ' + best.name + ' (' + formatMoney(best.net) + ')',
-        cls: best.net > 0 ? 'good' : 'neutral'
+        label: '🏆 ' + bestStrategy.name + ' — ' + formatMoney(bestStrategy.net),
+        cls: 'good'
       });
     }
-    if (worst && worst !== best) {
+    if (worstStrategy && worstStrategy !== bestStrategy && worstStrategy.net < 0) {
       badges.push({
-        label: '📉 بدترین: ' + worst.name + ' (' + formatMoney(worst.net) + ')',
-        cls: worst.net < 0 ? 'bad' : 'neutral'
+        label: '📉 ' + worstStrategy.name + ' — ' + formatMoney(worstStrategy.net),
+        cls: 'bad'
       });
     }
     badges.push({
-      label: '🎯 وین‌ریت: ' + winRate.toFixed(1) + '٪',
+      label: '🎯 وین‌ریت ' + winRate.toFixed(1) + '٪',
       cls: winRate >= 55 ? 'good' : winRate < 45 ? 'bad' : 'neutral'
     });
     if (isFinite(pf)) {
       badges.push({
-        label: '⚖️ PF: ' + pf.toFixed(2),
+        label: '⚖️ PF ' + pf.toFixed(2),
         cls: pf >= 1.5 ? 'good' : pf < 1 ? 'bad' : 'neutral'
       });
     }
+    if (maxStreak >= 3) {
+      badges.push({
+        label: '🔥 ' + maxStreak + ' برد متوالی',
+        cls: 'good'
+      });
+    }
 
-    return { mood: mood, title: title, text: text, badges: badges };
+    return { mood: mood, icon: icon, title: title, text: text, badges: badges };
   }
 
   function formatMoney(n) {
@@ -124,14 +186,13 @@
   function renderAssistant() {
     var host = $('#assistant-host');
     if (!host) return;
-    var trades = [];
-    try { trades = JSON.parse(localStorage.getItem('po.v4.trades') || '[]'); } catch(e) {}
+    var trades = getLS('po.v4.trades', []);
     var a = analyzePerformance(trades);
 
     host.innerHTML =
       '<div class="assistant">' +
         '<div class="assistant-inner">' +
-          '<div class="assistant-avatar">' + (a.mood === 'good' ? '🏆' : a.mood === 'bad' ? '🎯' : '🤖') + '</div>' +
+          '<div class="assistant-avatar">' + a.icon + '</div>' +
           '<div class="assistant-body">' +
             '<div class="assistant-title">' + a.title + '</div>' +
             '<div class="assistant-text">' + a.text + '</div>' +
@@ -148,20 +209,16 @@
   }
 
   /* ============================================================
-     2) GOALS BANNER (celebration + warning)
+     2) GOALS BANNER
      ============================================================ */
   function renderGoalsBanner() {
     var host = $('#goals-banner-host');
     if (!host) return;
 
-    var goal = null, rules = null;
-    try { goal = JSON.parse(localStorage.getItem('po.v4.goal') || 'null'); } catch(e) {}
-    try { rules = JSON.parse(localStorage.getItem('po.v4.rules') || 'null'); } catch(e) {}
+    var goal = getLS('po.v4.goal', null);
+    var rules = getLS('po.v4.rules', null);
+    var trades = getLS('po.v4.trades', []);
 
-    var trades = [];
-    try { trades = JSON.parse(localStorage.getItem('po.v4.trades') || '[]'); } catch(e) {}
-
-    // محاسبه‌ی دوره جاری
     var now = new Date();
     var startISO, endISO;
     if (goal && goal.period === 'month') {
@@ -175,12 +232,10 @@
       startISO = toISO(st); endISO = toISO(en);
     }
     var periodTrades = trades.filter(function(t) { return t.date >= startISO && t.date <= endISO; });
-
     var stat = computeStats(periodTrades);
 
     var banner = null;
 
-    // 1) هدف موفق
     if (goal && goal.target) {
       var current = 0;
       if (goal.metric === 'pnl') current = stat.net;
@@ -231,9 +286,7 @@
       }
     }
 
-    // 2) قوانین پراپ فرم (ضرر روزانه / افت سرمایه)
     if (rules && rules.enabled) {
-      // ضرر امروز
       var today = toISO(new Date());
       var todayTrades = trades.filter(function(t) { return t.date === today; });
       var todayNet = 0;
@@ -332,133 +385,181 @@
   }
 
   /* ============================================================
-     3) SHARE PANEL — تولید عکس PnL
+     3) SHARE PANEL — طراحی جدید حرفه‌ای
      ============================================================ */
   function drawShareImage() {
-    var trades = [];
-    try { trades = JSON.parse(localStorage.getItem('po.v4.trades') || '[]'); } catch(e) {}
+    var trades = getLS('po.v4.trades', []);
 
-    var W = 800, H = 600;
+    var W = 900, H = 700;
     var canvas = document.createElement('canvas');
-    canvas.width = W; canvas.height = H;
+    canvas.width = W;
+    canvas.height = H;
     var ctx = canvas.getContext('2d');
 
-    // پس‌زمینه
+    // پس‌زمینه گرادیانت عمیق
     var bgGrad = ctx.createLinearGradient(0, 0, W, H);
-    bgGrad.addColorStop(0, '#05070f');
+    bgGrad.addColorStop(0, '#04060f');
     bgGrad.addColorStop(0.5, '#0a1226');
-    bgGrad.addColorStop(1, '#05070f');
+    bgGrad.addColorStop(1, '#04060f');
     ctx.fillStyle = bgGrad;
     ctx.fillRect(0, 0, W, H);
 
-    // orbs
-    function orb(x, y, r, color) {
+    // Orbs
+    function drawOrb(x, y, r, colors) {
       var g = ctx.createRadialGradient(x, y, 0, x, y, r);
-      g.addColorStop(0, color);
-      g.addColorStop(1, 'rgba(0,0,0,0)');
+      for (var i = 0; i < colors.length; i++) {
+        g.addColorStop(colors[i][0], colors[i][1]);
+      }
       ctx.fillStyle = g;
-      ctx.fillRect(x - r, y - r, r * 2, r * 2);
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.fill();
     }
-    orb(150, 120, 220, 'rgba(46,230,166,0.35)');
-    orb(650, 500, 260, 'rgba(91,140,255,0.35)');
-    orb(400, 300, 180, 'rgba(255,95,162,0.18)');
+    drawOrb(180, 120, 280, [[0, 'rgba(46,230,166,0.4)'], [1, 'rgba(46,230,166,0)']]);
+    drawOrb(750, 580, 320, [[0, 'rgba(91,140,255,0.4)'], [1, 'rgba(91,140,255,0)']]);
+    drawOrb(450, 350, 240, [[0, 'rgba(255,95,162,0.22)'], [1, 'rgba(255,95,162,0)']]);
 
-    // grid
-    ctx.strokeStyle = 'rgba(120,150,200,0.06)';
+    // Grid
+    ctx.strokeStyle = 'rgba(120,150,200,0.05)';
     ctx.lineWidth = 1;
-    for (var x = 0; x < W; x += 40) {
+    for (var x = 0; x < W; x += 45) {
       ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
     }
-    for (var y = 0; y < H; y += 40) {
+    for (var y = 0; y < H; y += 45) {
       ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
     }
 
-    // عنوان
+    // کارت شیشه‌ای مرکزی
+    function roundRect(x, y, w, h, r) {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.arcTo(x + w, y, x + w, y + h, r);
+      ctx.arcTo(x + w, y + h, x, y + h, r);
+      ctx.arcTo(x, y + h, x, y, r);
+      ctx.arcTo(x, y, x + w, y, r);
+      ctx.closePath();
+    }
+
+    // Border glow بالای کارت
+    var topGrad = ctx.createLinearGradient(0, 0, W, 0);
+    topGrad.addColorStop(0, '#2ee6a6');
+    topGrad.addColorStop(0.33, '#5b8cff');
+    topGrad.addColorStop(0.66, '#c78aff');
+    topGrad.addColorStop(1, '#ff5fa2');
+    ctx.fillStyle = topGrad;
+    ctx.fillRect(40, 40, W - 80, 4);
+
+    // Brand
+    ctx.font = '900 52px Inter, sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'top';
-    ctx.font = '900 44px Inter, sans-serif';
-    var titleGrad = ctx.createLinearGradient(0, 40, W, 80);
-    titleGrad.addColorStop(0, '#2ee6a6');
-    titleGrad.addColorStop(0.5, '#5b8cff');
-    titleGrad.addColorStop(1, '#ff5fa2');
-    ctx.fillStyle = titleGrad;
-    ctx.fillText('PO-TRADE', W / 2, 40);
 
-    ctx.font = '700 14px Inter, sans-serif';
+    var brandGrad = ctx.createLinearGradient(200, 0, 700, 0);
+    brandGrad.addColorStop(0, '#2ee6a6');
+    brandGrad.addColorStop(0.5, '#5b8cff');
+    brandGrad.addColorStop(1, '#ff5fa2');
+    ctx.fillStyle = brandGrad;
+    ctx.fillText('PO-TRADE', W / 2, 80);
+
+    // Subtitle
+    ctx.font = '700 13px Inter, sans-serif';
     ctx.fillStyle = 'rgba(134,151,184,1)';
-    ctx.fillText('TRADING REPORT • ' + new Date().toISOString().slice(0, 10), W / 2, 96);
+    ctx.fillText('PERFORMANCE REPORT  •  ' + new Date().toISOString().slice(0, 10), W / 2, 148);
 
-    // محاسبه آمار
+    // Stats
     var wins = 0, losses = 0, be = 0, net = 0, gp = 0, gl = 0;
+    var bestTrade = 0, worstTrade = 0;
     trades.forEach(function(t) {
       var p = t.result === 'win' ? Math.abs(+t.amount || 0) :
               t.result === 'loss' ? -Math.abs(+t.amount || 0) : 0;
       net += p;
-      if (t.result === 'win') { wins++; gp += p; }
-      else if (t.result === 'loss') { losses++; gl += Math.abs(p); }
+      if (t.result === 'win') { wins++; gp += p; if (p > bestTrade) bestTrade = p; }
+      else if (t.result === 'loss') { losses++; gl += Math.abs(p); if (p < worstTrade) worstTrade = p; }
       else be++;
     });
     var closed = wins + losses;
     var winRate = closed ? (wins / closed) * 100 : 0;
     var pf = gl > 0 ? gp / gl : (gp > 0 ? Infinity : 0);
+    var avgWin = wins ? gp / wins : 0;
+    var avgLoss = losses ? gl / losses : 0;
 
-    // Net PnL بزرگ
-    var isProfit = net > 0;
-    var isLoss = net < 0;
-    var pnlColor = isProfit ? '#2ee6a6' : isLoss ? '#ff5674' : '#8697b8';
+    // Net PnL — بزرگ و برجسته
+    var pnlColor = net > 0 ? '#2ee6a6' : net < 0 ? '#ff5674' : '#8697b8';
     var sign = net > 0 ? '+' : net < 0 ? '-' : '';
     var netTxt = sign + '$' + Math.abs(net).toLocaleString('en-US', { maximumFractionDigits: 2 });
 
-    ctx.font = '900 84px Inter, sans-serif';
-    ctx.fillStyle = pnlColor;
+    // Glow
     ctx.shadowColor = pnlColor;
-    ctx.shadowBlur = 40;
-    ctx.fillText(netTxt, W / 2, 160);
+    ctx.shadowBlur = 60;
+    ctx.font = '900 96px Inter, sans-serif';
+    ctx.fillStyle = pnlColor;
+    ctx.fillText(netTxt, W / 2, 195);
     ctx.shadowBlur = 0;
 
-    ctx.font = '800 15px Inter, sans-serif';
+    ctx.font = '800 14px Inter, sans-serif';
     ctx.fillStyle = 'rgba(134,151,184,1)';
-    ctx.fillText('NET PROFIT / LOSS', W / 2, 260);
+    ctx.fillText('NET PROFIT / LOSS', W / 2, 310);
 
-    // کارت‌های آمار
-    var cardW = 160, cardH = 100, gap = 20;
-    var totalCardW = cardW * 4 + gap * 3;
-    var startX = (W - totalCardW) / 2;
-    var cardY = 310;
+    // 4 stat cards
+    var cardW = 175, cardH = 110, gap = 18;
+    var totalW = cardW * 4 + gap * 3;
+    var startX = (W - totalW) / 2;
+    var cardY = 360;
 
-    function statCard(x, y, label, value, color) {
+    function statCard(x, y, label, value, color, icon) {
+      // Background
       var g = ctx.createLinearGradient(x, y, x, y + cardH);
-      g.addColorStop(0, 'rgba(20,29,51,0.9)');
-      g.addColorStop(1, 'rgba(15,23,42,0.9)');
+      g.addColorStop(0, 'rgba(20,29,51,0.85)');
+      g.addColorStop(1, 'rgba(10,17,35,0.85)');
       ctx.fillStyle = g;
-      roundRect(ctx, x, y, cardW, cardH, 16);
+      roundRect(x, y, cardW, cardH, 18);
       ctx.fill();
-      ctx.strokeStyle = 'rgba(120,150,200,0.25)';
-      ctx.lineWidth = 1;
-      roundRect(ctx, x, y, cardW, cardH, 16);
+
+      // Border
+      ctx.strokeStyle = 'rgba(120,150,200,0.22)';
+      ctx.lineWidth = 1.5;
+      roundRect(x, y, cardW, cardH, 18);
       ctx.stroke();
 
-      ctx.font = '900 28px Inter, sans-serif';
+      // Top accent
+      var accentGrad = ctx.createLinearGradient(x, 0, x + cardW, 0);
+      accentGrad.addColorStop(0, color);
+      accentGrad.addColorStop(1, 'transparent');
+      ctx.fillStyle = accentGrad;
+      ctx.fillRect(x + 18, y, cardW - 36, 2);
+
+      // Icon
+      ctx.font = '20px Inter, sans-serif';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'top';
+      ctx.fillStyle = color;
+      ctx.fillText(icon, x + 16, y + 14);
+
+      // Value
+      ctx.font = '900 32px Inter, sans-serif';
       ctx.fillStyle = color;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText(value, x + cardW / 2, y + 42);
+      ctx.fillText(value, x + cardW / 2, y + 58);
 
-      ctx.font = '700 11px Inter, sans-serif';
+      // Label
+      ctx.font = '800 11px Inter, sans-serif';
       ctx.fillStyle = 'rgba(134,151,184,1)';
-      ctx.fillText(label, x + cardW / 2, y + 76);
+      ctx.textBaseline = 'middle';
+      ctx.fillText(label, x + cardW / 2, y + 88);
     }
 
-    statCard(startX, cardY, 'TOTAL TRADES', trades.length + '', '#eef3ff');
-    statCard(startX + cardW + gap, cardY, 'WIN RATE', winRate.toFixed(1) + '%', winRate >= 50 ? '#2ee6a6' : '#ff5674');
-    statCard(startX + (cardW + gap) * 2, cardY, 'WINS', wins + '', '#2ee6a6');
-    statCard(startX + (cardW + gap) * 3, cardY, 'LOSSES', losses + '', '#ff5674');
+    statCard(startX, cardY, 'TOTAL TRADES', trades.length + '', '#eef3ff', '📊');
+    statCard(startX + cardW + gap, cardY, 'WIN RATE', winRate.toFixed(1) + '%',
+             winRate >= 50 ? '#2ee6a6' : '#ff5674', '🎯');
+    statCard(startX + (cardW + gap) * 2, cardY, 'WINS', wins + '', '#2ee6a6', '✅');
+    statCard(startX + (cardW + gap) * 3, cardY, 'LOSSES', losses + '', '#ff5674', '❌');
 
-    // نوار پیشرفت win rate
-    var barY = 460;
-    var barX = 80, barW = W - 160, barH = 12;
-    ctx.fillStyle = 'rgba(120,150,200,0.15)';
-    roundRect(ctx, barX, barY, barW, barH, 6);
+    // Win rate bar
+    var barY = 540;
+    var barX = 80, barW = W - 160, barH = 14;
+    ctx.fillStyle = 'rgba(120,150,200,0.12)';
+    roundRect(barX, barY, barW, barH, 8);
     ctx.fill();
 
     var fillW = (winRate / 100) * barW;
@@ -467,46 +568,31 @@
     fillGrad.addColorStop(1, '#5b8cff');
     ctx.fillStyle = fillGrad;
     ctx.shadowColor = '#2ee6a6';
-    ctx.shadowBlur = 20;
-    roundRect(ctx, barX, barY, fillW, barH, 6);
+    ctx.shadowBlur = 24;
+    roundRect(barX, barY, Math.max(fillW, 8), barH, 8);
     ctx.fill();
     ctx.shadowBlur = 0;
 
-    // PF
-    ctx.font = '800 13px Inter, sans-serif';
+    // Labels above bar
+    ctx.font = '800 12px Inter, sans-serif';
     ctx.fillStyle = 'rgba(134,151,184,1)';
     ctx.textAlign = 'left';
-    ctx.textBaseline = 'top';
-    ctx.fillText('WIN RATE ' + winRate.toFixed(1) + '%', barX, barY - 26);
+    ctx.textBaseline = 'bottom';
+    ctx.fillText('WIN RATE', barX, barY - 10);
 
     var pfTxt = isFinite(pf) ? pf.toFixed(2) : '∞';
     ctx.textAlign = 'right';
     ctx.fillStyle = pf >= 1.5 ? '#2ee6a6' : pf < 1 ? '#ff5674' : '#ffb020';
-    ctx.fillText('PROFIT FACTOR ' + pfTxt, barX + barW, barY - 26);
+    ctx.fillText('PROFIT FACTOR: ' + pfTxt, barX + barW, barY - 10);
 
-    // امضا
+    // Footer
     ctx.font = '700 11px Inter, sans-serif';
-    ctx.fillStyle = 'rgba(134,151,184,0.6)';
+    ctx.fillStyle = 'rgba(134,151,184,0.55)';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'bottom';
-    ctx.fillText('Generated by PO-TRADE • github.com/IQZEUS/PO-TREAD', W / 2, H - 20);
+    ctx.fillText('Generated by PO-TRADE  •  github.com/IQZEUS/PO-TREAD', W / 2, H - 24);
 
     return canvas;
-  }
-
-  function roundRect(ctx, x, y, w, h, r) {
-    var rr = Math.min(r, w / 2, h / 2);
-    ctx.beginPath();
-    ctx.moveTo(x + rr, y);
-    ctx.lineTo(x + w - rr, y);
-    ctx.arcTo(x + w, y, x + w, y + rr, rr);
-    ctx.lineTo(x + w, y + h - rr);
-    ctx.arcTo(x + w, y + h, x + w - rr, y + h, rr);
-    ctx.lineTo(x + rr, y + h);
-    ctx.arcTo(x, y + h, x, y + h - rr, rr);
-    ctx.lineTo(x, y + rr);
-    ctx.arcTo(x, y, x + rr, y, rr);
-    ctx.closePath();
   }
 
   function initShare() {
@@ -537,8 +623,8 @@
       if (act === 'preview') {
         wrap.innerHTML = '';
         var c2 = canvas.cloneNode(true);
-        var ctx = c2.getContext('2d');
-        ctx.drawImage(canvas, 0, 0);
+        var ctx2 = c2.getContext('2d');
+        ctx2.drawImage(canvas, 0, 0);
         wrap.appendChild(c2);
         wrap.classList.add('show');
       } else if (act === 'download') {
@@ -569,7 +655,7 @@
   }
 
   /* ============================================================
-     4) THEME SWITCHER — 3 Presets
+     4) THEME SWITCHER
      ============================================================ */
   function initThemeSwitcher() {
     var host = $('#theme-switcher-host');
@@ -600,50 +686,15 @@
       document.documentElement.dataset.theme = name;
       localStorage.setItem('po.v4.theme', name);
       setActive(name);
-      // همگام‌سازی با theme-btn قدیمی
       var tb = document.querySelector('.theme-icon');
       if (tb) tb.textContent = name === 'aurora' ? '☀️' : name === 'cyber' ? '⚡' : '🌙';
-      // بازرندر چارت‌ها
       window.dispatchEvent(new Event('resize'));
     });
   }
 
   /* ============================================================
-     Init
+     5) MARKET CLOCK
      ============================================================ */
-  function init() {
-    renderAssistant();
-    renderGoalsBanner();
-    initShare();
-    initThemeSwitcher();
-
-    // هر ۵ ثانیه refresh
-    setInterval(function() {
-      renderAssistant();
-      renderGoalsBanner();
-    }, 5000);
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
-    init();
-  }
-
-  window.PT_Assistant = {
-    refresh: function() {
-      renderAssistant();
-      renderGoalsBanner();
-    }
-  };
-})();
-/* ============================================================
-   EXTRAS — Market Clock, Streak, Confetti, Command Palette
-   ============================================================ */
-(function() {
-  'use strict';
-
-  // انتقال تم‌سوییچر به داخل منوی کاربر
   function moveThemeSwitcher() {
     var dd = document.getElementById('userDropdown');
     var ts = document.getElementById('theme-switcher-host');
@@ -653,7 +704,6 @@
     else dd.appendChild(ts);
   }
 
-  // ===== Market Clock =====
   function initMarketClock() {
     if (document.querySelector('.market-clock')) return;
 
@@ -714,10 +764,11 @@
     setInterval(render, 1000);
   }
 
-  // ===== Streak =====
+  /* ============================================================
+     6) STREAK BADGE
+     ============================================================ */
   function calcStreak() {
-    var trades = [];
-    try { trades = JSON.parse(localStorage.getItem('po.v4.trades') || '[]'); } catch (e) {}
+    var trades = getLS('po.v4.trades', []);
     if (!trades.length) return 0;
 
     var byDay = {};
@@ -765,7 +816,9 @@
     setInterval(render, 30000);
   }
 
-  // ===== Confetti =====
+  /* ============================================================
+     7) CONFETTI
+     ============================================================ */
   function fireConfetti() {
     if (document.querySelector('.confetti-canvas')) return;
     var canvas = document.createElement('canvas');
@@ -777,28 +830,28 @@
     var ctx = canvas.getContext('2d');
     var colors = ['#2ee6a6', '#5b8cff', '#ff5fa2', '#ffb020', '#c78aff', '#f6ff00'];
     var pieces = [];
-    for (var i = 0; i < 150; i++) {
+    for (var i = 0; i < 180; i++) {
       pieces.push({
         x: Math.random() * canvas.width,
         y: -20 - Math.random() * canvas.height * 0.5,
-        w: 8 + Math.random() * 6,
-        h: 6 + Math.random() * 10,
+        w: 8 + Math.random() * 8,
+        h: 6 + Math.random() * 12,
         color: colors[Math.floor(Math.random() * colors.length)],
         vx: -2 + Math.random() * 4,
-        vy: 2 + Math.random() * 4,
+        vy: 2 + Math.random() * 5,
         rot: Math.random() * Math.PI * 2,
-        vr: -0.15 + Math.random() * 0.3
+        vr: -0.18 + Math.random() * 0.36
       });
     }
     var start = Date.now();
-    var duration = 4000;
+    var duration = 4500;
     function frame() {
       var elapsed = Date.now() - start;
       var alpha = elapsed < duration - 500 ? 1 : Math.max(0, (duration - elapsed) / 500);
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.globalAlpha = alpha;
       pieces.forEach(function(p) {
-        p.x += p.vx; p.y += p.vy; p.vy += 0.08; p.rot += p.vr;
+        p.x += p.vx; p.y += p.vy; p.vy += 0.09; p.rot += p.vr;
         ctx.save();
         ctx.translate(p.x, p.y);
         ctx.rotate(p.rot);
@@ -825,7 +878,9 @@
     }
   }
 
-  // ===== Command Palette =====
+  /* ============================================================
+     8) COMMAND PALETTE
+     ============================================================ */
   function initCommandPalette() {
     if (document.querySelector('.cmd-overlay')) return;
 
@@ -939,7 +994,9 @@
     });
   }
 
-  // ===== Kbd Hint =====
+  /* ============================================================
+     9) KBD HINT
+     ============================================================ */
   function showKbdHint() {
     if (localStorage.getItem('po.kbdhint.seen') === '1') return;
     setTimeout(function() {
@@ -964,23 +1021,44 @@
     }, 3500);
   }
 
-  // ===== Init =====
-  function initExtras() {
+  /* ============================================================
+     INIT
+     ============================================================ */
+  function init() {
     moveThemeSwitcher();
     setTimeout(moveThemeSwitcher, 500);
     setTimeout(moveThemeSwitcher, 1500);
+
+    renderAssistant();
+    renderGoalsBanner();
+    initShare();
+    initThemeSwitcher();
     initMarketClock();
     initStreakBadge();
     initCommandPalette();
     showKbdHint();
+
+    setInterval(function() {
+      renderAssistant();
+      renderGoalsBanner();
+    }, 5000);
     setInterval(checkGoalComplete, 2000);
   }
 
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function() { setTimeout(initExtras, 500); });
+    document.addEventListener('DOMContentLoaded', init);
   } else {
-    setTimeout(initExtras, 500);
+    init();
   }
 
-  window.PT_Extras = { confetti: fireConfetti, streak: calcStreak };
+  window.PT_Assistant = {
+    refresh: function() {
+      renderAssistant();
+      renderGoalsBanner();
+    }
+  };
+  window.PT_Extras = {
+    confetti: fireConfetti,
+    streak: calcStreak
+  };
 })();
