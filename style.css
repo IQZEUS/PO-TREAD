@@ -1,3 +1,4 @@
+/* سازگاری با تم‌های جدید در themes.css */
 @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap');
 
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -1304,3 +1305,7 @@ html[dir="ltr"] .switch input:checked + .switch-track .switch-thumb {
   .pill { font-size: 10px; padding: 4px 8px; }
   .ti-actions button { padding: 4px 5px; font-size: 11px; }
 }
+/* ===== تم پیش‌فرض اگر themes.css لود نشد ===== */
+[data-theme="obsidian"] { --bg-0: #05070f; --text: #eef3ff; --accent: #2ee6a6; }
+[data-theme="aurora"] { --bg-0: #eef2f9; --text: #0f1830; --accent: #0fa876; }
+[data-theme="cyber"] { --bg-0: #06001a; --text: #f5f0ff; --accent: #f6ff00; }
