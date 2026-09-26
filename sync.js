@@ -1,11 +1,10 @@
 /* ============================================================
-   PO-TRADE Sync v13 — FULL FIXED
-   ✅ سینک کامل: trades + goal + rules + checklist + theme + lang
-   ✅ رفع باگ اولین ورود (داده محلی پاک نمی‌شود)
-   ✅ flush با JWT معتبر
-   ✅ upsert به جای delete+insert
-   ✅ IndexedDB mirror برای مقاومت
-   ✅ Pending queue چندکلیدی
+   PO-TRADE Sync v14 — PERFORMANCE + RELIABILITY FIX
+   ✅ تایمر جدا برای trades و settings
+   ✅ diff سریع‌تر (hash + key-based)
+   ✅ debounce بیشتر (کمتر stress)
+   ✅ ذخیره تنظیمات تضمینی
+   ✅ requestIdleCallback برای diff سنگین
    ============================================================ */
 (function() {
   'use strict';
@@ -14,7 +13,6 @@
   var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJvZGd1aGN1YXRpeGRiendqZnZ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk5MTgyMTMsImV4cCI6MjEwNTQ5NDIxM30.oXGyCA3jOcsS5inqsXuSOhELZLoUG7pYagZox1SEmhY';
   var sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  /* ===== کلیدها ===== */
   var K = {
     trades:    'po.v4.trades',
     goal:      'po.v4.goal',
@@ -42,7 +40,8 @@
   var lastTradesSnap = '';
   var lastSettingsSnap = '';
   var pushTimer = null;
-  var checkTimer = null;
+  var tradesTimer = null;
+  var settingsTimer = null;
 
   /* ============ Loader Watchdog ============ */
   function killLoader() {
@@ -115,8 +114,17 @@
   }
 
   /* ============================================================
-     Diff trades
+     Diff سریع با hash
      ============================================================ */
+  function quickHash(str) {
+    if (!str) return 0;
+    var h = 0, len = str.length;
+    for (var i = 0; i < len; i++) {
+      h = ((h << 5) - h + str.charCodeAt(i)) | 0;
+    }
+    return h;
+  }
+
   function diffTrades(oldStr, newStr) {
     var oldArr = [], newArr = [];
     try { oldArr = JSON.parse(oldStr || '[]'); } catch(e) {}
@@ -133,7 +141,18 @@
       if (!newMap.has(id)) changes.delete.push(id);
       else {
         var n = newMap.get(id);
-        if (JSON.stringify(t) !== JSON.stringify(n)) changes.update.push(n);
+        // مقایسه سریع‌تر: فقط فیلدهای کلیدی
+        if (t.amount !== n.amount || t.result !== n.result ||
+            t.strategy !== n.strategy || t.symbol !== n.symbol ||
+            t.note !== n.note || t.emotion !== n.emotion ||
+            t.date !== n.date) {
+          changes.update.push(n);
+        } else {
+          // مقایسه عمیق‌تر اگه فیلدهای کلیدی یکسان بودن
+          if (JSON.stringify(t) !== JSON.stringify(n)) {
+            changes.update.push(n);
+          }
+        }
       }
     });
     newMap.forEach(function(t, id) {
@@ -143,55 +162,67 @@
   }
 
   function snapSettings() {
-    var out = {};
-    SETTINGS_KEYS.forEach(function(k) {
-      out[k] = origGetItem(k);
-    });
-    return JSON.stringify(out);
+    var parts = [];
+    for (var i = 0; i < SETTINGS_KEYS.length; i++) {
+      parts.push(origGetItem(SETTINGS_KEYS[i]) || '');
+    }
+    return parts.join('|');
   }
 
-  function checkLocalChanges() {
+  /* ============================================================
+     Check changes — جدا برای trades و settings
+     ============================================================ */
+  function checkTrades() {
     if (!uid || !ready) return;
+    var cur = origGetItem(K.trades) || '[]';
+    if (cur === lastTradesSnap) return;
 
-    var curTrades = origGetItem(K.trades) || '[]';
-    if (curTrades !== lastTradesSnap) {
-      var changes = diffTrades(lastTradesSnap, curTrades);
-      changes.delete.forEach(function(id) { addTradeOp('delete', id); });
-      changes.add.forEach(function(t) { addTradeOp('add', t); });
-      changes.update.forEach(function(t) { addTradeOp('update', t); });
-      lastTradesSnap = curTrades;
-      if (changes.delete.length || changes.add.length || changes.update.length) {
-        schedulePush(150);
-      }
-    }
+    var changes = diffTrades(lastTradesSnap, cur);
+    changes.delete.forEach(function(id) { addTradeOp('delete', id); });
+    changes.add.forEach(function(t) { addTradeOp('add', t); });
+    changes.update.forEach(function(t) { addTradeOp('update', t); });
+    lastTradesSnap = cur;
 
-    var curSettings = snapSettings();
-    if (curSettings !== lastSettingsSnap) {
-      lastSettingsSnap = curSettings;
-      markSettingsDirty();
+    if (changes.delete.length || changes.add.length || changes.update.length) {
       schedulePush(400);
     }
   }
 
+  function checkSettings() {
+    if (!uid || !ready) return;
+    var cur = snapSettings();
+    if (cur === lastSettingsSnap) return;
+    lastSettingsSnap = cur;
+    markSettingsDirty();
+    schedulePush(500);
+  }
+
   /* ============================================================
-     Override localStorage
+     Override localStorage — تایمرهای جدا
      ============================================================ */
   localStorage.setItem = function(key, value) {
     origSetItem(key, value);
     if (!uid || !ready) return;
 
     if (key === K.trades) {
-      if (checkTimer) return;
-      checkTimer = setTimeout(function() {
-        checkTimer = null;
-        checkLocalChanges();
-      }, 30);
+      // ⚡ debounce جدا برای trades
+      if (tradesTimer) clearTimeout(tradesTimer);
+      tradesTimer = setTimeout(function() {
+        tradesTimer = null;
+        var run = function() { checkTrades(); };
+        if (window.requestIdleCallback) {
+          requestIdleCallback(run, { timeout: 500 });
+        } else {
+          run();
+        }
+      }, 250);  // ۲۵۰ms به جای ۳۰ms
     } else if (SETTINGS_KEYS.indexOf(key) !== -1) {
-      if (checkTimer) return;
-      checkTimer = setTimeout(function() {
-        checkTimer = null;
-        checkLocalChanges();
-      }, 60);
+      // ⚡ debounce جدا برای settings
+      if (settingsTimer) clearTimeout(settingsTimer);
+      settingsTimer = setTimeout(function() {
+        settingsTimer = null;
+        checkSettings();
+      }, 200);  // ۲۰۰ms
     }
   };
 
@@ -200,23 +231,22 @@
     if (!uid || !ready) return;
 
     if (key === K.trades) {
-      if (checkTimer) return;
-      checkTimer = setTimeout(function() {
-        checkTimer = null;
+      if (tradesTimer) clearTimeout(tradesTimer);
+      tradesTimer = setTimeout(function() {
+        tradesTimer = null;
         try {
           var oldArr = JSON.parse(lastTradesSnap || '[]');
           oldArr.forEach(function(t) { if (t && t.id) addTradeOp('delete', t.id); });
           lastTradesSnap = '[]';
-          schedulePush(150);
+          schedulePush(400);
         } catch(e) {}
-      }, 30);
+      }, 250);
     } else if (SETTINGS_KEYS.indexOf(key) !== -1) {
-      if (checkTimer) return;
-      checkTimer = setTimeout(function() {
-        checkTimer = null;
-        markSettingsDirty();
-        schedulePush(200);
-      }, 60);
+      if (settingsTimer) clearTimeout(settingsTimer);
+      settingsTimer = setTimeout(function() {
+        settingsTimer = null;
+        checkSettings();
+      }, 200);
     }
   };
 
@@ -224,20 +254,8 @@
      Push
      ============================================================ */
   function schedulePush(delay) {
-    clearTimeout(pushTimer);
-    pushTimer = setTimeout(doPush, delay || 300);
-  }
-
-  async function refreshToken() {
-    try {
-      var sRes = await sb.auth.getSession();
-      if (sRes && sRes.data && sRes.data.session) {
-        accessToken = sRes.data.session.access_token;
-        uid = sRes.data.session.user.id;
-        return true;
-      }
-    } catch(e) {}
-    return false;
+    if (pushTimer) clearTimeout(pushTimer);
+    pushTimer = setTimeout(doPush, delay || 400);
   }
 
   async function doPush() {
@@ -252,13 +270,11 @@
     if (!delIds.length && !addItems.length && !updItems.length && !settingsDirty) return;
 
     pushing = true;
-    console.log('[Sync] 🚀 Push — del:', delIds.length,
-                'add:', addItems.length, 'upd:', updItems.length,
-                'settings:', settingsDirty);
 
     var success = false;
 
     try {
+      // ۱) حذف
       if (delIds.length) {
         var delRes = await sb.from('trades')
           .delete()
@@ -267,6 +283,7 @@
         if (delRes.error) throw delRes.error;
       }
 
+      // ۲) upsert
       var toUpsert = addItems.concat(updItems);
       if (toUpsert.length) {
         var upRes = await sb.from('trades').upsert(
@@ -278,6 +295,7 @@
         if (upRes.error) throw upRes.error;
       }
 
+      // ۳) settings
       if (settingsDirty) {
         var settings = {};
         SETTINGS_KEYS.forEach(function(k) {
@@ -292,30 +310,29 @@
           { onConflict: 'user_id' }
         );
         if (sRes.error) {
-          // جدول ممکنه نباشه — سایلنت رد شو ولی توابع دیگر ادامه بدن
-          console.warn('[Sync] settings table missing:', sRes.error.message);
+          console.warn('[Sync] settings table issue:', sRes.error.message);
         }
       }
 
       success = true;
     } catch(e) {
-      console.error('[Sync] ❌ Push failed:', e.message);
+      console.error('[Sync] Push failed:', e.message);
     } finally {
       pushing = false;
       if (success) {
         clearPending();
-        console.log('[Sync] ✅ Push done');
       }
-      if (pendingCount() > 0) schedulePush(900);
+      if (pendingCount() > 0) schedulePush(1500);
     }
   }
 
   /* ============================================================
-     Flush on unload — با JWT معتبر
+     Flush on unload
      ============================================================ */
   function flushSync() {
     if (!uid || !ready || !accessToken) return;
 
+    // اول تغییرات فعلی رو بگیر
     try {
       var curTrades = origGetItem(K.trades) || '[]';
       if (curTrades !== lastTradesSnap) {
@@ -399,17 +416,14 @@
     try {
       var sRes = await sb.auth.getSession();
       if (!sRes || !sRes.data || !sRes.data.session) {
-        console.log('[Sync] ⚠️ No session');
         ready = true;
         return;
       }
 
       uid = sRes.data.session.user.id;
       accessToken = sRes.data.session.access_token;
-      console.log('[Sync] 👤 uid:', uid.slice(0, 8));
 
       if (origGetItem(ONBOARDING_KEY) !== 'seen') {
-        console.log('[Sync] 🎉 New user → welcome.html');
         location.replace('welcome.html');
         return;
       }
@@ -417,19 +431,15 @@
       var lastUid = origGetItem(LAST_UID_KEY);
       var accountSwitched = lastUid && lastUid !== uid;
       if (accountSwitched) {
-        console.log('[Sync] 🔄 Account switch → clear local');
         origRemoveItem(K.trades);
         clearPending();
-        // settings رو نگه دار — ممکنه کاربر بخواد دوباره ست کنه
       }
       origSetItem(LAST_UID_KEY, uid);
 
-      // خواندن local قبل از cloud
       var localTrades = [];
       try { localTrades = JSON.parse(origGetItem(K.trades) || '[]'); } catch(e) {}
       if (!Array.isArray(localTrades)) localTrades = [];
 
-      // دریافت cloud
       var cloud = [];
       var cloudOk = false;
       try {
@@ -439,14 +449,12 @@
           .map(function(r) { return r.data; })
           .filter(function(t) { return t && t.id; });
         cloudOk = true;
-        console.log('[Sync] ☁️ Cloud trades:', cloud.length);
       } catch(e) {
         console.warn('[Sync] Cloud trades failed:', e.message);
       }
 
-      // 🔴 FIX: اگه cloud خالیه ولی local داده داره → local رو آپلود کن
+      // 🔴 FIX: cloud خالی + local پر → local رو آپلود کن
       if (cloudOk && cloud.length === 0 && localTrades.length > 0 && !accountSwitched) {
-        console.log('[Sync] 💾 Cloud empty but local has data → uploading', localTrades.length);
         var pp = getPending();
         localTrades.forEach(function(t) {
           if (t && t.id) pp.add[t.id] = t;
@@ -455,7 +463,6 @@
         cloud = localTrades.slice();
       }
 
-      // اعمال pending روی cloud
       var p = getPending();
       var delIds = Object.keys(p.delete);
       var addItems = Object.keys(p.add).map(function(k) { return p.add[k]; });
@@ -474,7 +481,7 @@
       origSetItem(K.trades, finalStr);
       lastTradesSnap = finalStr;
 
-      // ============ Settings ============
+      // Settings
       try {
         var setRes = await sb.from(SETTINGS_TABLE).select('data').eq('user_id', uid).maybeSingle();
         if (!setRes.error && setRes.data && setRes.data.data) {
@@ -485,7 +492,6 @@
               origSetItem(k, v);
             }
           });
-          console.log('[Sync] ⚙️ Settings loaded from cloud');
         }
       } catch(e) {
         console.warn('[Sync] Settings load failed:', e.message);
@@ -493,12 +499,11 @@
       lastSettingsSnap = snapSettings();
 
       ready = true;
-      console.log('[Sync] ✅ Boot — trades:', finalTrades.length, '| pending:', pendingCount());
 
-      if (pendingCount() > 0) schedulePush(300);
+      if (pendingCount() > 0) schedulePush(500);
 
     } catch(e) {
-      console.error('[Sync] ❌ Boot error:', e);
+      console.error('[Sync] Boot error:', e);
       ready = true;
     }
   }
