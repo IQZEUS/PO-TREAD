@@ -1,8 +1,8 @@
 /* ============================================================
-   PO-TRADE Assistant v9.0 — COSMIC MOBILE PERFECT
-   ✅ موبایل-اول، بدون لرزش
-   ✅ گرافیک کیهانی
-   ✅ Tier System + Market Clock + Share + Streak
+   PO-TRADE Assistant v10.0 — STABLE COSMIC
+   ✅ موبایل کامل OK
+   ✅ بدون overflow
+   ✅ عکس خروجی متفاوت برای هر سطح
    ============================================================ */
 (function() {
   'use strict';
@@ -10,31 +10,29 @@
   var $ = function(s, r) { return (r || document).querySelector(s); };
   var $$ = function(s, r) { return Array.from((r || document).querySelectorAll(s)); };
 
-  function getLS(key, fallback) {
+  function getLS(k, fb) {
     try {
-      var v = localStorage.getItem(key);
-      if (v === null) return fallback;
+      var v = localStorage.getItem(k);
+      if (v === null) return fb;
       return JSON.parse(v);
-    } catch(e) { return fallback; }
+    } catch(e) { return fb; }
   }
 
   function toISO(d) {
-    var y = d.getFullYear();
-    var m = String(d.getMonth() + 1).padStart(2, '0');
-    var dd = String(d.getDate()).padStart(2, '0');
-    return y + '-' + m + '-' + dd;
+    return d.getFullYear() + '-' +
+           String(d.getMonth() + 1).padStart(2, '0') + '-' +
+           String(d.getDate()).padStart(2, '0');
   }
 
-  function formatMoney(n) {
+  function money(n) {
     var v = +n || 0;
-    var a = Math.abs(v);
-    var s = a.toLocaleString('en-US', { maximumFractionDigits: 2 });
-    if (v > 0) return '+$' + s;
-    if (v < 0) return '-$' + s;
-    return '$' + s;
+    var a = Math.abs(v).toLocaleString('en-US', { maximumFractionDigits: 2 });
+    if (v > 0) return '+$' + a;
+    if (v < 0) return '-$' + a;
+    return '$' + a;
   }
 
-  function roundRect(ctx, x, y, w, h, r) {
+  function rr(ctx, x, y, w, h, r) {
     ctx.beginPath();
     ctx.moveTo(x + r, y);
     ctx.arcTo(x + w, y, x + w, y + h, r);
@@ -44,15 +42,14 @@
     ctx.closePath();
   }
 
-  /* ============================================================
-     1) MARKET CLOCK
-     ============================================================ */
+  /* ══════════════════════════════════════════════════════
+     MARKET CLOCK
+     ══════════════════════════════════════════════════════ */
   var clockTick = null;
   var clockRefresh = null;
 
-  function getSessions() {
-    var now = new Date();
-    var h = now.getUTCHours() + now.getUTCMinutes() / 60;
+  function sessions() {
+    var h = new Date().getUTCHours() + new Date().getUTCMinutes() / 60;
     function op(s, e) { return s < e ? (h >= s && h < e) : (h >= s || h < e); }
     return [
       { flag: '🇦🇺', name: 'Sydney',   hours: '22–07', open: op(22, 7) },
@@ -69,16 +66,12 @@
            String(d.getUTCSeconds()).padStart(2, '0');
   }
 
-  function buildClockHTML() {
-    var sessions = getSessions();
+  function clockHTML() {
     return '<div class="pt-market-clock">' +
       '<div class="pmc-head">' +
         '<div class="pmc-title">' +
           '<div class="pmc-icon">🌍</div>' +
-          '<div>' +
-            '<h3>بازارهای جهانی</h3>' +
-            '<p>ساعت زنده معاملاتی</p>' +
-          '</div>' +
+          '<div><h3>بازارهای جهانی</h3><p>ساعت زنده معاملاتی</p></div>' +
         '</div>' +
         '<div class="pmc-time">' +
           '<div class="pmc-clock" id="pmcClock">--:--:--</div>' +
@@ -86,7 +79,7 @@
         '</div>' +
       '</div>' +
       '<div class="pmc-body" id="pmcBody">' +
-        sessions.map(function(s) {
+        sessions().map(function(s) {
           return '<div class="pmc-session ' + (s.open ? 'open' : 'closed') + '">' +
             '<div class="pmc-flag">' + s.flag + '</div>' +
             '<div class="pmc-info">' +
@@ -101,7 +94,7 @@
     '</div>';
   }
 
-  function initMarketClock() {
+  function initClock() {
     document.querySelectorAll('.market-clock').forEach(function(c) { c.remove(); });
     var page = document.getElementById('page-analysis');
     if (!page) return;
@@ -113,7 +106,7 @@
       if (page.firstElementChild) page.insertBefore(host, page.firstElementChild);
       else page.appendChild(host);
     }
-    host.innerHTML = buildClockHTML();
+    host.innerHTML = clockHTML();
 
     function tick() {
       var c = document.getElementById('pmcClock');
@@ -127,7 +120,7 @@
     clockRefresh = setInterval(function() {
       var body = document.getElementById('pmcBody');
       if (!body) return;
-      getSessions().forEach(function(s, i) {
+      sessions().forEach(function(s, i) {
         var el = body.children[i];
         if (!el) return;
         el.classList.toggle('open', s.open);
@@ -138,10 +131,10 @@
     }, 60000);
   }
 
-  /* ============================================================
-     2) TIER
-     ============================================================ */
-  function calcTier(trades) {
+  /* ══════════════════════════════════════════════════════
+     TIER
+     ══════════════════════════════════════════════════════ */
+  function getTier(trades) {
     var now = new Date();
     var startISO = toISO(new Date(now.getFullYear(), now.getMonth(), 1));
     var month = trades.filter(function(t) { return t.date >= startISO; });
@@ -173,61 +166,50 @@
     var pct = 100, label = 'به بالاترین سطح رسیدی';
 
     if (next) {
-      var rng = next.min - cur.min;
-      var inR = net - cur.min;
-      pct = Math.max(0, Math.min(100, (inR / rng) * 100));
-      label = 'تا ' + next.name + ': ' + formatMoney(next.min - net);
+      pct = Math.max(0, Math.min(100, ((net - cur.min) / (next.min - cur.min)) * 100));
+      label = 'تا ' + next.name + ': ' + money(next.min - net);
     }
 
     return {
       key: cur.key,
       name: cur.name,
-      subtitle: month.length ? month.length + ' معامله این ماه' : 'هنوز معامله‌ای این ماه نیست',
-      monthPnL: formatMoney(net),
+      subtitle: month.length ? month.length + ' معامله این ماه' : 'هنوز معامله‌ای نیست',
+      monthPnL: money(net),
       monthCount: month.length + '',
       winRate: wr.toFixed(1) + '٪',
       progressPct: pct.toFixed(0) + '٪',
       progressLabel: label,
+      net: net,
       ladder: tiers.map(function(t, i) {
         return { key: t.key, name: t.name, unlocked: i <= idx, current: i === idx };
       })
     };
   }
 
-  /* ============================================================
-     3) ANALYZE
-     ============================================================ */
+  /* ══════════════════════════════════════════════════════
+     ANALYZE
+     ══════════════════════════════════════════════════════ */
   function analyze(trades) {
-    if (!trades || !trades.length) {
-      return {
-        mood: 'neutral',
-        icon: '🤖',
-        title: '👋 خوش آمدی!',
-        text: 'اولین معامله رو ثبت کن تا تحلیل هوشمند بگیری.',
-        badges: []
-      };
-    }
+    if (!trades.length) return {
+      icon: '🤖', title: '👋 خوش آمدی!',
+      text: 'اولین معامله رو ثبت کن تا تحلیل بگیری.', badges: []
+    };
 
     var w = 0, l = 0, net = 0, gp = 0, gl = 0;
-    var byStrat = {};
-    var maxStreak = 0, lossStreak = 0, maxLoss = 0;
+    var byStrat = {}, maxStreak = 0, lossStreak = 0, maxLoss = 0;
 
-    trades.slice().sort(function(a, b) {
-      return (a.createdAt || 0) - (b.createdAt || 0);
-    }).forEach(function(t) {
+    trades.slice().sort(function(a, b) { return (a.createdAt || 0) - (b.createdAt || 0); })
+    .forEach(function(t) {
       var p = t.result === 'win' ? Math.abs(+t.amount || 0) :
               t.result === 'loss' ? -Math.abs(+t.amount || 0) : 0;
       net += p;
-      if (t.result === 'win') {
-        w++; gp += p;
-        maxStreak++; lossStreak = 0;
-      } else if (t.result === 'loss') {
-        l++; gl += Math.abs(p);
-        lossStreak++;
+      if (t.result === 'win') { w++; gp += p; maxStreak++; lossStreak = 0; }
+      else if (t.result === 'loss') {
+        l++; gl += Math.abs(p); lossStreak++;
         if (lossStreak > maxLoss) maxLoss = lossStreak;
       }
       var s = t.strategy || '—';
-      if (!byStrat[s]) byStrat[s] = { w: 0, l: 0, net: 0 };
+      if (!byStrat[s]) byStrat[s] = { net: 0, w: 0, l: 0 };
       byStrat[s].net += p;
       if (t.result === 'win') byStrat[s].w++;
       else if (t.result === 'loss') byStrat[s].l++;
@@ -244,29 +226,24 @@
     var best = strats[0];
     var worst = strats[strats.length - 1];
     var profit = net > 0;
-    var mood = profit ? 'good' : net < 0 ? 'bad' : 'neutral';
 
-    var title, text, icon;
+    var icon, title, text;
     if (profit) {
       icon = '🏆';
       title = '🎉 عملکردت سودده بوده!';
-      text = 'خالص سودت <strong>' + formatMoney(net) + '</strong>. ';
-      if (best) text += 'بهترین استراتژی: <em>' + best.name + '</em>. ';
-      if (wr >= 60) text += 'وین‌ریت <strong>' + wr.toFixed(1) + '٪</strong> عالیه!';
-      else if (wr >= 50) text += 'وین‌ریت <strong>' + wr.toFixed(1) + '٪</strong> بالای ۵۰٪.';
-      else text += 'وین‌ریت <strong>' + wr.toFixed(1) + '٪</strong> قابل قبوله.';
+      text = 'خالص سودت <strong>' + money(net) + '</strong>. ';
+      if (best) text += 'بهترین: <em>' + best.name + '</em>. ';
+      text += 'وین‌ریت <strong>' + wr.toFixed(1) + '٪</strong>.';
     } else if (net < 0) {
       icon = '🎯';
       title = '⚠️ عملکردت در ضرر بوده';
-      text = 'خالص ضررت <strong>' + formatMoney(net) + '</strong>. ';
-      if (worst) text += 'بیشترین ضرر از <em>' + worst.name + '</em>. ';
-      if (wr < 40) text += 'وین‌ریت <strong>' + wr.toFixed(1) + '٪</strong> ضعیفه.';
-      else text += 'وین‌ریت <strong>' + wr.toFixed(1) + '٪</strong> قابل قبوله.';
-      if (maxLoss >= 3) text += ' <strong>' + maxLoss + ' ضرر پشت‌سرهم</strong> داشتی.';
+      text = 'خالص ضررت <strong>' + money(net) + '</strong>. ';
+      if (worst) text += 'بیشترین ضرر: <em>' + worst.name + '</em>. ';
+      if (maxLoss >= 3) text += ' <strong>' + maxLoss + ' ضرر پشت‌سرهم</strong>.';
     } else {
       icon = '📊';
       title = '📊 سربه‌سر';
-      text = 'نه سود، نه ضرر. ' + (best ? '<em>' + best.name + '</em> پتانسیل داره.' : '');
+      text = 'نه سود، نه ضرر.';
     }
 
     var badges = [];
@@ -276,7 +253,7 @@
     if (isFinite(pf)) badges.push({ label: '⚖️ ' + pf.toFixed(2), cls: pf >= 1.5 ? 'good' : pf < 1 ? 'bad' : 'neutral' });
     if (maxStreak >= 3) badges.push({ label: '🔥 ' + maxStreak + ' برد', cls: 'good' });
 
-    return { mood: mood, icon: icon, title: title, text: text, badges: badges };
+    return { icon: icon, title: title, text: text, badges: badges };
   }
 
   function renderAssistant() {
@@ -284,7 +261,7 @@
     if (!host) return;
     var trades = getLS('po.v4.trades', []);
     var a = analyze(trades);
-    var tier = calcTier(trades);
+    var tier = getTier(trades);
 
     host.innerHTML =
       '<div class="tier-card ' + tier.key + '">' +
@@ -320,20 +297,18 @@
           '<div class="assistant-body">' +
             '<div class="assistant-title">' + a.title + '</div>' +
             '<div class="assistant-text">' + a.text + '</div>' +
-            (a.badges.length ?
-              '<div class="assistant-badges">' +
-                a.badges.map(function(b) {
-                  return '<span class="assistant-badge ' + b.cls + '">' + b.label + '</span>';
-                }).join('') +
-              '</div>' : '') +
+            (a.badges.length ? '<div class="assistant-badges">' +
+              a.badges.map(function(b) {
+                return '<span class="assistant-badge ' + b.cls + '">' + b.label + '</span>';
+              }).join('') + '</div>' : '') +
           '</div>' +
         '</div>' +
       '</div>';
   }
 
-  /* ============================================================
-     4) GOALS BANNER
-     ============================================================ */
+  /* ══════════════════════════════════════════════════════
+     GOALS
+     ══════════════════════════════════════════════════════ */
   function renderGoals() {
     var host = $('#goals-banner-host');
     if (!host) return;
@@ -348,14 +323,13 @@
       startISO = toISO(new Date(now.getFullYear(), now.getMonth(), 1));
       endISO = toISO(new Date(now.getFullYear(), now.getMonth() + 1, 0));
     } else {
-      var dow = now.getDay();
-      var dss = (dow + 1) % 7;
+      var dss = (now.getDay() + 1) % 7;
       var st = new Date(now); st.setDate(now.getDate() - dss);
       var en = new Date(st); en.setDate(st.getDate() + 6);
       startISO = toISO(st); endISO = toISO(en);
     }
-    var pt = trades.filter(function(t) { return t.date >= startISO && t.date <= endISO; });
 
+    var pt = trades.filter(function(t) { return t.date >= startISO && t.date <= endISO; });
     var w = 0, l = 0, net = 0;
     pt.forEach(function(t) {
       var p = t.result === 'win' ? Math.abs(+t.amount || 0) :
@@ -375,27 +349,29 @@
       var prog = goal.target > 0 ? Math.min(100, (cur / goal.target) * 100) : 0;
 
       function fmt(v, m) {
-        if (m === 'pnl') return formatMoney(v);
+        if (m === 'pnl') return money(v);
         if (m === 'trades') return Math.round(v) + '';
         return (+v).toFixed(1) + '٪';
       }
 
-      if (prog >= 100) {
-        banner = { cls: 'success', icon: '🏆', title: '🎉 به هدفت رسیدی!',
-          sub: 'هدف ' + (goal.period === 'week' ? 'هفتگی' : 'ماهانه') + 'ت تکمیل شد',
-          stats: [{ v: fmt(cur, goal.metric), l: 'فعلی' }, { v: fmt(goal.target, goal.metric), l: 'هدف' }, { v: '۱۰۰٪', l: 'پیشرفت' }],
-          progress: 100 };
-      } else if (prog >= 70) {
-        banner = { cls: 'warning', icon: '⚡', title: 'داری نزدیک میشی!',
-          sub: (100 - prog).toFixed(0) + '٪ تا هدف',
-          stats: [{ v: fmt(cur, goal.metric), l: 'فعلی' }, { v: fmt(goal.target, goal.metric), l: 'هدف' }, { v: prog.toFixed(0) + '٪', l: 'پیشرفت' }],
-          progress: prog };
-      } else {
-        banner = { cls: 'neutral', icon: '🎯', title: 'هدف ' + (goal.period === 'week' ? 'هفتگی' : 'ماهانه'),
-          sub: 'در مسیر هدفت',
-          stats: [{ v: fmt(cur, goal.metric), l: 'فعلی' }, { v: fmt(goal.target, goal.metric), l: 'هدف' }, { v: prog.toFixed(0) + '٪', l: 'پیشرفت' }],
-          progress: prog };
-      }
+      var cls = prog >= 100 ? 'success' : prog >= 70 ? 'warning' : 'neutral';
+      var ic = prog >= 100 ? '🏆' : prog >= 70 ? '⚡' : '🎯';
+      var ti = prog >= 100 ? '🎉 به هدفت رسیدی!' :
+               prog >= 70 ? 'داری نزدیک میشی!' :
+               'هدف ' + (goal.period === 'week' ? 'هفتگی' : 'ماهانه');
+      var sb = prog >= 100 ? 'هدف تکمیل شد' :
+               prog >= 70 ? (100 - prog).toFixed(0) + '٪ تا هدف' :
+               'در مسیر هدفت';
+
+      banner = {
+        cls: cls, icon: ic, title: ti, sub: sb,
+        stats: [
+          { v: fmt(cur, goal.metric), l: 'فعلی' },
+          { v: fmt(goal.target, goal.metric), l: 'هدف' },
+          { v: prog.toFixed(0) + '٪', l: 'پیشرفت' }
+        ],
+        progress: prog
+      };
     }
 
     if (rules && rules.enabled && rules.dailyLoss > 0) {
@@ -409,13 +385,27 @@
       var du = (tl / rules.dailyLoss) * 100;
 
       if (du >= 100) {
-        banner = { cls: 'danger', icon: '🚨', title: 'حد ضرر نقض شد!', sub: 'معامله رو متوقف کن',
-          stats: [{ v: formatMoney(-tl), l: 'ضرر' }, { v: formatMoney(-rules.dailyLoss), l: 'حد' }, { v: du.toFixed(0) + '٪', l: 'مصرف' }],
-          progress: Math.min(100, du) };
+        banner = {
+          cls: 'danger', icon: '🚨', title: 'حد ضرر نقض شد!',
+          sub: 'معامله رو متوقف کن',
+          stats: [
+            { v: money(-tl), l: 'ضرر' },
+            { v: money(-rules.dailyLoss), l: 'حد' },
+            { v: du.toFixed(0) + '٪', l: 'مصرف' }
+          ],
+          progress: Math.min(100, du)
+        };
       } else if (du >= 80 && (!banner || banner.cls === 'neutral')) {
-        banner = { cls: 'warning', icon: '⚠️', title: 'نزدیک حد ضرر', sub: du.toFixed(0) + '٪ مصرف شده',
-          stats: [{ v: formatMoney(-tl), l: 'ضرر' }, { v: formatMoney(-rules.dailyLoss), l: 'حد' }, { v: du.toFixed(0) + '٪', l: 'مصرف' }],
-          progress: du };
+        banner = {
+          cls: 'warning', icon: '⚠️', title: 'نزدیک حد ضرر',
+          sub: du.toFixed(0) + '٪ مصرف شده',
+          stats: [
+            { v: money(-tl), l: 'ضرر' },
+            { v: money(-rules.dailyLoss), l: 'حد' },
+            { v: du.toFixed(0) + '٪', l: 'مصرف' }
+          ],
+          progress: du
+        };
       }
     }
 
@@ -439,82 +429,152 @@
       '</div>';
   }
 
-  /* ============================================================
-     5) SHARE IMAGE
-     ============================================================ */
+  /* ══════════════════════════════════════════════════════
+     SHARE IMAGE — متفاوت برای هر سطح
+     ══════════════════════════════════════════════════════ */
   function drawShare() {
     var trades = getLS('po.v4.trades', []);
-    var tier = calcTier(trades);
+    var tier = getTier(trades);
 
-    var W = 800, H = 1100;
+    var W = 800, H = 1200;
     var canvas = document.createElement('canvas');
-    canvas.width = W; canvas.height = H;
+    canvas.width = W;
+    canvas.height = H;
     var ctx = canvas.getContext('2d');
 
-    var bg = ctx.createLinearGradient(0, 0, 0, H);
-    bg.addColorStop(0, '#0a0f1e');
-    bg.addColorStop(0.5, '#050810');
-    bg.addColorStop(1, '#0a0f1e');
+    // ═══ تنظیمات رنگ بر اساس Tier ═══
+    var config = {
+      bronze: {
+        bg1: '#1a0f08', bg2: '#2a1810', bg3: '#0f0704',
+        primary: '#cd7f32', secondary: '#e8a370', accent: '#f5d5b0',
+        glow: 'rgba(205,127,50,0.5)', label: 'BRONZE',
+        starColors: ['#cd7f32', '#f0a96c'],
+        orbColors: ['rgba(205,127,50,0.25)', 'rgba(240,169,108,0.15)']
+      },
+      silver: {
+        bg1: '#0f121e', bg2: '#1a2030', bg3: '#08090f',
+        primary: '#c0c0d2', secondary: '#e0e0f0', accent: '#ffffff',
+        glow: 'rgba(192,192,210,0.5)', label: 'SILVER',
+        starColors: ['#c0c0d2', '#ffffff'],
+        orbColors: ['rgba(192,192,210,0.25)', 'rgba(224,224,240,0.15)']
+      },
+      gold: {
+        bg1: '#1a1404', bg2: '#2a2008', bg3: '#0f0c02',
+        primary: '#ffc828', secondary: '#fff9c4', accent: '#ffd94a',
+        glow: 'rgba(255,200,40,0.55)', label: 'GOLD',
+        starColors: ['#ffc828', '#ffd94a', '#fff9c4'],
+        orbColors: ['rgba(255,200,40,0.3)', 'rgba(255,217,74,0.15)']
+      },
+      diamond: {
+        bg1: '#050a1e', bg2: '#0a1430', bg3: '#020510',
+        primary: '#7dd8ff', secondary: '#ffffff', accent: '#ba68ff',
+        glow: 'rgba(120,220,255,0.6)', label: 'DIAMOND',
+        starColors: ['#7dd8ff', '#ffffff', '#ba68ff'],
+        orbColors: ['rgba(120,220,255,0.3)', 'rgba(186,104,255,0.2)']
+      }
+    };
+    var C = config[tier.key] || config.bronze;
+
+    // ═══ پس‌زمینه ═══
+    var bg = ctx.createLinearGradient(0, 0, W, H);
+    bg.addColorStop(0, C.bg1);
+    bg.addColorStop(0.5, C.bg2);
+    bg.addColorStop(1, C.bg3);
     ctx.fillStyle = bg;
     ctx.fillRect(0, 0, W, H);
 
-    function orb(x, y, r, c) {
+    // ═══ ستاره‌ها (فقط برای DIAMOND بیشتر) ═══
+    var starCount = tier.key === 'diamond' ? 200 :
+                    tier.key === 'gold' ? 100 :
+                    tier.key === 'silver' ? 60 : 30;
+    for (var i = 0; i < starCount; i++) {
+      var sx = Math.random() * W;
+      var sy = Math.random() * H;
+      var sr = Math.random() * 1.6 + 0.3;
+      var sa = Math.random() * 0.7 + 0.2;
+      var sc = C.starColors[Math.floor(Math.random() * C.starColors.length)];
+      ctx.globalAlpha = sa;
+      ctx.fillStyle = sc;
+      ctx.beginPath();
+      ctx.arc(sx, sy, sr, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+
+    // ═══ Orbs (Nebula) ═══
+    function orb(x, y, r, color) {
       var g = ctx.createRadialGradient(x, y, 0, x, y, r);
-      g.addColorStop(0, c);
+      g.addColorStop(0, color);
       g.addColorStop(1, 'rgba(0,0,0,0)');
       ctx.fillStyle = g;
       ctx.beginPath();
       ctx.arc(x, y, r, 0, Math.PI * 2);
       ctx.fill();
     }
-    orb(120, 100, 260, 'rgba(46,230,166,0.22)');
-    orb(700, 1000, 300, 'rgba(91,140,255,0.22)');
+    orb(150, 180, 400, C.orbColors[0]);
+    orb(W - 100, H - 250, 450, C.orbColors[1]);
 
+    // ═══ نوار رنگی بالا ═══
     var topBar = ctx.createLinearGradient(0, 0, W, 0);
-    topBar.addColorStop(0, '#2ee6a6');
-    topBar.addColorStop(0.5, '#5b8cff');
-    topBar.addColorStop(1, '#ff5fa2');
+    topBar.addColorStop(0, 'rgba(255,255,255,0)');
+    topBar.addColorStop(0.2, C.primary);
+    topBar.addColorStop(0.5, C.secondary);
+    topBar.addColorStop(0.8, C.primary);
+    topBar.addColorStop(1, 'rgba(255,255,255,0)');
     ctx.fillStyle = topBar;
-    ctx.fillRect(0, 0, W, 4);
+    ctx.fillRect(0, 0, W, 5);
 
-    var tierClr = {
-      bronze: '#cd7f32',
-      silver: '#c0c0d2',
-      gold: '#ffc828',
-      diamond: '#7dd8ff'
-    };
-    var tc = tierClr[tier.key] || '#cd7f32';
+    // ═══ نشان Tier (Badge) ═══
+    var bw = 240, bh = 70;
+    var bx = (W - bw) / 2;
+    var by = 50;
 
-    var bw = 200, bh = 56;
-    var bx = (W - bw) / 2, by = 32;
-    ctx.fillStyle = 'rgba(255,255,255,0.06)';
-    roundRect(ctx, bx, by, bw, bh, 28);
+    // Glow پشت
+    ctx.shadowColor = C.glow;
+    ctx.shadowBlur = 60;
+    ctx.fillStyle = C.primary;
+    ctx.globalAlpha = 0.3;
+    rr(ctx, bx, by, bw, bh, 35);
     ctx.fill();
-    ctx.strokeStyle = tc;
-    ctx.lineWidth = 2;
-    roundRect(ctx, bx, by, bw, bh, 28);
-    ctx.stroke();
+    ctx.globalAlpha = 1;
+    ctx.shadowBlur = 0;
 
-    ctx.fillStyle = tc;
-    ctx.font = '900 22px Inter, sans-serif';
+    // کادر اصلی با گرادیانت
+    var badgeGrad = ctx.createLinearGradient(bx, by, bx + bw, by + bh);
+    badgeGrad.addColorStop(0, C.primary);
+    badgeGrad.addColorStop(0.5, C.secondary);
+    badgeGrad.addColorStop(1, C.primary);
+    ctx.fillStyle = badgeGrad;
+    rr(ctx, bx, by, bw, bh, 35);
+    ctx.fill();
+
+    // متن Tier
+    ctx.fillStyle = C.bg1;
+    ctx.font = '900 26px Inter, sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(tier.name, W / 2, by + bh / 2 + 1);
+    ctx.fillText(C.label, W / 2, by + bh / 2 + 1);
 
-    var tg = ctx.createLinearGradient(200, 0, 600, 0);
-    tg.addColorStop(0, '#2ee6a6');
-    tg.addColorStop(0.5, '#5b8cff');
-    tg.addColorStop(1, '#ff5fa2');
-    ctx.fillStyle = tg;
-    ctx.font = '900 54px Inter, sans-serif';
+    // ═══ لوگو ═══
+    var titleGrad = ctx.createLinearGradient(W / 2 - 250, 0, W / 2 + 250, 0);
+    titleGrad.addColorStop(0, C.primary);
+    titleGrad.addColorStop(0.5, C.secondary);
+    titleGrad.addColorStop(1, C.primary);
+    ctx.fillStyle = titleGrad;
+    ctx.font = '900 68px Inter, sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'top';
-    ctx.fillText('PO-TRADE', W / 2, 110);
+    ctx.shadowColor = C.glow;
+    ctx.shadowBlur = 40;
+    ctx.fillText('PO-TRADE', W / 2, 165);
+    ctx.shadowBlur = 0;
 
-    ctx.font = '700 12px Inter, sans-serif';
-    ctx.fillStyle = 'rgba(134,151,184,1)';
-    ctx.fillText('PERFORMANCE REPORT  •  ' + new Date().toISOString().slice(0, 10), W / 2, 178);
+    ctx.font = '700 13px Inter, sans-serif';
+    ctx.fillStyle = 'rgba(200,215,240,0.7)';
+    ctx.fillText('◆  PERFORMANCE REPORT  ◆  ' +
+                 new Date().toISOString().slice(0, 10) + '  ◆', W / 2, 255);
 
+    // ═══ محاسبه آمار ═══
     var w = 0, l = 0, net = 0, gp = 0, gl = 0;
     trades.forEach(function(t) {
       var p = t.result === 'win' ? Math.abs(+t.amount || 0) :
@@ -527,80 +587,123 @@
     var wr = closed ? (w / closed) * 100 : 0;
     var pf = gl > 0 ? gp / gl : (gp > 0 ? Infinity : 0);
 
-    var pc = net > 0 ? '#2ee6a6' : net < 0 ? '#ff5674' : '#8697b8';
+    // ═══ Net PnL بزرگ ═══
+    var pnlColor = net > 0 ? '#2ee6a6' : net < 0 ? '#ff5674' : '#8697b8';
+    var pnlColor2 = net > 0 ? '#7bffd0' : net < 0 ? '#ff95a8' : '#c7d3ea';
     var sgn = net > 0 ? '+' : net < 0 ? '-' : '';
     var nTxt = sgn + '$' + Math.abs(net).toLocaleString('en-US', { maximumFractionDigits: 2 });
 
-    ctx.shadowColor = pc;
-    ctx.shadowBlur = 40;
-    ctx.font = '900 78px Inter, sans-serif';
-    ctx.fillStyle = pc;
+    // هاله
+    var halo = ctx.createRadialGradient(W / 2, 420, 0, W / 2, 420, 340);
+    halo.addColorStop(0, net > 0 ? 'rgba(46,230,166,0.35)' : 'rgba(255,86,116,0.35)');
+    halo.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = halo;
+    ctx.fillRect(0, 280, W, 320);
+
+    // عدد با گرادیانت
+    var numGrad = ctx.createLinearGradient(W / 2 - 300, 0, W / 2 + 300, 0);
+    numGrad.addColorStop(0, pnlColor);
+    numGrad.addColorStop(0.5, pnlColor2);
+    numGrad.addColorStop(1, pnlColor);
+
+    ctx.shadowColor = pnlColor;
+    ctx.shadowBlur = 90;
+    ctx.font = '900 118px Inter, sans-serif';
+    ctx.fillStyle = numGrad;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(nTxt, W / 2, 280);
+    ctx.fillText(nTxt, W / 2, 420);
     ctx.shadowBlur = 0;
 
-    ctx.font = '800 13px Inter, sans-serif';
-    ctx.fillStyle = 'rgba(134,151,184,1)';
+    ctx.font = '900 14px Inter, sans-serif';
+    ctx.fillStyle = 'rgba(200,215,240,0.7)';
     ctx.textBaseline = 'top';
-    ctx.fillText('NET PROFIT / LOSS', W / 2, 335);
+    ctx.fillText('N E T   P R O F I T   /   L O S S', W / 2, 500);
 
-    var cw = 165, ch = 100, g = 12;
-    var tw = cw * 4 + g * 3;
+    // ═══ ۴ کارت آمار ═══
+    var cw = 175, ch = 110, gap = 10;
+    var tw = cw * 4 + gap * 3;
     var sx = (W - tw) / 2;
-    var cy = 400;
+    var cy = 570;
 
-    function card(x, y, label, val, color) {
-      ctx.fillStyle = 'rgba(20,29,51,0.9)';
-      roundRect(ctx, x, y, cw, ch, 14);
+    function statCard(x, y, label, val, clr) {
+      // Background
+      ctx.fillStyle = 'rgba(15,20,35,0.85)';
+      rr(ctx, x, y, cw, ch, 16);
       ctx.fill();
-      ctx.strokeStyle = 'rgba(120,150,200,0.25)';
+
+      // Border
+      ctx.strokeStyle = 'rgba(200,215,240,0.15)';
       ctx.lineWidth = 1;
-      roundRect(ctx, x, y, cw, ch, 14);
+      rr(ctx, x, y, cw, ch, 16);
       ctx.stroke();
-      ctx.fillStyle = color;
-      ctx.fillRect(x + 15, y, cw - 30, 2);
-      ctx.font = '900 26px Inter, sans-serif';
-      ctx.fillStyle = color;
+
+      // Top accent
+      var ag = ctx.createLinearGradient(x, 0, x + cw, 0);
+      ag.addColorStop(0, clr);
+      ag.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = ag;
+      ctx.fillRect(x + 20, y, cw - 40, 2);
+
+      // Value
+      ctx.font = '900 30px Inter, sans-serif';
+      ctx.fillStyle = clr;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText(val, x + cw / 2, y + 40);
-      ctx.font = '800 10px Inter, sans-serif';
-      ctx.fillStyle = 'rgba(134,151,184,1)';
-      ctx.fillText(label, x + cw / 2, y + 72);
+      ctx.fillText(val, x + cw / 2, y + 45);
+
+      // Label
+      ctx.font = '900 10px Inter, sans-serif';
+      ctx.fillStyle = 'rgba(200,215,240,0.6)';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(label, x + cw / 2, y + 85);
     }
 
-    card(sx, cy, 'TRADES', trades.length + '', '#eef3ff');
-    card(sx + cw + g, cy, 'WIN RATE', wr.toFixed(1) + '%', wr >= 50 ? '#2ee6a6' : '#ff5674');
-    card(sx + (cw + g) * 2, cy, 'WINS', w + '', '#2ee6a6');
-    card(sx + (cw + g) * 3, cy, 'LOSSES', l + '', '#ff5674');
+    statCard(sx, cy, 'TOTAL TRADES', trades.length + '', C.primary);
+    statCard(sx + cw + gap, cy, 'WIN RATE', wr.toFixed(1) + '%',
+             wr >= 50 ? '#2ee6a6' : '#ff5674');
+    statCard(sx + (cw + gap) * 2, cy, 'WINS', w + '', '#2ee6a6');
+    statCard(sx + (cw + gap) * 3, cy, 'LOSSES', l + '', '#ff5674');
 
-    var byY = 555;
-    var bX = 60, bW = W - 120, bH = 12;
+    // ═══ نوار Win Rate ═══
+    var barY = 730;
+    var barX = 60, barW = W - 120, barH = 14;
 
-    ctx.fillStyle = 'rgba(120,150,200,0.15)';
-    roundRect(ctx, bX, byY, bW, bH, 6);
+    ctx.fillStyle = 'rgba(0,0,0,0.5)';
+    rr(ctx, barX, barY, barW, barH, 7);
     ctx.fill();
 
-    var fw = (wr / 100) * bW;
-    var fg = ctx.createLinearGradient(bX, 0, bX + fw, 0);
-    fg.addColorStop(0, '#2ee6a6');
-    fg.addColorStop(1, '#5b8cff');
-    ctx.fillStyle = fg;
-    roundRect(ctx, bX, byY, Math.max(fw, 8), bH, 6);
-    ctx.fill();
+    ctx.strokeStyle = 'rgba(200,215,240,0.15)';
+    ctx.lineWidth = 1;
+    rr(ctx, barX, barY, barW, barH, 7);
+    ctx.stroke();
 
-    ctx.font = '900 11px Inter, sans-serif';
-    ctx.fillStyle = 'rgba(134,151,184,1)';
+    var fw = (wr / 100) * barW;
+    if (fw > 0) {
+      var fg = ctx.createLinearGradient(barX, 0, barX + fw, 0);
+      fg.addColorStop(0, '#2ee6a6');
+      fg.addColorStop(0.5, C.primary);
+      fg.addColorStop(1, C.secondary);
+      ctx.fillStyle = fg;
+      ctx.shadowColor = C.glow;
+      ctx.shadowBlur = 30;
+      rr(ctx, barX, barY, Math.max(fw, 14), barH, 7);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+    }
+
+    ctx.font = '900 12px Inter, sans-serif';
+    ctx.fillStyle = 'rgba(200,215,240,0.7)';
     ctx.textAlign = 'left';
     ctx.textBaseline = 'bottom';
-    ctx.fillText('WIN RATE ' + wr.toFixed(1) + '%', bX, byY - 8);
+    ctx.fillText('WIN RATE ' + wr.toFixed(1) + '%', barX, barY - 10);
 
     var pfT = isFinite(pf) ? pf.toFixed(2) : '∞';
     ctx.textAlign = 'right';
     ctx.fillStyle = pf >= 1.5 ? '#2ee6a6' : pf < 1 ? '#ff5674' : '#ffb020';
-    ctx.fillText('PF ' + pfT, bX + bW, byY - 8);
+    ctx.fillText('PROFIT FACTOR ' + pfT, barX + barW, barY - 10);
 
+    // ═══ Top Strategies ═══
     var bs = {};
     trades.forEach(function(t) {
       var s = t.strategy || '—';
@@ -609,39 +712,83 @@
       if (!bs[s]) bs[s] = 0;
       bs[s] += p;
     });
-    var strats = Object.keys(bs).map(function(k) { return { name: k, net: bs[k] }; })
-      .sort(function(a, b) { return b.net - a.net; });
+    var strats = Object.keys(bs).map(function(k) {
+      return { name: k, net: bs[k] };
+    }).sort(function(a, b) { return b.net - a.net; });
 
-    var sY = 620;
-    ctx.font = '900 13px Inter, sans-serif';
-    ctx.fillStyle = 'rgba(255,255,255,0.85)';
+    var sY = 790;
+
+    // Header خط
+    var hLine = ctx.createLinearGradient(W / 2 - 200, 0, W / 2 + 200, 0);
+    hLine.addColorStop(0, 'rgba(255,255,255,0)');
+    hLine.addColorStop(0.5, C.primary);
+    hLine.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = hLine;
+    ctx.fillRect(W / 2 - 200, sY, 400, 1);
+
+    ctx.font = '900 16px Inter, sans-serif';
+    ctx.fillStyle = C.secondary;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'top';
-    ctx.fillText('TOP STRATEGIES', W / 2, sY);
+    ctx.fillText('◆  TOP STRATEGIES  ◆', W / 2, sY + 14);
 
-    ctx.font = '700 13px Inter, sans-serif';
     strats.slice(0, 4).forEach(function(s, i) {
-      var y = sY + 32 + i * 28;
-      var c = s.net > 0 ? '#2ee6a6' : s.net < 0 ? '#ff5674' : '#8697b8';
-      var t2 = s.net > 0 ? '+$' + s.net.toFixed(0) : '-$' + Math.abs(s.net).toFixed(0);
-      var sg = s.net > 0 ? '▲' : s.net < 0 ? '▼' : '●';
+      var y = sY + 50 + i * 42;
+      var isP = s.net > 0;
+      var color = isP ? '#2ee6a6' : s.net < 0 ? '#ff5674' : '#8697b8';
+      var sign = isP ? '▲' : s.net < 0 ? '▼' : '●';
+      var txt = isP ? '+$' + s.net.toFixed(0) : '-$' + Math.abs(s.net).toFixed(0);
 
+      // Row background
+      var rowG = ctx.createLinearGradient(80, 0, W - 80, 0);
+      rowG.addColorStop(0, isP ? 'rgba(46,230,166,0.06)' : 'rgba(255,86,116,0.06)');
+      rowG.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = rowG;
+      rr(ctx, 60, y - 12, W - 120, 34, 10);
+      ctx.fill();
+
+      // Rank
+      ctx.font = '900 16px Inter, sans-serif';
+      ctx.fillStyle = C.primary;
       ctx.textAlign = 'left';
-      ctx.fillStyle = 'rgba(200,215,240,0.9)';
-      ctx.fillText(sg + ' ' + s.name, 100, y);
+      ctx.textBaseline = 'middle';
+      ctx.fillText('#' + (i + 1), 85, y + 5);
 
+      // Name
+      ctx.font = '800 15px Inter, sans-serif';
+      ctx.fillStyle = 'rgba(230,240,255,0.9)';
+      var nm = s.name.length > 22 ? s.name.substring(0, 20) + '...' : s.name;
+      ctx.fillText(nm, 130, y + 5);
+
+      // PnL
+      ctx.font = '900 17px Inter, sans-serif';
+      ctx.fillStyle = color;
       ctx.textAlign = 'right';
-      ctx.fillStyle = c;
-      ctx.font = '900 13px Inter, sans-serif';
-      ctx.fillText(t2, W - 100, y);
-      ctx.font = '700 13px Inter, sans-serif';
+      ctx.fillText(txt, W - 90, y + 5);
     });
 
-    ctx.font = '700 10px Inter, sans-serif';
-    ctx.fillStyle = 'rgba(134,151,184,0.5)';
+    // ═══ Footer ═══
+    var footY = H - 55;
+
+    var fLine = ctx.createLinearGradient(150, 0, W - 150, 0);
+    fLine.addColorStop(0, 'rgba(255,255,255,0)');
+    fLine.addColorStop(0.5, 'rgba(200,215,240,0.3)');
+    fLine.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = fLine;
+    ctx.fillRect(150, footY - 15, W - 300, 1);
+
+    ctx.font = '900 14px Inter, sans-serif';
+    var footG = ctx.createLinearGradient(W / 2 - 100, 0, W / 2 + 100, 0);
+    footG.addColorStop(0, C.primary);
+    footG.addColorStop(1, C.secondary);
+    ctx.fillStyle = footG;
     ctx.textAlign = 'center';
-    ctx.textBaseline = 'bottom';
-    ctx.fillText('Generated by PO-TRADE  •  github.com/IQZEUS/PO-TREAD', W / 2, H - 20);
+    ctx.textBaseline = 'middle';
+    ctx.fillText('◆  PO-TRADE  ◆', W / 2, footY);
+
+    ctx.font = '600 10px Inter, sans-serif';
+    ctx.fillStyle = 'rgba(200,215,240,0.5)';
+    ctx.fillText('github.com/IQZEUS/PO-TREAD', W / 2, footY + 22);
 
     return canvas;
   }
@@ -697,9 +844,9 @@
     });
   }
 
-  /* ============================================================
-     6) THEME + STREAK + CONFETTI + COMMAND PALETTE
-     ============================================================ */
+  /* ══════════════════════════════════════════════════════
+     THEME + STREAK + CONFETTI + COMMAND PALETTE
+     ══════════════════════════════════════════════════════ */
   function initThemeSwitcher() {
     var host = $('#theme-switcher-host');
     if (!host) return;
@@ -752,14 +899,11 @@
               t.result === 'loss' ? -Math.abs(+t.amount || 0) : 0;
       bd[t.date] = (bd[t.date] || 0) + p;
     });
-    var today = new Date();
     var st = 0;
     for (var i = 0; i < 365; i++) {
-      var d = new Date(today);
+      var d = new Date();
       d.setDate(d.getDate() - i);
-      var iso = d.getFullYear() + '-' +
-                String(d.getMonth() + 1).padStart(2, '0') + '-' +
-                String(d.getDate()).padStart(2, '0');
+      var iso = toISO(d);
       var n = bd[iso];
       if (n === undefined) { if (i === 0) continue; break; }
       if (n > 0) st++; else break;
@@ -779,10 +923,10 @@
       var s = calcStreak();
       if (s > 0) {
         el.classList.remove('cold'); el.classList.add('hot');
-        el.innerHTML = '<span class="fire">🔥</span><span class="num">' + s + '</span><span class="lbl">روز سوددهی</span>';
+        el.innerHTML = '<span class="fire">🔥</span><span class="num">' + s + '</span><span class="lbl">روز</span>';
       } else {
         el.classList.remove('hot'); el.classList.add('cold');
-        el.innerHTML = '<span class="fire">❄️</span><span class="lbl">استریک صفر</span>';
+        el.innerHTML = '<span class="fire">❄️</span><span class="lbl">صفر</span>';
       }
     }
     r();
@@ -799,7 +943,7 @@
     var ctx = cv.getContext('2d');
     var colors = ['#2ee6a6', '#5b8cff', '#ff5fa2', '#ffb020', '#c78aff'];
     var pcs = [];
-    for (var i = 0; i < 150; i++) {
+    for (var i = 0; i < 120; i++) {
       pcs.push({
         x: Math.random() * cv.width,
         y: -20 - Math.random() * cv.height * 0.5,
@@ -813,7 +957,7 @@
       });
     }
     var start = Date.now();
-    var dur = 4000;
+    var dur = 3500;
     function f() {
       var e = Date.now() - start;
       var a = e < dur - 500 ? 1 : Math.max(0, (dur - e) / 500);
@@ -844,7 +988,7 @@
     if (x && x !== lastCel) { lastCel = x; fireConfetti(); }
   }
 
-  function initCmdPalette() {
+  function initCmd() {
     if (document.querySelector('.cmd-overlay')) return;
     var ov = document.createElement('div');
     ov.className = 'cmd-overlay';
@@ -863,14 +1007,6 @@
     var active = 0;
 
     function switchTab(n) { var t = document.querySelector('.tab[data-view="' + n + '"]'); if (t) t.click(); }
-    function setTh(n) {
-      document.documentElement.dataset.theme = n;
-      localStorage.setItem('po.v4.theme', n);
-      document.querySelectorAll('.theme-pick').forEach(function(b) {
-        b.classList.toggle('active', b.dataset.themePick === n);
-      });
-      window.dispatchEvent(new Event('resize'));
-    }
 
     var cmds = [
       { e: '✍️', l: 'ثبت معامله', a: function() { switchTab('add'); } },
@@ -878,9 +1014,6 @@
       { e: '📅', l: 'تقویم', a: function() { switchTab('calendar'); } },
       { e: '📋', l: 'معاملات', a: function() { switchTab('trades'); } },
       { e: '⚙️', l: 'تنظیمات', a: function() { switchTab('settings'); } },
-      { e: '🌙', l: 'تم Obsidian', a: function() { setTh('obsidian'); } },
-      { e: '☀️', l: 'تم Aurora', a: function() { setTh('aurora'); } },
-      { e: '⚡', l: 'تم Cyber', a: function() { setTh('cyber'); } },
       { e: '🔄', l: 'همگام‌سازی', a: function() { if (window.PT_Sync) window.PT_Sync.forcePush(); } },
       { e: '🚪', l: 'خروج', a: function() { if (window.poLogout) window.poLogout(); } }
     ];
@@ -923,24 +1056,24 @@
     });
   }
 
-  /* ============================================================
+  /* ══════════════════════════════════════════════════════
      INIT
-     ============================================================ */
+     ══════════════════════════════════════════════════════ */
   function init() {
     document.querySelectorAll('.market-clock').forEach(function(c) { c.remove(); });
     moveThemeSwitcher();
     setTimeout(moveThemeSwitcher, 500);
     setTimeout(moveThemeSwitcher, 1500);
 
-    setTimeout(initMarketClock, 100);
-    setTimeout(initMarketClock, 700);
+    setTimeout(initClock, 100);
+    setTimeout(initClock, 700);
 
     renderAssistant();
     renderGoals();
     initShare();
     initThemeSwitcher();
     initStreak();
-    initCmdPalette();
+    initCmd();
 
     setInterval(function() {
       renderAssistant();
@@ -949,7 +1082,7 @@
     setInterval(checkGoal, 2000);
 
     document.querySelectorAll('.tab').forEach(function(t) {
-      t.addEventListener('click', function() { setTimeout(initMarketClock, 100); });
+      t.addEventListener('click', function() { setTimeout(initClock, 100); });
     });
   }
 
@@ -961,7 +1094,7 @@
 
   window.PT_Assistant = {
     refresh: function() { renderAssistant(); renderGoals(); },
-    initMarketClock: initMarketClock
+    initClock: initClock
   };
   window.PT_Extras = {
     confetti: fireConfetti,
