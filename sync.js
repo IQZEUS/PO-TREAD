@@ -1,5 +1,5 @@
 /* ============================================================
-   PO-TRADE Sync v16 — FAST + CLEAN + DELETE FIX
+   PO-TRADE Sync v17 — DUPLICATE FIX + FAST + CLEAN
    ============================================================ */
 (function() {
   'use strict';
@@ -88,6 +88,13 @@
     return res;
   }
 
+  // ⚡ dedup آرایه بر اساس id (آخرین نسخه برنده)
+  function dedupe(arr) {
+    var map = {};
+    arr.forEach(function(t) { if (t && t.id) map[t.id] = t; });
+    return Object.keys(map).map(function(k) { return map[k]; });
+  }
+
   function snapSettings() {
     var out = {};
     SETTINGS_KEYS.forEach(function(k) { out[k] = origGetItem(k); });
@@ -136,7 +143,7 @@
     schedulePush();
   }
 
-  // ===== Override localStorage — debounce بسیار کم =====
+  // ===== Override localStorage =====
   localStorage.setItem = function(key, value) {
     origSetItem(key, value);
     if (!uid || !ready) return;
@@ -177,6 +184,9 @@
 
     if (!delIds.length && !upItems.length && !settings) return;
 
+    // ⚡ dedup قبل از ارسال
+    upItems = dedupe(upItems);
+
     pushing = true;
     var ok = false;
 
@@ -215,16 +225,14 @@
     if (pendingTotal() > 0) schedulePush();
   }
 
-  // ===== ⚡ حذف فوری از سرور =====
+  // ===== ⚡ حذف فوری =====
   async function deleteNow(tradeIds) {
     if (!uid || !tradeIds || !tradeIds.length) return false;
     var ids = Array.isArray(tradeIds) ? tradeIds : [tradeIds];
     try {
       var r = await sb.from('trades').delete().eq('user_id', uid).in('trade_id', ids);
       if (r.error) throw r.error;
-      console.log('[Sync] 🗑️ Deleted from server:', ids.length);
-
-      // پاک کردن از pending
+      console.log('[Sync] 🗑️ Deleted:', ids.length);
       var p = getPending();
       ids.forEach(function(id) {
         delete p.add[id];
@@ -235,7 +243,6 @@
       return true;
     } catch (e) {
       console.error('[Sync] Delete failed:', e.message);
-      // اگه خطا خورد، بذار تو pending بمونه
       var p2 = getPending();
       ids.forEach(function(id) {
         if (p2.add[id]) delete p2.add[id];
@@ -246,13 +253,12 @@
     }
   }
 
-  // ===== ⚡ حذف همه از سرور =====
   async function deleteAllNow() {
     if (!uid) return false;
     try {
       var r = await sb.from('trades').delete().eq('user_id', uid);
       if (r.error) throw r.error;
-      console.log('[Sync] 🗑️ ALL trades deleted from server');
+      console.log('[Sync] 🗑️ ALL deleted');
       clearPending();
       return true;
     } catch (e) {
@@ -261,7 +267,7 @@
     }
   }
 
-  // ===== Flush on unload =====
+  // ===== Flush =====
   function flush() {
     if (!uid || !ready) return;
     sb.auth.getSession().then(function(r) {
@@ -273,8 +279,10 @@
 
       var p = getPending();
       var delIds = Object.keys(p.delete);
-      var upItems = Object.keys(p.add).map(function(k) { return p.add[k]; })
-        .concat(Object.keys(p.update).map(function(k) { return p.update[k]; }));
+      var upItems = dedupe(
+        Object.keys(p.add).map(function(k) { return p.add[k]; })
+          .concat(Object.keys(p.update).map(function(k) { return p.update[k]; }))
+      );
 
       var h = { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + token };
 
@@ -322,7 +330,7 @@
     if (document.visibilityState === 'hidden') flush();
   });
 
-  // ===== Boot — سریع =====
+  // ===== Boot =====
   async function boot() {
     try {
       var sRes = await sb.auth.getSession();
@@ -332,7 +340,6 @@
       }
       uid = sRes.data.session.user.id;
 
-      // account switch
       var lastUid = origGetItem(LAST_UID_KEY);
       if (lastUid && lastUid !== uid) {
         origRemoveItem(TRADES_KEY);
@@ -344,6 +351,7 @@
       var localTrades = [];
       try { localTrades = JSON.parse(origGetItem(TRADES_KEY) || '[]'); } catch (e) {}
       if (!Array.isArray(localTrades)) localTrades = [];
+      localTrades = dedupe(localTrades);  // ⚡ dedup
 
       // cloud
       var cloudTrades = [];
@@ -352,6 +360,7 @@
         var r = await sb.from('trades').select('data').eq('user_id', uid);
         if (r.error) throw r.error;
         cloudTrades = (r.data || []).map(function(x) { return x.data; }).filter(function(t) { return t && t.id; });
+        cloudTrades = dedupe(cloudTrades);  // ⚡ dedup
         cloudOk = true;
       } catch (e) {
         console.warn('[Sync] cloud:', e.message);
@@ -359,23 +368,34 @@
 
       var p = getPending();
 
-      // اگه cloud خالی و local پر و اولین باره → آپلود
-      if (cloudOk && cloudTrades.length === 0 && localTrades.length > 0 && !lastUid) {
-        localTrades.forEach(function(t) { if (t && t.id) p.add[t.id] = t; });
+      // ⚡ اگه cloud خالی و local پر → local رو بفرست (بدون دو بار اضافه شدن)
+      if (cloudOk && cloudTrades.length === 0 && localTrades.length > 0) {
+        localTrades.forEach(function(t) { p.add[t.id] = t; });
         savePending(p);
-        cloudTrades = localTrades.slice();
+        console.log('[Sync] Uploading local:', localTrades.length);
       }
 
-      // merge
-      var delIds = Object.keys(p.delete);
-      var addItems = Object.keys(p.add).map(function(k) { return p.add[k]; });
-      var updItems = Object.keys(p.update).map(function(k) { return p.update[k]; });
+      // ⚡ merge با Map → بدون تکرار
+      var mergedMap = {};
 
-      var merged = cloudTrades.filter(function(t) { return delIds.indexOf(t.id) === -1; });
-      var updIds = {};
-      updItems.forEach(function(u) { updIds[u.id] = 1; });
-      merged = merged.filter(function(t) { return !updIds[t.id]; });
-      merged = merged.concat(addItems, updItems);
+      // 1) از cloud شروع کن
+      cloudTrades.forEach(function(t) { mergedMap[t.id] = t; });
+
+      // 2) حذف‌ها رو اعمال کن
+      Object.keys(p.delete).forEach(function(id) { delete mergedMap[id]; });
+
+      // 3) اگه cloud خالی بود، local رو از pending بگیر
+      Object.keys(p.add).forEach(function(id) { mergedMap[id] = p.add[id]; });
+
+      // 4) آپدیت‌ها
+      Object.keys(p.update).forEach(function(id) { mergedMap[id] = p.update[id]; });
+
+      // 5) اگه cloud خالی و local داره و pending خالی (یعنی اولین بار) → local رو نگه دار
+      if (cloudTrades.length === 0 && localTrades.length > 0) {
+        localTrades.forEach(function(t) { mergedMap[t.id] = t; });
+      }
+
+      var merged = Object.keys(mergedMap).map(function(k) { return mergedMap[k]; });
       merged.sort(function(a, b) { return (a.createdAt || 0) - (b.createdAt || 0); });
 
       var finalStr = JSON.stringify(merged);
@@ -397,7 +417,7 @@
       lastSettings = snapSettings();
 
       ready = true;
-      console.log('[Sync] Ready:', merged.length, 'trades | pending:', pendingTotal());
+      console.log('[Sync] Ready:', merged.length, 'trades (cloud:', cloudTrades.length, ', local:', localTrades.length, ')');
 
       if (pendingTotal() > 0) schedulePush();
 
@@ -440,6 +460,36 @@
     forcePush: function() { schedulePush(); },
     deleteNow: deleteNow,
     deleteAllNow: deleteAllNow,
-    killLoader: killLoader
+    killLoader: killLoader,
+
+    // ⚡ پاک کردن دیتای تکراری از localStorage
+    cleanLocal: function() {
+      try {
+        var arr = JSON.parse(origGetItem(TRADES_KEY) || '[]');
+        var before = arr.length;
+        arr = dedupe(arr);
+        var str = JSON.stringify(arr);
+        origSetItem(TRADES_KEY, str);
+        lastTrades = str;
+        console.log('[Sync] Cleaned:', before, '→', arr.length);
+        return arr.length;
+      } catch (e) { return 0; }
+    },
+
+    // ⚡ پاک کردن همه چیز از سرور و local (reset کامل)
+    hardReset: async function() {
+      if (!uid) return false;
+      try {
+        await sb.from('trades').delete().eq('user_id', uid);
+        origRemoveItem(TRADES_KEY);
+        origRemoveItem(PENDING_KEY);
+        lastTrades = '[]';
+        console.log('[Sync] 🔥 Hard reset done');
+        return true;
+      } catch (e) {
+        console.error('[Sync] Hard reset failed:', e.message);
+        return false;
+      }
+    }
   };
 })();
