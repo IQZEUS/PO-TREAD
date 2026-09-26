@@ -1,12 +1,11 @@
 /* ============================================================
-   PO-TRADE Assistant v5.0 — ULTIMATE EDITION
-   ✅ Market Clock INSIDE Analysis (فقط داخل صفحه)
-   ✅ Tier System (Bronze/Silver/Gold/Diamond)
-   ✅ Enhanced Assistant
-   ✅ Epic Share Image
-   ✅ Clear Streak Badge
+   PO-TRADE Assistant v6.0 — ULTIMATE STABLE
+   ✅ بدون لرزش، بدون پرش
+   ✅ آیکن‌های SVG (نه ایموجی)
+   ✅ Tier با 4 سطح (BRONZE/SILVER/GOLD/DIAMOND)
+   ✅ Market Clock داخل آنالیز
+   ✅ Share Image 1000×1500
    ✅ Confetti, Command Palette
-   ✅ Theme Switcher (inside dropdown)
    ============================================================ */
 (function() {
   'use strict';
@@ -14,9 +13,6 @@
   var $ = function(s, r) { return (r || document).querySelector(s); };
   var $$ = function(s, r) { return Array.from((r || document).querySelectorAll(s)); };
 
-  /* ============================================================
-     HELPERS
-     ============================================================ */
   function getLS(key, fallback) {
     try {
       var v = localStorage.getItem(key);
@@ -52,7 +48,7 @@
   }
 
   /* ============================================================
-     1) MARKET CLOCK — فقط داخل صفحه آنالیز
+     1) MARKET CLOCK — داخل آنالیز
      ============================================================ */
   var clockTickInterval = null;
   var clockSessionInterval = null;
@@ -116,26 +112,20 @@
   }
 
   function initMarketClock() {
-    // پاک کردن ساعت‌های قدیمی که ممکنه مونده باشن
     document.querySelectorAll('.market-clock').forEach(function(c) { c.remove(); });
 
     var analysisPage = document.getElementById('page-analysis');
     if (!analysisPage) return;
-    if (document.getElementById('market-clock-host')) {
-      // اگه هست، فقط دوباره رندر کن
-      var existing = document.getElementById('market-clock-host');
-      existing.innerHTML = buildMarketClockHTML();
-    } else {
-      var host = document.createElement('div');
+
+    var host = document.getElementById('market-clock-host');
+    if (!host) {
+      host = document.createElement('div');
       host.id = 'market-clock-host';
       var firstChild = analysisPage.firstElementChild;
-      if (firstChild) {
-        analysisPage.insertBefore(host, firstChild);
-      } else {
-        analysisPage.appendChild(host);
-      }
-      host.innerHTML = buildMarketClockHTML();
+      if (firstChild) analysisPage.insertBefore(host, firstChild);
+      else analysisPage.appendChild(host);
     }
+    host.innerHTML = buildMarketClockHTML();
 
     function tick() {
       var clock = document.getElementById('pmcClock');
@@ -162,7 +152,7 @@
   }
 
   /* ============================================================
-     2) TIER SYSTEM
+     2) TIER SYSTEM — بدون ایموجی، با داده data-tier
      ============================================================ */
   function calculateTier(trades) {
     var now = new Date();
@@ -183,10 +173,10 @@
     var winRate = closed ? (wins / closed) * 100 : 0;
 
     var tiers = [
-      { key: 'bronze',  min: 0,     icon: '🥉', name: 'BRONZE',  color: '#cd7f32' },
-      { key: 'silver',  min: 1000,  icon: '🥈', name: 'SILVER',  color: '#c0c0d2' },
-      { key: 'gold',    min: 2500,  icon: '🥇', name: 'GOLD',    color: '#ffc828' },
-      { key: 'diamond', min: 5000,  icon: '💎', name: 'DIAMOND', color: '#7dd8ff' }
+      { key: 'bronze',  min: 0,     name: 'BRONZE',  color: '#cd7f32' },
+      { key: 'silver',  min: 1000,  name: 'SILVER',  color: '#c0c0d2' },
+      { key: 'gold',    min: 2500,  name: 'GOLD',    color: '#ffc828' },
+      { key: 'diamond', min: 5000,  name: 'DIAMOND', color: '#7dd8ff' }
     ];
 
     var current = tiers[0];
@@ -200,9 +190,8 @@
     }
 
     var next = tiers[currentIdx + 1];
-
     var progressPct = 100;
-    var progressLabel = 'به بالاترین سطح رسیدی! 🏆';
+    var progressLabel = 'به بالاترین سطح رسیدی';
 
     if (next) {
       var range = next.min - current.min;
@@ -218,7 +207,7 @@
 
     var ladder = tiers.map(function(t, i) {
       return {
-        icon: t.icon,
+        key: t.key,
         name: t.name,
         color: t.color,
         unlocked: i <= currentIdx,
@@ -228,7 +217,6 @@
 
     return {
       key: current.key,
-      icon: current.icon,
       name: current.name,
       color: current.color,
       subtitle: subtitle,
@@ -312,9 +300,9 @@
                 formatMoney(bestStrategy.net) + '</strong> سوده. ';
       }
       if (winRate >= 65) {
-        text += 'وین‌ریت <strong>' + winRate.toFixed(1) + '٪</strong> یعنی دقت ورودت فوق‌العاده‌ست! 🔥';
+        text += 'وین‌ریت <strong>' + winRate.toFixed(1) + '٪</strong> یعنی دقت ورودت فوق‌العاده‌ست!';
       } else if (winRate >= 50) {
-        text += 'وین‌ریت <strong>' + winRate.toFixed(1) + '٪</strong> بالای ۵۰٪ — عملکرد متعادل و حرفه‌ای. ✅';
+        text += 'وین‌ریت <strong>' + winRate.toFixed(1) + '٪</strong> بالای ۵۰٪ — عملکرد متعادل و حرفه‌ای.';
       } else if (winRate >= 40) {
         text += 'وین‌ریت <strong>' + winRate.toFixed(1) + '٪</strong> پایین‌تر از میانه، ولی مدیریت ریسکت خوبه.';
       } else {
@@ -336,7 +324,7 @@
         text += 'وین‌ریت <strong>' + winRate.toFixed(1) + '٪</strong> قابل قبول، ولی نسبت سود به ضرر رو بهتر کن.';
       }
       if (maxLossStreak >= 3) {
-        text += ' 🔴 <strong>' + maxLossStreak + ' ضرر پشت‌سرهم</strong> داشتی — چک‌لیستت رو جدی بگیر.';
+        text += ' <strong>' + maxLossStreak + ' ضرر پشت‌سرهم</strong> داشتی — چک‌لیستت رو جدی بگیر.';
       }
     } else {
       icon = '📊';
@@ -376,7 +364,7 @@
       '<div class="tier-card ' + tier.key + '">' +
         '<div class="tier-head">' +
           '<div class="tier-icon-wrap">' +
-            '<div class="tier-icon">' + tier.icon + '</div>' +
+            '<div class="tier-icon"></div>' +
           '</div>' +
           '<div class="tier-info">' +
             '<div class="tier-label">سطح فعلی</div>' +
@@ -398,8 +386,8 @@
         '</div>' +
         '<div class="tier-ladder">' +
           tier.ladder.map(function(s) {
-            return '<div class="tier-step' + (s.unlocked ? ' unlocked' : '') + (s.current ? ' current' : '') + '" style="color:' + s.color + '">' +
-              '<span class="ico">' + s.icon + '</span>' +
+            return '<div class="tier-step' + (s.unlocked ? ' unlocked' : '') + (s.current ? ' current' : '') + '" data-tier="' + s.key + '" style="color:' + s.color + '">' +
+              '<span class="ico"></span>' +
               '<span class="nm">' + s.name + '</span>' +
             '</div>';
           }).join('') +
@@ -590,7 +578,6 @@
     canvas.height = H;
     var ctx = canvas.getContext('2d');
 
-    // پس‌زمینه
     var bgGrad = ctx.createLinearGradient(0, 0, W, H);
     bgGrad.addColorStop(0, '#02030a');
     bgGrad.addColorStop(0.5, '#050a18');
@@ -598,7 +585,6 @@
     ctx.fillStyle = bgGrad;
     ctx.fillRect(0, 0, W, H);
 
-    // Nebula orbs
     function drawOrb(x, y, r, color) {
       var g = ctx.createRadialGradient(x, y, 0, x, y, r);
       g.addColorStop(0, color);
@@ -613,7 +599,6 @@
     drawOrb(500, 750, 350, 'rgba(255,95,162,0.22)');
     drawOrb(850, 300, 300, 'rgba(186,104,255,0.28)');
 
-    // Stars
     for (var i = 0; i < 220; i++) {
       ctx.globalAlpha = Math.random() * 0.8 + 0.2;
       ctx.fillStyle = '#ffffff';
@@ -623,7 +608,6 @@
     }
     ctx.globalAlpha = 1;
 
-    // Grid
     ctx.strokeStyle = 'rgba(120,150,200,0.05)';
     ctx.lineWidth = 1;
     for (var x = 0; x < W; x += 50) {
@@ -633,7 +617,6 @@
       ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
     }
 
-    // Top bar
     var topBar = ctx.createLinearGradient(0, 0, W, 0);
     topBar.addColorStop(0, 'rgba(46,230,166,0)');
     topBar.addColorStop(0.2, '#2ee6a6');
@@ -643,7 +626,6 @@
     ctx.fillStyle = topBar;
     ctx.fillRect(0, 0, W, 4);
 
-    // Tier badge
     var tierColors = {
       bronze:  { main: '#cd7f32', soft: 'rgba(205,127,50,0.2)' },
       silver:  { main: '#c0c0d2', soft: 'rgba(192,192,210,0.2)' },
@@ -668,16 +650,12 @@
     roundRect(ctx, badgeX, badgeY, badgeW, badgeH, 41);
     ctx.stroke();
 
-    ctx.font = '46px Inter, sans-serif';
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(tier.icon, badgeX + 20, badgeY + badgeH / 2 + 2);
-
     ctx.fillStyle = tc.main;
     ctx.font = '900 28px Inter, sans-serif';
-    ctx.fillText(tier.name, badgeX + 86, badgeY + badgeH / 2 + 2);
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(tier.name, W / 2, badgeY + badgeH / 2 + 2);
 
-    // Title
     ctx.textAlign = 'center';
     ctx.textBaseline = 'top';
     var titleGrad = ctx.createLinearGradient(200, 0, 800, 0);
@@ -692,7 +670,6 @@
     ctx.fillStyle = 'rgba(134,151,184,1)';
     ctx.fillText('PERFORMANCE REPORT  •  ' + new Date().toISOString().slice(0, 10), W / 2, 290);
 
-    // Stats
     var wins = 0, losses = 0, be = 0, net = 0, gp = 0, gl = 0;
     var bestTrade = 0, worstTrade = 0;
     trades.forEach(function(t) {
@@ -733,7 +710,6 @@
     ctx.textBaseline = 'top';
     ctx.fillText('NET PROFIT / LOSS', W / 2, 630);
 
-    // Star sparks around PnL
     for (var k = 0; k < 28; k++) {
       var angle = (k / 28) * Math.PI * 2;
       var radius = 340 + Math.random() * 90;
@@ -747,7 +723,6 @@
     }
     ctx.globalAlpha = 1;
 
-    // 2x2 cards
     var cardW = 210, cardH = 140, gap = 24;
     var totalW = cardW * 2 + gap;
     var startX = (W - totalW) / 2;
@@ -803,7 +778,6 @@
     statCard(startX, cardY + cardH + gap, 'WINS', wins + '', '#2ee6a6', '✅');
     statCard(startX + cardW + gap, cardY + cardH + gap, 'LOSSES', losses + '', '#ff5674', '❌');
 
-    // Win rate bar
     var barY = cardY + cardH * 2 + gap + 70;
     var barX = 80, barW = W - 160, barH = 16;
 
@@ -839,7 +813,6 @@
     ctx.fillStyle = pf >= 1.5 ? '#2ee6a6' : pf < 1 ? '#ff5674' : '#ffb020';
     ctx.fillText('PROFIT FACTOR ' + pfTxt, barX + barW, barY - 12);
 
-    // Mini stats
     var miniY = barY + 70;
     var miniW = (W - 160) / 3;
 
@@ -858,7 +831,6 @@
     miniStat(80 + miniW * 1.5, 'AVG LOSS', '-$' + avgLoss.toFixed(0), '#ff5674');
     miniStat(80 + miniW * 2.5, 'BEST', '+$' + bestTrade.toFixed(0), '#ffc828');
 
-    // Footer
     ctx.textAlign = 'center';
     ctx.textBaseline = 'bottom';
 
@@ -873,7 +845,6 @@
     ctx.fillStyle = 'rgba(134,151,184,0.55)';
     ctx.fillText('Generated by PO-TRADE  •  github.com/IQZEUS/PO-TREAD', W / 2, H - 40);
 
-    // Vignette
     var vignette = ctx.createRadialGradient(W / 2, H / 2, 400, W / 2, H / 2, 900);
     vignette.addColorStop(0, 'rgba(0,0,0,0)');
     vignette.addColorStop(1, 'rgba(0,0,0,0.6)');
@@ -1253,7 +1224,7 @@
      INIT
      ============================================================ */
   function init() {
-    // پاک‌سازی ساعت‌های قدیمی فوری
+    // پاک‌سازی ساعت‌های قدیمی
     document.querySelectorAll('.market-clock').forEach(function(c) { c.remove(); });
 
     // تم
@@ -1261,12 +1232,12 @@
     setTimeout(moveThemeSwitcher, 500);
     setTimeout(moveThemeSwitcher, 1500);
 
-    // ساعت داخل آنالیز (چند بار برای اطمینان)
+    // ساعت بازار داخل آنالیز
     setTimeout(initMarketClock, 100);
     setTimeout(initMarketClock, 700);
     setTimeout(initMarketClock, 1500);
 
-    // بقیه اجزا
+    // اجزا
     renderAssistant();
     renderGoalsBanner();
     initShare();
@@ -1275,14 +1246,13 @@
     initCommandPalette();
     showKbdHint();
 
-    // به‌روزرسانی دوره‌ای
     setInterval(function() {
       renderAssistant();
       renderGoalsBanner();
     }, 5000);
     setInterval(checkGoalComplete, 2000);
 
-    // اگه کاربر تب رو عوض کرد، ساعت رو دوباره چک کن
+    // اگه کاربر تب رو عوض کرد
     document.querySelectorAll('.tab').forEach(function(tab) {
       tab.addEventListener('click', function() {
         setTimeout(initMarketClock, 100);
