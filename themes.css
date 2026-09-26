@@ -1157,3 +1157,850 @@
   .streak-badge .fire { font-size: 13px; }
   .streak-badge .lbl { display: none; }
 }
+/* ============================================================
+   🌪️ ANALYSIS ULTIMATE STORM — نسخه انفجاری
+   ============================================================ */
+
+/* ===== پس‌زمینه صفحه آنالیز با گرادیانت زنده ===== */
+#page-analysis {
+  position: relative;
+  padding-top: 4px;
+}
+
+#page-analysis::before {
+  content: '';
+  position: absolute;
+  inset: -40px -20px 0;
+  background:
+    radial-gradient(ellipse 60% 40% at 15% 0%, color-mix(in srgb, var(--accent) 18%, transparent), transparent 60%),
+    radial-gradient(ellipse 50% 35% at 85% 20%, color-mix(in srgb, var(--accent-2) 14%, transparent), transparent 60%),
+    radial-gradient(ellipse 70% 30% at 50% 90%, color-mix(in srgb, var(--accent-3) 10%, transparent), transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+  animation: analysisAurora 18s ease-in-out infinite;
+  filter: blur(40px);
+  opacity: .7;
+}
+
+@keyframes analysisAurora {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(-20px, 10px) scale(1.08); }
+  66% { transform: translate(15px, -15px) scale(.96); }
+}
+
+#page-analysis > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* ============================================================
+   🎯 TIER CARD — سطح‌بندی خفن‌تر
+   ============================================================ */
+.tier-card {
+  position: relative;
+  border-radius: 28px !important;
+  padding: 28px 30px !important;
+  margin-bottom: 22px !important;
+  overflow: hidden;
+  isolation: isolate;
+  animation: tierUltimateIn 1s cubic-bezier(.2,.9,.3,1.2);
+}
+
+@keyframes tierUltimateIn {
+  from { opacity: 0; transform: scale(.88) translateY(-30px) rotateX(-15deg); }
+  to { opacity: 1; transform: none; }
+}
+
+/* بخش‌های تزئینی داخل Tier */
+.tier-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(45deg,
+      transparent 0,
+      transparent 8px,
+      rgba(255,255,255,0.02) 8px,
+      rgba(255,255,255,0.02) 16px);
+  pointer-events: none;
+  z-index: 1;
+  animation: tierPattern 30s linear infinite;
+}
+
+@keyframes tierPattern {
+  from { background-position: 0 0; }
+  to { background-position: 100px 100px; }
+}
+
+/* الماس — اضافه کردن ستاره‌های پس‌زمینه */
+.tier-card.diamond::after {
+  background:
+    radial-gradient(2px 2px at 10% 20%, rgba(255,255,255,0.9), transparent),
+    radial-gradient(2px 2px at 30% 70%, rgba(255,255,255,0.7), transparent),
+    radial-gradient(1px 1px at 50% 15%, rgba(255,255,255,0.9), transparent),
+    radial-gradient(2px 2px at 70% 80%, rgba(255,255,255,0.6), transparent),
+    radial-gradient(1px 1px at 85% 30%, rgba(255,255,255,0.9), transparent),
+    radial-gradient(1px 1px at 20% 90%, rgba(255,255,255,0.7), transparent),
+    radial-gradient(2px 2px at 90% 60%, rgba(255,255,255,0.8), transparent),
+    radial-gradient(1px 1px at 60% 45%, rgba(255,255,255,0.9), transparent);
+  animation: starTwinkle 4s ease-in-out infinite;
+}
+
+@keyframes starTwinkle {
+  0%, 100% { opacity: .6; }
+  50% { opacity: 1; }
+}
+
+/* آیکن بزرگ‌تر با حلقه مضاعف */
+.tier-icon-wrap {
+  flex: 0 0 96px !important;
+  width: 96px !important;
+  height: 96px !important;
+}
+
+.tier-icon {
+  width: 96px !important;
+  height: 96px !important;
+  border-radius: 28px !important;
+  font-size: 50px !important;
+  border-width: 3px !important;
+}
+
+.tier-icon-wrap::before {
+  inset: -14px !important;
+  border-radius: 40px !important;
+  animation-duration: 3s !important;
+  filter: blur(12px) !important;
+  opacity: .7 !important;
+}
+
+.tier-icon-wrap::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: 34px;
+  border: 2px dashed currentColor;
+  opacity: .3;
+  animation: ringSpin 8s linear infinite;
+  z-index: 0;
+}
+
+@keyframes ringSpin {
+  to { transform: rotate(360deg); }
+}
+
+/* نام سطح — فونت فوق بزرگ */
+.tier-name {
+  font-size: 34px !important;
+  letter-spacing: -1px !important;
+  font-family: 'Inter', sans-serif !important;
+  font-weight: 900 !important;
+}
+
+.tier-label {
+  font-size: 11px !important;
+  letter-spacing: 3px !important;
+}
+
+.tier-sub {
+  font-size: 13px !important;
+  margin-top: 6px !important;
+}
+
+/* آمار داخل Tier — بزرگ‌تر */
+.tier-stats {
+  gap: 14px !important;
+  margin-top: 8px;
+}
+
+.tier-stat {
+  padding: 16px 14px !important;
+  border-radius: 18px !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.08), rgba(0,0,0,0.25)) !important;
+  border: 1.5px solid rgba(255,255,255,0.15) !important;
+  position: relative;
+  overflow: hidden;
+}
+
+.tier-stat::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, currentColor, transparent);
+  opacity: .6;
+}
+
+.tier-stat .v {
+  font-size: 24px !important;
+  letter-spacing: -1px !important;
+}
+
+.tier-stat .l {
+  font-size: 10px !important;
+  letter-spacing: 1.2px !important;
+}
+
+/* نوار پیشرفت Tier — ضخیم‌تر با gradient */
+.tier-progress-bar {
+  height: 16px !important;
+  border-radius: 999px !important;
+  border-width: 2px !important;
+}
+
+.tier-progress-fill {
+  box-shadow:
+    0 0 30px currentColor,
+    inset 0 0 12px rgba(255,255,255,0.4) !important;
+  position: relative;
+}
+
+.tier-progress-fill::before {
+  content: '';
+  position: absolute;
+  right: -8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow:
+    0 0 20px currentColor,
+    0 0 40px currentColor,
+    inset 0 0 6px rgba(255,255,255,0.8);
+  animation: progressDot 1.5s ease-in-out infinite;
+}
+
+@keyframes progressDot {
+  0%, 100% { transform: translateY(-50%) scale(1); }
+  50% { transform: translateY(-50%) scale(1.15); }
+}
+
+/* نردبان — بزرگ‌تر */
+.tier-ladder {
+  gap: 12px !important;
+  margin-top: 20px !important;
+  padding-top: 20px !important;
+}
+
+.tier-step {
+  padding: 14px 10px !important;
+  border-radius: 16px !important;
+  border-width: 2px !important;
+}
+
+.tier-step.current {
+  transform: scale(1.12) translateY(-4px) !important;
+  box-shadow:
+    0 0 30px -4px currentColor,
+    0 12px 24px -8px rgba(0,0,0,.6) !important;
+}
+
+.tier-step .ico {
+  font-size: 28px !important;
+  margin-bottom: 5px !important;
+}
+
+.tier-step .nm {
+  font-size: 10px !important;
+  letter-spacing: .8px !important;
+}
+
+/* ============================================================
+   🤖 ASSISTANT — دستیار پرمیوم
+   ============================================================ */
+.assistant {
+  border-radius: 26px !important;
+  padding: 26px 28px !important;
+  border-width: 2px !important;
+}
+
+.assistant-avatar {
+  flex: 0 0 72px !important;
+  width: 72px !important;
+  height: 72px !important;
+  font-size: 34px !important;
+  border-radius: 22px !important;
+  border-width: 2.5px !important;
+}
+
+.assistant-title {
+  font-size: 19px !important;
+  margin-bottom: 10px !important;
+}
+
+.assistant-text {
+  font-size: 14px !important;
+  line-height: 1.9 !important;
+}
+
+.assistant-badge {
+  padding: 8px 14px !important;
+  font-size: 12px !important;
+  font-weight: 900 !important;
+}
+
+/* ============================================================
+   💎 KPI CARDS — انفجار گرافیکی
+   ============================================================ */
+.kpis {
+  gap: 16px !important;
+  margin-bottom: 22px !important;
+}
+
+.kpi {
+  border-radius: 22px !important;
+  padding: 20px 20px 22px !important;
+  position: relative;
+  overflow: hidden;
+  transition: transform .4s cubic-bezier(.2,.9,.3,1.15),
+              box-shadow .4s, border-color .4s !important;
+}
+
+.kpi:hover {
+  transform: translateY(-6px) scale(1.02) !important;
+}
+
+.kpi .ico {
+  width: 46px !important;
+  height: 46px !important;
+  font-size: 22px !important;
+  border-radius: 15px !important;
+}
+
+.kpi .val {
+  font-size: 26px !important;
+  letter-spacing: -1px !important;
+}
+
+.kpi .lbl {
+  font-size: 10.5px !important;
+  letter-spacing: 1.2px !important;
+  text-transform: uppercase !important;
+  opacity: .85;
+}
+
+/* اضافه کردن خط موجی به KPI */
+.kpi::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40px;
+  background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--accent) 8%, transparent));
+  pointer-events: none;
+  z-index: 1;
+}
+
+.kpi.pos::after {
+  background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--green) 12%, transparent));
+}
+.kpi.neg::after {
+  background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--red) 12%, transparent));
+}
+
+/* ============================================================
+   📈 CHARTS — نمودارهای پرمیوم
+   ============================================================ */
+.chart-card {
+  border-radius: 24px !important;
+  padding: 22px !important;
+  position: relative;
+  overflow: hidden;
+  transition: transform .3s, box-shadow .3s;
+}
+
+.chart-card:hover {
+  transform: translateY(-3px);
+  box-shadow:
+    var(--shadow-lg),
+    0 0 40px -20px color-mix(in srgb, var(--accent) 60%, transparent);
+}
+
+.chart-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg,
+    transparent,
+    color-mix(in srgb, var(--accent) 60%, transparent),
+    transparent);
+  animation: chartLineShine 4s linear infinite;
+}
+
+@keyframes chartLineShine {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.chart-card .card-head h2 {
+  font-size: 15px !important;
+  font-weight: 900 !important;
+  letter-spacing: -.2px;
+}
+
+.chart-box {
+  height: 320px !important;
+  border-radius: 18px !important;
+  background:
+    radial-gradient(ellipse at top, color-mix(in srgb, var(--accent) 6%, transparent), transparent 70%),
+    linear-gradient(180deg, rgba(0,0,0,0.15), transparent) !important;
+  padding: 8px;
+  margin: 0 -8px;
+  position: relative;
+}
+
+/* ============================================================
+   🎯 GOAL BANNER — جشن انفجاری
+   ============================================================ */
+.goal-banner {
+  border-radius: 26px !important;
+  padding: 28px 30px !important;
+  margin-bottom: 22px !important;
+  border-width: 2.5px !important;
+}
+
+.goal-banner-icon {
+  flex: 0 0 84px !important;
+  width: 84px !important;
+  height: 84px !important;
+  font-size: 44px !important;
+  border-radius: 26px !important;
+  border-width: 3px !important;
+  box-shadow:
+    0 24px 50px -18px currentColor,
+    inset 0 2px 0 rgba(255,255,255,0.25) !important;
+}
+
+.goal-banner-title {
+  font-size: 24px !important;
+  letter-spacing: -.5px;
+}
+
+.goal-banner-sub {
+  font-size: 14px !important;
+  opacity: .9;
+}
+
+.goal-banner-stat {
+  padding: 18px 16px !important;
+  border-radius: 18px !important;
+  background: color-mix(in srgb, var(--card-solid) 75%, transparent) !important;
+  border-width: 2px !important;
+}
+
+.goal-banner-stat .v {
+  font-size: 26px !important;
+  letter-spacing: -1px;
+}
+
+.goal-banner-stat .l {
+  font-size: 11px !important;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.goal-banner-progress {
+  height: 16px !important;
+  margin-top: 18px !important;
+}
+
+/* ============================================================
+   📤 SHARE CARD — پنل اشتراک‌گذاری خفن
+   ============================================================ */
+.share-card {
+  border-radius: 26px !important;
+  padding: 28px !important;
+  border-width: 2px !important;
+  position: relative;
+  overflow: hidden;
+}
+
+.share-card::after {
+  content: '';
+  position: absolute;
+  top: -30%; right: -10%;
+  width: 400px;
+  height: 400px;
+  background: conic-gradient(from 0deg,
+    transparent 0deg,
+    color-mix(in srgb, var(--accent) 20%, transparent) 90deg,
+    transparent 180deg,
+    color-mix(in srgb, var(--accent-2) 20%, transparent) 270deg,
+    transparent 360deg);
+  animation: ringSpin 20s linear infinite;
+  opacity: .35;
+  pointer-events: none;
+  z-index: 0;
+  filter: blur(30px);
+}
+
+.share-head {
+  position: relative;
+  z-index: 2;
+}
+
+.share-head h3 {
+  font-size: 17px !important;
+  font-weight: 900 !important;
+}
+
+.share-btn {
+  padding: 14px 22px !important;
+  border-radius: 15px !important;
+  font-size: 13.5px !important;
+  font-weight: 900 !important;
+  transition: all .3s cubic-bezier(.2,.9,.3,1.2) !important;
+  position: relative;
+  overflow: hidden;
+}
+
+.share-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.2), transparent);
+  transform: translateX(-100%);
+  transition: transform .6s;
+}
+
+.share-btn:hover::before {
+  transform: translateX(100%);
+}
+
+.share-btn.primary {
+  background: linear-gradient(135deg, var(--accent), var(--accent-2), var(--accent-3)) !important;
+  background-size: 200% 100% !important;
+  animation: btnGradient 3s ease infinite;
+  box-shadow:
+    0 18px 40px -14px var(--accent),
+    inset 0 1px 0 rgba(255,255,255,.3) !important;
+}
+
+@keyframes btnGradient {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+.share-btn.primary:hover {
+  transform: translateY(-4px) scale(1.03);
+  box-shadow:
+    0 28px 60px -14px var(--accent),
+    0 0 60px -10px var(--accent-2),
+    inset 0 1px 0 rgba(255,255,255,.4) !important;
+}
+
+.share-preview {
+  border-radius: 20px !important;
+  border-width: 2px !important;
+  box-shadow: 0 40px 80px -40px rgba(0,0,0,.9);
+}
+
+/* ============================================================
+   🕐 MARKET CLOCK داخل آنالیز — خفن‌تر
+   ============================================================ */
+.pt-market-clock {
+  border-radius: 26px !important;
+  border-width: 2px !important;
+}
+
+.pmc-head {
+  padding: 24px 28px 20px !important;
+}
+
+.pmc-icon {
+  flex: 0 0 58px !important;
+  width: 58px !important;
+  height: 58px !important;
+  font-size: 30px !important;
+  border-radius: 18px !important;
+  border-width: 2px !important;
+}
+
+.pmc-title h3 {
+  font-size: 19px !important;
+}
+
+.pmc-clock {
+  font-size: 40px !important;
+  letter-spacing: 3px !important;
+}
+
+.pmc-session {
+  padding: 24px 18px !important;
+  gap: 12px !important;
+}
+
+.pmc-flag {
+  font-size: 46px !important;
+}
+
+.pmc-name {
+  font-size: 14px !important;
+}
+
+.pmc-hours {
+  font-size: 11px !important;
+}
+
+.pmc-status {
+  padding: 7px 14px !important;
+  font-size: 11px !important;
+}
+
+.pmc-session.open {
+  box-shadow:
+    inset 0 -4px 0 0 color-mix(in srgb, var(--green) 50%, transparent);
+}
+
+.pmc-session.open .pmc-flag {
+  filter: drop-shadow(0 8px 20px color-mix(in srgb, var(--green) 70%, transparent));
+}
+
+/* ============================================================
+   📊 TABLES در آنالیز — مدرن‌تر
+   ============================================================ */
+#page-analysis .table-wrap {
+  border-radius: 18px;
+  padding: 4px;
+}
+
+#page-analysis table {
+  font-size: 13px;
+}
+
+#page-analysis thead th {
+  padding: 14px 12px;
+  font-size: 11.5px;
+  letter-spacing: .8px;
+  text-transform: uppercase;
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--accent) 8%, var(--card-solid)),
+    var(--card-solid));
+}
+
+#page-analysis tbody td {
+  padding: 12px;
+  font-size: 12.5px;
+}
+
+#page-analysis tbody tr {
+  transition: background .2s;
+}
+
+/* ============================================================
+   🎨 EMOTIONS STATS — کارت‌های احساسی
+   ============================================================ */
+.emotions-stats {
+  gap: 14px !important;
+}
+
+.emo-stat {
+  padding: 16px 18px !important;
+  border-radius: 18px !important;
+  border-width: 1.5px !important;
+  transition: transform .3s, box-shadow .3s, border-color .3s !important;
+  position: relative;
+  overflow: hidden;
+}
+
+.emo-stat::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -30%;
+  width: 120px;
+  height: 120px;
+  background: radial-gradient(circle,
+    color-mix(in srgb, currentColor 25%, transparent), transparent 65%);
+  opacity: 0;
+  transition: opacity .4s;
+  pointer-events: none;
+}
+
+.emo-stat:hover {
+  transform: translateY(-4px);
+  border-color: var(--accent) !important;
+  box-shadow: 0 20px 40px -20px color-mix(in srgb, var(--accent) 60%, transparent);
+}
+
+.emo-stat:hover::before { opacity: 1; }
+
+.emo-stat .emo-ico {
+  font-size: 34px !important;
+  filter: drop-shadow(0 4px 12px rgba(0,0,0,.4));
+}
+
+.emo-stat .emo-name {
+  font-size: 13px !important;
+  font-weight: 900 !important;
+}
+
+.emo-stat .emo-net {
+  font-size: 17px !important;
+  font-weight: 900 !important;
+  letter-spacing: -.4px;
+}
+
+/* ============================================================
+   🎯 TOOLBAR — دکمه‌های رنج
+   ============================================================ */
+#page-analysis .toolbar {
+  border-radius: 20px !important;
+  padding: 14px 16px !important;
+  border-width: 1.5px !important;
+}
+
+#page-analysis .seg {
+  border-radius: 14px;
+  padding: 5px;
+}
+
+#page-analysis .seg button {
+  border-radius: 10px;
+  font-weight: 900;
+  font-size: 12.5px;
+  padding: 11px 8px;
+  transition: all .25s cubic-bezier(.2,.9,.3,1.2);
+}
+
+#page-analysis .seg button.active {
+  background: linear-gradient(135deg,
+    color-mix(in srgb, var(--accent) 30%, transparent),
+    color-mix(in srgb, var(--accent-2) 20%, transparent));
+  color: var(--text);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--accent) 50%, transparent),
+    0 4px 12px -4px color-mix(in srgb, var(--accent) 60%, transparent);
+  transform: scale(1.02);
+}
+
+#page-analysis .tools .btn.sm {
+  border-radius: 12px;
+  font-weight: 900;
+  transition: all .25s;
+}
+
+#page-analysis .tools .btn.sm:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px -10px color-mix(in srgb, var(--accent) 70%, transparent);
+}
+
+/* ============================================================
+   ✨ ENTRANCE ANIMATIONS — ورود پله‌ای
+   ============================================================ */
+#page-analysis.active #market-clock-host {
+  animation: slideInBounce .8s cubic-bezier(.2,.9,.3,1.2) both;
+}
+
+#page-analysis.active #assistant-host {
+  animation: slideInBounce .8s cubic-bezier(.2,.9,.3,1.2) both;
+  animation-delay: .08s;
+}
+
+#page-analysis.active #goals-banner-host {
+  animation: slideInBounce .8s cubic-bezier(.2,.9,.3,1.2) both;
+  animation-delay: .16s;
+}
+
+#page-analysis.active #rules-banner {
+  animation: slideInBounce .8s cubic-bezier(.2,.9,.3,1.2) both;
+  animation-delay: .24s;
+}
+
+#page-analysis.active .toolbar {
+  animation: slideInBounce .8s cubic-bezier(.2,.9,.3,1.2) both;
+  animation-delay: .32s;
+}
+
+#page-analysis.active .kpis {
+  animation: slideInBounce .8s cubic-bezier(.2,.9,.3,1.2) both;
+  animation-delay: .4s;
+}
+
+#page-analysis.active .card {
+  animation: slideInBounce .8s cubic-bezier(.2,.9,.3,1.2) both;
+}
+
+@keyframes slideInBounce {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ============================================================
+   📱 RESPONSIVE — همه چیز در موبایل هم خفن
+   ============================================================ */
+@media (max-width: 640px) {
+  .tier-card {
+    padding: 22px 20px !important;
+    border-radius: 22px !important;
+  }
+  .tier-icon-wrap {
+    flex: 0 0 72px !important;
+    width: 72px !important;
+    height: 72px !important;
+  }
+  .tier-icon {
+    width: 72px !important;
+    height: 72px !important;
+    font-size: 38px !important;
+    border-radius: 22px !important;
+  }
+  .tier-name { font-size: 24px !important; }
+  .tier-stat .v { font-size: 18px !important; }
+  .tier-step .ico { font-size: 22px !important; }
+  .tier-step .nm { font-size: 8.5px !important; }
+
+  .assistant { padding: 20px 18px !important; border-radius: 20px !important; }
+  .assistant-avatar {
+    flex: 0 0 52px !important;
+    width: 52px !important;
+    height: 52px !important;
+    font-size: 24px !important;
+  }
+  .assistant-title { font-size: 16px !important; }
+  .assistant-text { font-size: 12.5px !important; }
+
+  .kpi { padding: 16px 16px 18px !important; }
+  .kpi .val { font-size: 22px !important; }
+  .kpi .ico { width: 40px !important; height: 40px !important; font-size: 19px !important; }
+
+  .chart-box { height: 260px !important; }
+
+  .goal-banner { padding: 22px 18px !important; border-radius: 22px !important; }
+  .goal-banner-icon {
+    flex: 0 0 64px !important;
+    width: 64px !important;
+    height: 64px !important;
+    font-size: 32px !important;
+    border-radius: 20px !important;
+  }
+  .goal-banner-title { font-size: 18px !important; }
+  .goal-banner-stat .v { font-size: 20px !important; }
+
+  .share-card { padding: 22px 18px !important; border-radius: 22px !important; }
+  .share-head h3 { font-size: 15px !important; }
+  .share-btn { padding: 12px 16px !important; font-size: 12.5px !important; }
+
+  .pmc-clock { font-size: 30px !important; letter-spacing: 2px !important; }
+  .pmc-flag { font-size: 36px !important; }
+  .pmc-session { padding: 18px 14px !important; }
+}
+
+@media (max-width: 380px) {
+  .tier-name { font-size: 20px !important; }
+  .tier-stat .v { font-size: 16px !important; }
+  .kpi .val { font-size: 19px !important; }
+  .pmc-clock { font-size: 26px !important; }
+  .pmc-flag { font-size: 30px !important; }
+}
