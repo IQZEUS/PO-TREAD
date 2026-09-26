@@ -1119,19 +1119,32 @@
   }
 
   /* ============================ THEME ============================ */
-  function applyTheme(th) {
-    theme = th;
-    el.html.dataset.theme = th;
-    if (el.themeBtn) {
-      const icon = el.themeBtn.querySelector('.theme-icon');
-      if (icon) icon.textContent = th === 'light' ? '☀️' : '🌙';
+ function applyTheme(th) {
+  if (th === 'dark') th = 'obsidian';
+  if (th === 'light') th = 'aurora';
+
+  theme = th;
+  el.html.dataset.theme = th;
+
+  if (el.themeBtn) {
+    const icon = el.themeBtn.querySelector('.theme-icon');
+    if (icon) {
+      icon.textContent = th === 'aurora' ? '☀️' : th === 'cyber' ? '⚡' : '🌙';
     }
-    const meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.content = th === 'light' ? '#f3f6fc' : '#05070f';
-    saveJSON(KEYS.theme, th);
-    if (el.pageAnalysis && el.pageAnalysis.classList.contains('active')) renderCharts();
   }
-  function toggleTheme() { applyTheme(theme === 'dark' ? 'light' : 'dark'); }
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) {
+    meta.content = th === 'aurora' ? '#eef2f9' : th === 'cyber' ? '#06001a' : '#05070f';
+  }
+  saveJSON(KEYS.theme, th);
+
+  document.querySelectorAll('.theme-pick').forEach(b => {
+    b.classList.toggle('active', b.dataset.themePick === th);
+  });
+
+  if (el.pageAnalysis && el.pageAnalysis.classList.contains('active')) {
+    requestAnimationFrame(renderCharts);
+  }
 
   /* ============================ I18N APPLY ============================ */
   function applyLang(l) {
