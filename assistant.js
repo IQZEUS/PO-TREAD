@@ -1,10 +1,8 @@
 /* ============================================================
-   PO-TRADE Assistant v7.0 — FINAL STABLE
-   ✅ بدون لرزش
-   ✅ عکس اشتراک‌گذاری سبک (JPEG 800×1100 ~ 150KB)
-   ✅ Tier System (BRONZE/SILVER/GOLD/DIAMOND)
-   ✅ Market Clock داخل آنالیز
-   ✅ Command Palette + Confetti
+   PO-TRADE Assistant v9.0 — COSMIC MOBILE PERFECT
+   ✅ موبایل-اول، بدون لرزش
+   ✅ گرافیک کیهانی
+   ✅ Tier System + Market Clock + Share + Streak
    ============================================================ */
 (function() {
   'use strict';
@@ -49,35 +47,30 @@
   /* ============================================================
      1) MARKET CLOCK
      ============================================================ */
-  var clockTickInterval = null;
-  var clockSessionInterval = null;
+  var clockTick = null;
+  var clockRefresh = null;
 
-  function getSessionData() {
+  function getSessions() {
     var now = new Date();
-    var utcHour = now.getUTCHours() + now.getUTCMinutes() / 60;
-
-    function isOpen(start, end) {
-      if (start < end) return utcHour >= start && utcHour < end;
-      return utcHour >= start || utcHour < end;
-    }
-
+    var h = now.getUTCHours() + now.getUTCMinutes() / 60;
+    function op(s, e) { return s < e ? (h >= s && h < e) : (h >= s || h < e); }
     return [
-      { flag: '🇦🇺', name: 'Sydney',   hours: '22–07', open: isOpen(22, 7) },
-      { flag: '🇯🇵', name: 'Tokyo',    hours: '00–09', open: isOpen(0, 9) },
-      { flag: '🇬🇧', name: 'London',   hours: '08–17', open: isOpen(8, 17) },
-      { flag: '🇺🇸', name: 'New York', hours: '13–22', open: isOpen(13, 22) }
+      { flag: '🇦🇺', name: 'Sydney',   hours: '22–07', open: op(22, 7) },
+      { flag: '🇯🇵', name: 'Tokyo',    hours: '00–09', open: op(0, 9) },
+      { flag: '🇬🇧', name: 'London',   hours: '08–17', open: op(8, 17) },
+      { flag: '🇺🇸', name: 'New York', hours: '13–22', open: op(13, 22) }
     ];
   }
 
-  function formatUTC() {
+  function fmtUTC() {
     var d = new Date();
     return String(d.getUTCHours()).padStart(2, '0') + ':' +
            String(d.getUTCMinutes()).padStart(2, '0') + ':' +
            String(d.getUTCSeconds()).padStart(2, '0');
   }
 
-  function buildMarketClockHTML() {
-    var sessions = getSessionData();
+  function buildClockHTML() {
+    var sessions = getSessions();
     return '<div class="pt-market-clock">' +
       '<div class="pmc-head">' +
         '<div class="pmc-title">' +
@@ -100,10 +93,8 @@
               '<div class="pmc-name">' + s.name + '</div>' +
               '<div class="pmc-hours">' + s.hours + '</div>' +
             '</div>' +
-            '<div class="pmc-status">' +
-              '<span class="pmc-dot"></span>' +
-              '<span>' + (s.open ? 'باز' : 'بسته') + '</span>' +
-            '</div>' +
+            '<div class="pmc-status"><span class="pmc-dot"></span><span>' +
+              (s.open ? 'باز' : 'بسته') + '</span></div>' +
           '</div>';
         }).join('') +
       '</div>' +
@@ -112,242 +103,178 @@
 
   function initMarketClock() {
     document.querySelectorAll('.market-clock').forEach(function(c) { c.remove(); });
-
-    var analysisPage = document.getElementById('page-analysis');
-    if (!analysisPage) return;
+    var page = document.getElementById('page-analysis');
+    if (!page) return;
 
     var host = document.getElementById('market-clock-host');
     if (!host) {
       host = document.createElement('div');
       host.id = 'market-clock-host';
-      var firstChild = analysisPage.firstElementChild;
-      if (firstChild) analysisPage.insertBefore(host, firstChild);
-      else analysisPage.appendChild(host);
+      if (page.firstElementChild) page.insertBefore(host, page.firstElementChild);
+      else page.appendChild(host);
     }
-    host.innerHTML = buildMarketClockHTML();
+    host.innerHTML = buildClockHTML();
 
     function tick() {
-      var clock = document.getElementById('pmcClock');
-      if (clock) clock.textContent = formatUTC();
+      var c = document.getElementById('pmcClock');
+      if (c) c.textContent = fmtUTC();
     }
     tick();
-    if (clockTickInterval) clearInterval(clockTickInterval);
-    clockTickInterval = setInterval(tick, 1000);
+    if (clockTick) clearInterval(clockTick);
+    clockTick = setInterval(tick, 1000);
 
-    if (clockSessionInterval) clearInterval(clockSessionInterval);
-    clockSessionInterval = setInterval(function() {
+    if (clockRefresh) clearInterval(clockRefresh);
+    clockRefresh = setInterval(function() {
       var body = document.getElementById('pmcBody');
       if (!body) return;
-      var sessions = getSessionData();
-      sessions.forEach(function(s, i) {
+      getSessions().forEach(function(s, i) {
         var el = body.children[i];
         if (!el) return;
         el.classList.toggle('open', s.open);
         el.classList.toggle('closed', !s.open);
-        var status = el.querySelector('.pmc-status span:last-child');
-        if (status) status.textContent = s.open ? 'باز' : 'بسته';
+        var st = el.querySelector('.pmc-status span:last-child');
+        if (st) st.textContent = s.open ? 'باز' : 'بسته';
       });
     }, 60000);
   }
 
   /* ============================================================
-     2) TIER SYSTEM
+     2) TIER
      ============================================================ */
-  function calculateTier(trades) {
+  function calcTier(trades) {
     var now = new Date();
-    var monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-    var monthStartISO = toISO(monthStart);
+    var startISO = toISO(new Date(now.getFullYear(), now.getMonth(), 1));
+    var month = trades.filter(function(t) { return t.date >= startISO; });
 
-    var monthTrades = trades.filter(function(t) { return t.date >= monthStartISO; });
-
-    var net = 0, wins = 0, losses = 0;
-    monthTrades.forEach(function(t) {
+    var net = 0, w = 0, l = 0;
+    month.forEach(function(t) {
       var p = t.result === 'win' ? Math.abs(+t.amount || 0) :
               t.result === 'loss' ? -Math.abs(+t.amount || 0) : 0;
       net += p;
-      if (t.result === 'win') wins++;
-      else if (t.result === 'loss') losses++;
+      if (t.result === 'win') w++;
+      else if (t.result === 'loss') l++;
     });
-    var closed = wins + losses;
-    var winRate = closed ? (wins / closed) * 100 : 0;
+    var closed = w + l;
+    var wr = closed ? (w / closed) * 100 : 0;
 
     var tiers = [
-      { key: 'bronze',  min: 0,     name: 'BRONZE',  color: '#cd7f32' },
-      { key: 'silver',  min: 1000,  name: 'SILVER',  color: '#c0c0d2' },
-      { key: 'gold',    min: 2500,  name: 'GOLD',    color: '#ffc828' },
-      { key: 'diamond', min: 5000,  name: 'DIAMOND', color: '#7dd8ff' }
+      { key: 'bronze',  min: 0,    name: 'BRONZE'  },
+      { key: 'silver',  min: 1000, name: 'SILVER'  },
+      { key: 'gold',    min: 2500, name: 'GOLD'    },
+      { key: 'diamond', min: 5000, name: 'DIAMOND' }
     ];
 
-    var current = tiers[0];
-    var currentIdx = 0;
+    var cur = tiers[0], idx = 0;
     for (var i = tiers.length - 1; i >= 0; i--) {
-      if (net >= tiers[i].min) {
-        current = tiers[i];
-        currentIdx = i;
-        break;
-      }
+      if (net >= tiers[i].min) { cur = tiers[i]; idx = i; break; }
     }
 
-    var next = tiers[currentIdx + 1];
-    var progressPct = 100;
-    var progressLabel = 'به بالاترین سطح رسیدی';
+    var next = tiers[idx + 1];
+    var pct = 100, label = 'به بالاترین سطح رسیدی';
 
     if (next) {
-      var range = next.min - current.min;
-      var inRange = net - current.min;
-      progressPct = Math.max(0, Math.min(100, (inRange / range) * 100));
-      var remaining = next.min - net;
-      progressLabel = 'تا سطح ' + next.name + ': ' + formatMoney(remaining);
+      var rng = next.min - cur.min;
+      var inR = net - cur.min;
+      pct = Math.max(0, Math.min(100, (inR / rng) * 100));
+      label = 'تا ' + next.name + ': ' + formatMoney(next.min - net);
     }
 
-    var subtitle = monthTrades.length
-      ? monthTrades.length + ' معامله این ماه'
-      : 'هنوز معامله‌ای این ماه ثبت نکردی';
-
-    var ladder = tiers.map(function(t, i) {
-      return {
-        key: t.key,
-        name: t.name,
-        color: t.color,
-        unlocked: i <= currentIdx,
-        current: i === currentIdx
-      };
-    });
-
     return {
-      key: current.key,
-      name: current.name,
-      color: current.color,
-      subtitle: subtitle,
+      key: cur.key,
+      name: cur.name,
+      subtitle: month.length ? month.length + ' معامله این ماه' : 'هنوز معامله‌ای این ماه نیست',
       monthPnL: formatMoney(net),
-      monthCount: monthTrades.length + '',
-      winRate: winRate.toFixed(1) + '٪',
-      progressPct: progressPct.toFixed(0) + '٪',
-      progressLabel: progressLabel,
-      ladder: ladder,
-      net: net
+      monthCount: month.length + '',
+      winRate: wr.toFixed(1) + '٪',
+      progressPct: pct.toFixed(0) + '٪',
+      progressLabel: label,
+      ladder: tiers.map(function(t, i) {
+        return { key: t.key, name: t.name, unlocked: i <= idx, current: i === idx };
+      })
     };
   }
 
   /* ============================================================
-     3) ASSISTANT — تحلیل
+     3) ANALYZE
      ============================================================ */
-  function analyzePerformance(trades) {
+  function analyze(trades) {
     if (!trades || !trades.length) {
       return {
         mood: 'neutral',
         icon: '🤖',
         title: '👋 خوش آمدی!',
-        text: 'هنوز معامله‌ای ثبت نکردی. اولین معامله رو ثبت کن تا <strong>تحلیل هوشمند</strong> بگیری.',
+        text: 'اولین معامله رو ثبت کن تا تحلیل هوشمند بگیری.',
         badges: []
       };
     }
 
-    var wins = 0, losses = 0, be = 0, net = 0, gp = 0, gl = 0;
-    var byStrategy = {};
-    var maxStreak = 0, lossStreak = 0, maxLossStreak = 0;
+    var w = 0, l = 0, net = 0, gp = 0, gl = 0;
+    var byStrat = {};
+    var maxStreak = 0, lossStreak = 0, maxLoss = 0;
 
-    var sorted = trades.slice().sort(function(a, b) {
+    trades.slice().sort(function(a, b) {
       return (a.createdAt || 0) - (b.createdAt || 0);
-    });
-
-    sorted.forEach(function(t) {
+    }).forEach(function(t) {
       var p = t.result === 'win' ? Math.abs(+t.amount || 0) :
               t.result === 'loss' ? -Math.abs(+t.amount || 0) : 0;
       net += p;
-
       if (t.result === 'win') {
-        wins++; gp += p;
-        maxStreak++;
-        lossStreak = 0;
+        w++; gp += p;
+        maxStreak++; lossStreak = 0;
       } else if (t.result === 'loss') {
-        losses++; gl += Math.abs(p);
+        l++; gl += Math.abs(p);
         lossStreak++;
-        if (lossStreak > maxLossStreak) maxLossStreak = lossStreak;
-      } else be++;
-
+        if (lossStreak > maxLoss) maxLoss = lossStreak;
+      }
       var s = t.strategy || '—';
-      if (!byStrategy[s]) byStrategy[s] = { w: 0, l: 0, net: 0, count: 0 };
-      byStrategy[s].count++;
-      byStrategy[s].net += p;
-      if (t.result === 'win') byStrategy[s].w++;
-      else if (t.result === 'loss') byStrategy[s].l++;
+      if (!byStrat[s]) byStrat[s] = { w: 0, l: 0, net: 0 };
+      byStrat[s].net += p;
+      if (t.result === 'win') byStrat[s].w++;
+      else if (t.result === 'loss') byStrat[s].l++;
     });
 
-    var closed = wins + losses;
-    var winRate = closed ? (wins / closed) * 100 : 0;
+    var closed = w + l;
+    var wr = closed ? (w / closed) * 100 : 0;
     var pf = gl > 0 ? gp / gl : (gp > 0 ? Infinity : 0);
 
-    var strategies = Object.keys(byStrategy).map(function(k) {
-      var s = byStrategy[k];
-      var c = s.w + s.l;
-      return { name: k, net: s.net, count: s.count, winRate: c ? (s.w / c) * 100 : 0 };
+    var strats = Object.keys(byStrat).map(function(k) {
+      return { name: k, net: byStrat[k].net };
     }).sort(function(a, b) { return b.net - a.net; });
 
-    var bestStrategy = strategies[0];
-    var worstStrategy = strategies[strategies.length - 1];
-    var profitable = net > 0;
-    var mood = profitable ? 'good' : net < 0 ? 'bad' : 'neutral';
+    var best = strats[0];
+    var worst = strats[strats.length - 1];
+    var profit = net > 0;
+    var mood = profit ? 'good' : net < 0 ? 'bad' : 'neutral';
 
     var title, text, icon;
-    if (profitable) {
+    if (profit) {
       icon = '🏆';
       title = '🎉 عملکردت سودده بوده!';
-      text = 'خالص سودت <strong>' + formatMoney(net) + '</strong> بوده. ';
-      if (bestStrategy && bestStrategy.net > 0) {
-        text += 'بهترین استراتژی‌ت <em>' + bestStrategy.name + '</em> با سود <strong>' +
-                formatMoney(bestStrategy.net) + '</strong> سوده. ';
-      }
-      if (winRate >= 65) {
-        text += 'وین‌ریت <strong>' + winRate.toFixed(1) + '٪</strong> یعنی دقت ورودت فوق‌العاده‌ست!';
-      } else if (winRate >= 50) {
-        text += 'وین‌ریت <strong>' + winRate.toFixed(1) + '٪</strong> بالای ۵۰٪ — عملکرد متعادل و حرفه‌ای.';
-      } else if (winRate >= 40) {
-        text += 'وین‌ریت <strong>' + winRate.toFixed(1) + '٪</strong> پایین‌تر از میانه، ولی مدیریت ریسکت خوبه.';
-      } else {
-        text += 'وین‌ریت <strong>' + winRate.toFixed(1) + '٪</strong> کمه — دقت ورودت رو افزایش بده.';
-      }
+      text = 'خالص سودت <strong>' + formatMoney(net) + '</strong>. ';
+      if (best) text += 'بهترین استراتژی: <em>' + best.name + '</em>. ';
+      if (wr >= 60) text += 'وین‌ریت <strong>' + wr.toFixed(1) + '٪</strong> عالیه!';
+      else if (wr >= 50) text += 'وین‌ریت <strong>' + wr.toFixed(1) + '٪</strong> بالای ۵۰٪.';
+      else text += 'وین‌ریت <strong>' + wr.toFixed(1) + '٪</strong> قابل قبوله.';
     } else if (net < 0) {
       icon = '🎯';
       title = '⚠️ عملکردت در ضرر بوده';
-      text = 'خالص ضررت <strong>' + formatMoney(net) + '</strong> بوده. ';
-      if (worstStrategy && worstStrategy.net < 0) {
-        text += 'بیشترین ضرر از <em>' + worstStrategy.name + '</em> با <strong>' +
-                formatMoney(worstStrategy.net) + '</strong> آمده. ';
-      }
-      if (winRate < 40) {
-        text += 'وین‌ریت <strong>' + winRate.toFixed(1) + '٪</strong> ضعیفه — دقت ورود رو بازبینی کن.';
-      } else if (winRate >= 50) {
-        text += 'وین‌ریت <strong>' + winRate.toFixed(1) + '٪</strong> مناسبه، پس مشکل از مدیریت ریسک یا اندازه حجمه.';
-      } else {
-        text += 'وین‌ریت <strong>' + winRate.toFixed(1) + '٪</strong> قابل قبول، ولی نسبت سود به ضرر رو بهتر کن.';
-      }
-      if (maxLossStreak >= 3) {
-        text += ' <strong>' + maxLossStreak + ' ضرر پشت‌سرهم</strong> داشتی — چک‌لیستت رو جدی بگیر.';
-      }
+      text = 'خالص ضررت <strong>' + formatMoney(net) + '</strong>. ';
+      if (worst) text += 'بیشترین ضرر از <em>' + worst.name + '</em>. ';
+      if (wr < 40) text += 'وین‌ریت <strong>' + wr.toFixed(1) + '٪</strong> ضعیفه.';
+      else text += 'وین‌ریت <strong>' + wr.toFixed(1) + '٪</strong> قابل قبوله.';
+      if (maxLoss >= 3) text += ' <strong>' + maxLoss + ' ضرر پشت‌سرهم</strong> داشتی.';
     } else {
       icon = '📊';
-      title = '📊 عملکردت سربه‌سر است';
-      text = 'نه سود کرده‌ای، نه ضرر. ';
-      if (bestStrategy) {
-        text += 'ولی <em>' + bestStrategy.name + '</em> پتانسیل داره — روش کار کن.';
-      }
+      title = '📊 سربه‌سر';
+      text = 'نه سود، نه ضرر. ' + (best ? '<em>' + best.name + '</em> پتانسیل داره.' : '');
     }
 
     var badges = [];
-    if (bestStrategy && bestStrategy.net > 0) {
-      badges.push({ label: '🏆 ' + bestStrategy.name + ' — ' + formatMoney(bestStrategy.net), cls: 'good' });
-    }
-    if (worstStrategy && worstStrategy !== bestStrategy && worstStrategy.net < 0) {
-      badges.push({ label: '📉 ' + worstStrategy.name + ' — ' + formatMoney(worstStrategy.net), cls: 'bad' });
-    }
-    badges.push({ label: '🎯 وین‌ریت ' + winRate.toFixed(1) + '٪', cls: winRate >= 55 ? 'good' : winRate < 45 ? 'bad' : 'neutral' });
-    if (isFinite(pf)) {
-      badges.push({ label: '⚖️ PF ' + pf.toFixed(2), cls: pf >= 1.5 ? 'good' : pf < 1 ? 'bad' : 'neutral' });
-    }
-    if (maxStreak >= 3) {
-      badges.push({ label: '🔥 ' + maxStreak + ' برد متوالی', cls: 'good' });
-    }
+    if (best && best.net > 0) badges.push({ label: '🏆 ' + best.name, cls: 'good' });
+    if (worst && worst !== best && worst.net < 0) badges.push({ label: '📉 ' + worst.name, cls: 'bad' });
+    badges.push({ label: '🎯 ' + wr.toFixed(1) + '٪', cls: wr >= 55 ? 'good' : wr < 45 ? 'bad' : 'neutral' });
+    if (isFinite(pf)) badges.push({ label: '⚖️ ' + pf.toFixed(2), cls: pf >= 1.5 ? 'good' : pf < 1 ? 'bad' : 'neutral' });
+    if (maxStreak >= 3) badges.push({ label: '🔥 ' + maxStreak + ' برد', cls: 'good' });
 
     return { mood: mood, icon: icon, title: title, text: text, badges: badges };
   }
@@ -356,15 +283,13 @@
     var host = $('#assistant-host');
     if (!host) return;
     var trades = getLS('po.v4.trades', []);
-    var a = analyzePerformance(trades);
-    var tier = calculateTier(trades);
+    var a = analyze(trades);
+    var tier = calcTier(trades);
 
     host.innerHTML =
       '<div class="tier-card ' + tier.key + '">' +
         '<div class="tier-head">' +
-          '<div class="tier-icon-wrap">' +
-            '<div class="tier-icon"></div>' +
-          '</div>' +
+          '<div class="tier-icon-wrap"><div class="tier-icon"></div></div>' +
           '<div class="tier-info">' +
             '<div class="tier-label">سطح فعلی</div>' +
             '<div class="tier-name">' + tier.name + '</div>' +
@@ -377,17 +302,13 @@
           '<div class="tier-stat"><span class="v">' + tier.winRate + '</span><span class="l">وین‌ریت</span></div>' +
         '</div>' +
         '<div class="tier-progress-wrap">' +
-          '<div class="tier-progress-label">' +
-            '<span>' + tier.progressLabel + '</span>' +
-            '<span>' + tier.progressPct + '</span>' +
-          '</div>' +
+          '<div class="tier-progress-label"><span>' + tier.progressLabel + '</span><span>' + tier.progressPct + '</span></div>' +
           '<div class="tier-progress-bar"><div class="tier-progress-fill" style="width:' + tier.progressPct + '"></div></div>' +
         '</div>' +
         '<div class="tier-ladder">' +
           tier.ladder.map(function(s) {
-            return '<div class="tier-step' + (s.unlocked ? ' unlocked' : '') + (s.current ? ' current' : '') + '" data-tier="' + s.key + '" style="color:' + s.color + '">' +
-              '<span class="ico"></span>' +
-              '<span class="nm">' + s.name + '</span>' +
+            return '<div class="tier-step' + (s.unlocked ? ' unlocked' : '') + (s.current ? ' current' : '') + '" data-tier="' + s.key + '">' +
+              '<span class="ico"></span><span class="nm">' + s.name + '</span>' +
             '</div>';
           }).join('') +
         '</div>' +
@@ -399,13 +320,12 @@
           '<div class="assistant-body">' +
             '<div class="assistant-title">' + a.title + '</div>' +
             '<div class="assistant-text">' + a.text + '</div>' +
-            (a.badges.length
-              ? '<div class="assistant-badges">' +
-                  a.badges.map(function(b) {
-                    return '<span class="assistant-badge ' + b.cls + '">' + b.label + '</span>';
-                  }).join('') +
-                '</div>'
-              : '') +
+            (a.badges.length ?
+              '<div class="assistant-badges">' +
+                a.badges.map(function(b) {
+                  return '<span class="assistant-badge ' + b.cls + '">' + b.label + '</span>';
+                }).join('') +
+              '</div>' : '') +
           '</div>' +
         '</div>' +
       '</div>';
@@ -414,7 +334,7 @@
   /* ============================================================
      4) GOALS BANNER
      ============================================================ */
-  function renderGoalsBanner() {
+  function renderGoals() {
     var host = $('#goals-banner-host');
     if (!host) return;
 
@@ -429,118 +349,73 @@
       endISO = toISO(new Date(now.getFullYear(), now.getMonth() + 1, 0));
     } else {
       var dow = now.getDay();
-      var daysSinceSat = (dow + 1) % 7;
-      var st = new Date(now); st.setDate(now.getDate() - daysSinceSat);
+      var dss = (dow + 1) % 7;
+      var st = new Date(now); st.setDate(now.getDate() - dss);
       var en = new Date(st); en.setDate(st.getDate() + 6);
       startISO = toISO(st); endISO = toISO(en);
     }
-    var periodTrades = trades.filter(function(t) { return t.date >= startISO && t.date <= endISO; });
+    var pt = trades.filter(function(t) { return t.date >= startISO && t.date <= endISO; });
 
-    var wins = 0, losses = 0, net = 0;
-    periodTrades.forEach(function(t) {
+    var w = 0, l = 0, net = 0;
+    pt.forEach(function(t) {
       var p = t.result === 'win' ? Math.abs(+t.amount || 0) :
               t.result === 'loss' ? -Math.abs(+t.amount || 0) : 0;
       net += p;
-      if (t.result === 'win') wins++;
-      else if (t.result === 'loss') losses++;
+      if (t.result === 'win') w++;
+      else if (t.result === 'loss') l++;
     });
-    var closed = wins + losses;
-    var stat = {
-      total: periodTrades.length,
-      net: net,
-      winRate: closed ? (wins / closed) * 100 : 0
-    };
+    var closed = w + l;
+    var stat = { total: pt.length, net: net, winRate: closed ? (w / closed) * 100 : 0 };
 
     var banner = null;
 
     if (goal && goal.target) {
-      var current = 0;
-      if (goal.metric === 'pnl') current = stat.net;
-      else if (goal.metric === 'trades') current = stat.total;
-      else if (goal.metric === 'winrate') current = stat.winRate;
-
-      var progress = goal.target > 0 ? Math.min(100, (current / goal.target) * 100) : 0;
+      var cur = goal.metric === 'pnl' ? stat.net :
+                goal.metric === 'trades' ? stat.total : stat.winRate;
+      var prog = goal.target > 0 ? Math.min(100, (cur / goal.target) * 100) : 0;
 
       function fmt(v, m) {
         if (m === 'pnl') return formatMoney(v);
         if (m === 'trades') return Math.round(v) + '';
-        if (m === 'winrate') return (+v).toFixed(1) + '٪';
-        return v;
+        return (+v).toFixed(1) + '٪';
       }
 
-      if (progress >= 100) {
-        banner = {
-          cls: 'success', icon: '🏆',
-          title: '🎉 تبریک! به هدفت رسیدی!',
-          sub: 'هدف ' + (goal.period === 'week' ? 'هفتگی' : 'ماهانه') + 'ت با موفقیت تکمیل شد',
-          stats: [
-            { v: fmt(current, goal.metric), l: 'دستیابی' },
-            { v: fmt(goal.target, goal.metric), l: 'هدف' },
-            { v: '۱۰۰٪', l: 'پیشرفت' }
-          ],
-          progress: 100
-        };
-      } else if (progress >= 70) {
-        banner = {
-          cls: 'warning', icon: '⚡',
-          title: 'داری نزدیک میشی!',
-          sub: 'فقط ' + (100 - progress).toFixed(0) + '٪ تا تکمیل هدف مونده',
-          stats: [
-            { v: fmt(current, goal.metric), l: 'فعلی' },
-            { v: fmt(goal.target, goal.metric), l: 'هدف' },
-            { v: progress.toFixed(0) + '٪', l: 'پیشرفت' }
-          ],
-          progress: progress
-        };
+      if (prog >= 100) {
+        banner = { cls: 'success', icon: '🏆', title: '🎉 به هدفت رسیدی!',
+          sub: 'هدف ' + (goal.period === 'week' ? 'هفتگی' : 'ماهانه') + 'ت تکمیل شد',
+          stats: [{ v: fmt(cur, goal.metric), l: 'فعلی' }, { v: fmt(goal.target, goal.metric), l: 'هدف' }, { v: '۱۰۰٪', l: 'پیشرفت' }],
+          progress: 100 };
+      } else if (prog >= 70) {
+        banner = { cls: 'warning', icon: '⚡', title: 'داری نزدیک میشی!',
+          sub: (100 - prog).toFixed(0) + '٪ تا هدف',
+          stats: [{ v: fmt(cur, goal.metric), l: 'فعلی' }, { v: fmt(goal.target, goal.metric), l: 'هدف' }, { v: prog.toFixed(0) + '٪', l: 'پیشرفت' }],
+          progress: prog };
       } else {
-        banner = {
-          cls: 'neutral', icon: '🎯',
-          title: 'هدف ' + (goal.period === 'week' ? 'هفتگی' : 'ماهانه'),
-          sub: 'در مسیر رسیدن به هدفت هستی',
-          stats: [
-            { v: fmt(current, goal.metric), l: 'فعلی' },
-            { v: fmt(goal.target, goal.metric), l: 'هدف' },
-            { v: progress.toFixed(0) + '٪', l: 'پیشرفت' }
-          ],
-          progress: progress
-        };
+        banner = { cls: 'neutral', icon: '🎯', title: 'هدف ' + (goal.period === 'week' ? 'هفتگی' : 'ماهانه'),
+          sub: 'در مسیر هدفت',
+          stats: [{ v: fmt(cur, goal.metric), l: 'فعلی' }, { v: fmt(goal.target, goal.metric), l: 'هدف' }, { v: prog.toFixed(0) + '٪', l: 'پیشرفت' }],
+          progress: prog };
       }
     }
 
     if (rules && rules.enabled && rules.dailyLoss > 0) {
       var today = toISO(new Date());
-      var todayNet = 0;
+      var tn = 0;
       trades.filter(function(t) { return t.date === today; }).forEach(function(t) {
-        todayNet += t.result === 'win' ? Math.abs(+t.amount || 0) :
-                    t.result === 'loss' ? -Math.abs(+t.amount || 0) : 0;
+        tn += t.result === 'win' ? Math.abs(+t.amount || 0) :
+              t.result === 'loss' ? -Math.abs(+t.amount || 0) : 0;
       });
-      var todayLoss = todayNet < 0 ? -todayNet : 0;
-      var du = (todayLoss / rules.dailyLoss) * 100;
+      var tl = tn < 0 ? -tn : 0;
+      var du = (tl / rules.dailyLoss) * 100;
 
       if (du >= 100) {
-        banner = {
-          cls: 'danger', icon: '🚨',
-          title: 'حد ضرر روزانه نقض شد!',
-          sub: 'برای امروز معامله رو متوقف کن',
-          stats: [
-            { v: formatMoney(-todayLoss), l: 'ضرر امروز' },
-            { v: formatMoney(-rules.dailyLoss), l: 'حد مجاز' },
-            { v: du.toFixed(0) + '٪', l: 'مصرف' }
-          ],
-          progress: Math.min(100, du)
-        };
+        banner = { cls: 'danger', icon: '🚨', title: 'حد ضرر نقض شد!', sub: 'معامله رو متوقف کن',
+          stats: [{ v: formatMoney(-tl), l: 'ضرر' }, { v: formatMoney(-rules.dailyLoss), l: 'حد' }, { v: du.toFixed(0) + '٪', l: 'مصرف' }],
+          progress: Math.min(100, du) };
       } else if (du >= 80 && (!banner || banner.cls === 'neutral')) {
-        banner = {
-          cls: 'warning', icon: '⚠️',
-          title: 'نزدیک حد ضرر روزانه',
-          sub: 'احتیاط کن — ' + du.toFixed(0) + '٪ از حد مجاز مصرف شده',
-          stats: [
-            { v: formatMoney(-todayLoss), l: 'ضرر امروز' },
-            { v: formatMoney(-rules.dailyLoss), l: 'حد مجاز' },
-            { v: du.toFixed(0) + '٪', l: 'مصرف' }
-          ],
-          progress: du
-        };
+        banner = { cls: 'warning', icon: '⚠️', title: 'نزدیک حد ضرر', sub: du.toFixed(0) + '٪ مصرف شده',
+          stats: [{ v: formatMoney(-tl), l: 'ضرر' }, { v: formatMoney(-rules.dailyLoss), l: 'حد' }, { v: du.toFixed(0) + '٪', l: 'مصرف' }],
+          progress: du };
       }
     }
 
@@ -565,36 +440,35 @@
   }
 
   /* ============================================================
-     5) SHARE IMAGE — سبک و خفن
+     5) SHARE IMAGE
      ============================================================ */
-  function drawShareImage() {
+  function drawShare() {
     var trades = getLS('po.v4.trades', []);
-    var tier = calculateTier(trades);
+    var tier = calcTier(trades);
 
     var W = 800, H = 1100;
     var canvas = document.createElement('canvas');
-    canvas.width = W;
-    canvas.height = H;
+    canvas.width = W; canvas.height = H;
     var ctx = canvas.getContext('2d');
 
-    var bgGrad = ctx.createLinearGradient(0, 0, 0, H);
-    bgGrad.addColorStop(0, '#0a0f1e');
-    bgGrad.addColorStop(0.5, '#050810');
-    bgGrad.addColorStop(1, '#0a0f1e');
-    ctx.fillStyle = bgGrad;
+    var bg = ctx.createLinearGradient(0, 0, 0, H);
+    bg.addColorStop(0, '#0a0f1e');
+    bg.addColorStop(0.5, '#050810');
+    bg.addColorStop(1, '#0a0f1e');
+    ctx.fillStyle = bg;
     ctx.fillRect(0, 0, W, H);
 
-    function drawOrb(x, y, r, color) {
+    function orb(x, y, r, c) {
       var g = ctx.createRadialGradient(x, y, 0, x, y, r);
-      g.addColorStop(0, color);
+      g.addColorStop(0, c);
       g.addColorStop(1, 'rgba(0,0,0,0)');
       ctx.fillStyle = g;
       ctx.beginPath();
       ctx.arc(x, y, r, 0, Math.PI * 2);
       ctx.fill();
     }
-    drawOrb(120, 100, 260, 'rgba(46,230,166,0.22)');
-    drawOrb(700, 1000, 300, 'rgba(91,140,255,0.22)');
+    orb(120, 100, 260, 'rgba(46,230,166,0.22)');
+    orb(700, 1000, 300, 'rgba(91,140,255,0.22)');
 
     var topBar = ctx.createLinearGradient(0, 0, W, 0);
     topBar.addColorStop(0, '#2ee6a6');
@@ -603,38 +477,35 @@
     ctx.fillStyle = topBar;
     ctx.fillRect(0, 0, W, 4);
 
-    var tierColors = {
-      bronze:  { main: '#cd7f32', soft: 'rgba(205,127,50,0.15)' },
-      silver:  { main: '#c0c0d2', soft: 'rgba(192,192,210,0.15)' },
-      gold:    { main: '#ffc828', soft: 'rgba(255,200,40,0.15)' },
-      diamond: { main: '#7dd8ff', soft: 'rgba(120,220,255,0.15)' }
+    var tierClr = {
+      bronze: '#cd7f32',
+      silver: '#c0c0d2',
+      gold: '#ffc828',
+      diamond: '#7dd8ff'
     };
-    var tc = tierColors[tier.key] || tierColors.bronze;
+    var tc = tierClr[tier.key] || '#cd7f32';
 
-    var badgeW = 200, badgeH = 56;
-    var badgeX = (W - badgeW) / 2;
-    var badgeY = 32;
-
-    ctx.fillStyle = tc.soft;
-    roundRect(ctx, badgeX, badgeY, badgeW, badgeH, 28);
+    var bw = 200, bh = 56;
+    var bx = (W - bw) / 2, by = 32;
+    ctx.fillStyle = 'rgba(255,255,255,0.06)';
+    roundRect(ctx, bx, by, bw, bh, 28);
     ctx.fill();
-
-    ctx.strokeStyle = tc.main;
+    ctx.strokeStyle = tc;
     ctx.lineWidth = 2;
-    roundRect(ctx, badgeX, badgeY, badgeW, badgeH, 28);
+    roundRect(ctx, bx, by, bw, bh, 28);
     ctx.stroke();
 
-    ctx.fillStyle = tc.main;
+    ctx.fillStyle = tc;
     ctx.font = '900 22px Inter, sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(tier.name, W / 2, badgeY + badgeH / 2 + 1);
+    ctx.fillText(tier.name, W / 2, by + bh / 2 + 1);
 
-    var titleGrad = ctx.createLinearGradient(200, 0, 600, 0);
-    titleGrad.addColorStop(0, '#2ee6a6');
-    titleGrad.addColorStop(0.5, '#5b8cff');
-    titleGrad.addColorStop(1, '#ff5fa2');
-    ctx.fillStyle = titleGrad;
+    var tg = ctx.createLinearGradient(200, 0, 600, 0);
+    tg.addColorStop(0, '#2ee6a6');
+    tg.addColorStop(0.5, '#5b8cff');
+    tg.addColorStop(1, '#ff5fa2');
+    ctx.fillStyle = tg;
     ctx.font = '900 54px Inter, sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'top';
@@ -644,29 +515,29 @@
     ctx.fillStyle = 'rgba(134,151,184,1)';
     ctx.fillText('PERFORMANCE REPORT  •  ' + new Date().toISOString().slice(0, 10), W / 2, 178);
 
-    var wins = 0, losses = 0, net = 0, gp = 0, gl = 0;
+    var w = 0, l = 0, net = 0, gp = 0, gl = 0;
     trades.forEach(function(t) {
       var p = t.result === 'win' ? Math.abs(+t.amount || 0) :
               t.result === 'loss' ? -Math.abs(+t.amount || 0) : 0;
       net += p;
-      if (t.result === 'win') { wins++; gp += p; }
-      else if (t.result === 'loss') { losses++; gl += Math.abs(p); }
+      if (t.result === 'win') { w++; gp += p; }
+      else if (t.result === 'loss') { l++; gl += Math.abs(p); }
     });
-    var closed = wins + losses;
-    var winRate = closed ? (wins / closed) * 100 : 0;
+    var closed = w + l;
+    var wr = closed ? (w / closed) * 100 : 0;
     var pf = gl > 0 ? gp / gl : (gp > 0 ? Infinity : 0);
 
-    var pnlColor = net > 0 ? '#2ee6a6' : net < 0 ? '#ff5674' : '#8697b8';
-    var sign = net > 0 ? '+' : net < 0 ? '-' : '';
-    var netTxt = sign + '$' + Math.abs(net).toLocaleString('en-US', { maximumFractionDigits: 2 });
+    var pc = net > 0 ? '#2ee6a6' : net < 0 ? '#ff5674' : '#8697b8';
+    var sgn = net > 0 ? '+' : net < 0 ? '-' : '';
+    var nTxt = sgn + '$' + Math.abs(net).toLocaleString('en-US', { maximumFractionDigits: 2 });
 
-    ctx.shadowColor = pnlColor;
+    ctx.shadowColor = pc;
     ctx.shadowBlur = 40;
     ctx.font = '900 78px Inter, sans-serif';
-    ctx.fillStyle = pnlColor;
+    ctx.fillStyle = pc;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(netTxt, W / 2, 280);
+    ctx.fillText(nTxt, W / 2, 280);
     ctx.shadowBlur = 0;
 
     ctx.font = '800 13px Inter, sans-serif';
@@ -674,103 +545,95 @@
     ctx.textBaseline = 'top';
     ctx.fillText('NET PROFIT / LOSS', W / 2, 335);
 
-    var cardW = 165, cardH = 100, gap = 12;
-    var totalW = cardW * 4 + gap * 3;
-    var startX = (W - totalW) / 2;
-    var cardY = 400;
+    var cw = 165, ch = 100, g = 12;
+    var tw = cw * 4 + g * 3;
+    var sx = (W - tw) / 2;
+    var cy = 400;
 
-    function statCard(x, y, label, value, color) {
+    function card(x, y, label, val, color) {
       ctx.fillStyle = 'rgba(20,29,51,0.9)';
-      roundRect(ctx, x, y, cardW, cardH, 14);
+      roundRect(ctx, x, y, cw, ch, 14);
       ctx.fill();
-
       ctx.strokeStyle = 'rgba(120,150,200,0.25)';
       ctx.lineWidth = 1;
-      roundRect(ctx, x, y, cardW, cardH, 14);
+      roundRect(ctx, x, y, cw, ch, 14);
       ctx.stroke();
-
       ctx.fillStyle = color;
-      ctx.fillRect(x + 15, y, cardW - 30, 2);
-
+      ctx.fillRect(x + 15, y, cw - 30, 2);
       ctx.font = '900 26px Inter, sans-serif';
       ctx.fillStyle = color;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText(value, x + cardW / 2, y + 40);
-
+      ctx.fillText(val, x + cw / 2, y + 40);
       ctx.font = '800 10px Inter, sans-serif';
       ctx.fillStyle = 'rgba(134,151,184,1)';
-      ctx.fillText(label, x + cardW / 2, y + 72);
+      ctx.fillText(label, x + cw / 2, y + 72);
     }
 
-    statCard(startX, cardY, 'TRADES', trades.length + '', '#eef3ff');
-    statCard(startX + cardW + gap, cardY, 'WIN RATE', winRate.toFixed(1) + '%',
-             winRate >= 50 ? '#2ee6a6' : '#ff5674');
-    statCard(startX + (cardW + gap) * 2, cardY, 'WINS', wins + '', '#2ee6a6');
-    statCard(startX + (cardW + gap) * 3, cardY, 'LOSSES', losses + '', '#ff5674');
+    card(sx, cy, 'TRADES', trades.length + '', '#eef3ff');
+    card(sx + cw + g, cy, 'WIN RATE', wr.toFixed(1) + '%', wr >= 50 ? '#2ee6a6' : '#ff5674');
+    card(sx + (cw + g) * 2, cy, 'WINS', w + '', '#2ee6a6');
+    card(sx + (cw + g) * 3, cy, 'LOSSES', l + '', '#ff5674');
 
-    var barY = 555;
-    var barX = 60, barW = W - 120, barH = 12;
+    var byY = 555;
+    var bX = 60, bW = W - 120, bH = 12;
 
     ctx.fillStyle = 'rgba(120,150,200,0.15)';
-    roundRect(ctx, barX, barY, barW, barH, 6);
+    roundRect(ctx, bX, byY, bW, bH, 6);
     ctx.fill();
 
-    var fillW = (winRate / 100) * barW;
-    var fillGrad = ctx.createLinearGradient(barX, 0, barX + fillW, 0);
-    fillGrad.addColorStop(0, '#2ee6a6');
-    fillGrad.addColorStop(1, '#5b8cff');
-    ctx.fillStyle = fillGrad;
-    roundRect(ctx, barX, barY, Math.max(fillW, 8), barH, 6);
+    var fw = (wr / 100) * bW;
+    var fg = ctx.createLinearGradient(bX, 0, bX + fw, 0);
+    fg.addColorStop(0, '#2ee6a6');
+    fg.addColorStop(1, '#5b8cff');
+    ctx.fillStyle = fg;
+    roundRect(ctx, bX, byY, Math.max(fw, 8), bH, 6);
     ctx.fill();
 
     ctx.font = '900 11px Inter, sans-serif';
     ctx.fillStyle = 'rgba(134,151,184,1)';
     ctx.textAlign = 'left';
     ctx.textBaseline = 'bottom';
-    ctx.fillText('WIN RATE ' + winRate.toFixed(1) + '%', barX, barY - 8);
+    ctx.fillText('WIN RATE ' + wr.toFixed(1) + '%', bX, byY - 8);
 
-    var pfTxt = isFinite(pf) ? pf.toFixed(2) : '∞';
+    var pfT = isFinite(pf) ? pf.toFixed(2) : '∞';
     ctx.textAlign = 'right';
     ctx.fillStyle = pf >= 1.5 ? '#2ee6a6' : pf < 1 ? '#ff5674' : '#ffb020';
-    ctx.fillText('PF ' + pfTxt, barX + barW, barY - 8);
+    ctx.fillText('PF ' + pfT, bX + bW, byY - 8);
 
-    // استراتژی‌ها
-    var byStrategy = {};
+    var bs = {};
     trades.forEach(function(t) {
       var s = t.strategy || '—';
       var p = t.result === 'win' ? Math.abs(+t.amount || 0) :
               t.result === 'loss' ? -Math.abs(+t.amount || 0) : 0;
-      if (!byStrategy[s]) byStrategy[s] = { net: 0, count: 0 };
-      byStrategy[s].net += p;
-      byStrategy[s].count++;
+      if (!bs[s]) bs[s] = 0;
+      bs[s] += p;
     });
-    var strategies = Object.keys(byStrategy).map(function(k) {
-      return { name: k, net: byStrategy[k].net };
-    }).sort(function(a, b) { return b.net - a.net; });
+    var strats = Object.keys(bs).map(function(k) { return { name: k, net: bs[k] }; })
+      .sort(function(a, b) { return b.net - a.net; });
 
-    var summaryY = 620;
+    var sY = 620;
     ctx.font = '900 13px Inter, sans-serif';
     ctx.fillStyle = 'rgba(255,255,255,0.85)';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'top';
-    ctx.fillText('TOP STRATEGIES', W / 2, summaryY);
+    ctx.fillText('TOP STRATEGIES', W / 2, sY);
 
     ctx.font = '700 13px Inter, sans-serif';
-    strategies.slice(0, 4).forEach(function(s, i) {
-      var y = summaryY + 32 + i * 28;
-      var color = s.net > 0 ? '#2ee6a6' : s.net < 0 ? '#ff5674' : '#8697b8';
-      var txt = s.net > 0 ? '+$' + s.net.toFixed(0) : '-$' + Math.abs(s.net).toFixed(0);
-      var sign = s.net > 0 ? '▲' : s.net < 0 ? '▼' : '●';
+    strats.slice(0, 4).forEach(function(s, i) {
+      var y = sY + 32 + i * 28;
+      var c = s.net > 0 ? '#2ee6a6' : s.net < 0 ? '#ff5674' : '#8697b8';
+      var t2 = s.net > 0 ? '+$' + s.net.toFixed(0) : '-$' + Math.abs(s.net).toFixed(0);
+      var sg = s.net > 0 ? '▲' : s.net < 0 ? '▼' : '●';
 
       ctx.textAlign = 'left';
       ctx.fillStyle = 'rgba(200,215,240,0.9)';
-      ctx.fillText(sign + ' ' + s.name, 100, y);
+      ctx.fillText(sg + ' ' + s.name, 100, y);
 
       ctx.textAlign = 'right';
-      ctx.fillStyle = color;
+      ctx.fillStyle = c;
       ctx.font = '900 13px Inter, sans-serif';
-      ctx.fillText(txt, W - 100, y);
+      ctx.fillText(t2, W - 100, y);
       ctx.font = '700 13px Inter, sans-serif';
     });
 
@@ -790,11 +653,11 @@
     host.innerHTML =
       '<div class="share-card">' +
         '<div class="share-head">' +
-          '<h3>📤 اشتراک‌گذاری وضعیت من</h3>' +
+          '<h3>📤 اشتراک‌گذاری وضعیت</h3>' +
           '<div class="share-actions">' +
             '<button class="share-btn" data-act="preview">👁️ پیش‌نمایش</button>' +
-            '<button class="share-btn primary" data-act="download">⬇️ دانلود عکس</button>' +
-            '<button class="share-btn" data-act="share">📱 اشتراک‌گذاری</button>' +
+            '<button class="share-btn primary" data-act="download">⬇️ دانلود</button>' +
+            '<button class="share-btn" data-act="share">📱 اشتراک</button>' +
           '</div>' +
         '</div>' +
         '<div class="share-preview" id="sharePreviewWrap"></div>' +
@@ -804,38 +667,30 @@
       var btn = e.target.closest('button[data-act]');
       if (!btn) return;
       var act = btn.dataset.act;
-
-      var canvas = drawShareImage();
+      var canvas = drawShare();
       var wrap = $('#sharePreviewWrap');
 
       if (act === 'preview') {
         wrap.innerHTML = '';
         var c2 = canvas.cloneNode(true);
-        var ctx2 = c2.getContext('2d');
-        ctx2.drawImage(canvas, 0, 0);
+        c2.getContext('2d').drawImage(canvas, 0, 0);
         wrap.appendChild(c2);
         wrap.classList.add('show');
       } else if (act === 'download') {
         var url = canvas.toDataURL('image/jpeg', 0.92);
         var a = document.createElement('a');
         a.href = url;
-        a.download = 'po-trade-report-' + new Date().toISOString().slice(0, 10) + '.jpg';
+        a.download = 'po-trade-' + new Date().toISOString().slice(0, 10) + '.jpg';
         a.click();
       } else if (act === 'share') {
         canvas.toBlob(async function(blob) {
-          var file = new File([blob], 'po-trade-report.jpg', { type: 'image/jpeg' });
+          var file = new File([blob], 'po-trade.jpg', { type: 'image/jpeg' });
           if (navigator.canShare && navigator.canShare({ files: [file] })) {
             try {
-              await navigator.share({
-                files: [file],
-                title: 'PO-TRADE Report',
-                text: 'وضعیت معاملات من در PO-TRADE'
-              });
-            } catch(err) {
-              if (err.name !== 'AbortError') console.warn(err);
-            }
+              await navigator.share({ files: [file], title: 'PO-TRADE', text: 'وضعیت معاملات من' });
+            } catch(err) { if (err.name !== 'AbortError') console.warn(err); }
           } else {
-            alert('مرورگرت از اشتراک‌گذاری مستقیم پشتیبانی نمی‌کند. از «دانلود عکس» استفاده کن.');
+            alert('مرورگر پشتیبانی نمی‌کند. از دانلود استفاده کن.');
           }
         }, 'image/jpeg', 0.92);
       }
@@ -843,39 +698,38 @@
   }
 
   /* ============================================================
-     6) THEME SWITCHER
+     6) THEME + STREAK + CONFETTI + COMMAND PALETTE
      ============================================================ */
   function initThemeSwitcher() {
     var host = $('#theme-switcher-host');
     if (!host) return;
-
-    var current = localStorage.getItem('po.v4.theme') || 'obsidian';
-    if (current === 'dark') current = 'obsidian';
-    if (current === 'light') current = 'aurora';
+    var cur = localStorage.getItem('po.v4.theme') || 'obsidian';
+    if (cur === 'dark') cur = 'obsidian';
+    if (cur === 'light') cur = 'aurora';
 
     host.innerHTML =
       '<div class="theme-switcher">' +
         '<button class="theme-pick" data-theme-pick="obsidian" title="Obsidian"></button>' +
         '<button class="theme-pick" data-theme-pick="aurora" title="Aurora"></button>' +
-        '<button class="theme-pick" data-theme-pick="cyber" title="Cyberpunk"></button>' +
+        '<button class="theme-pick" data-theme-pick="cyber" title="Cyber"></button>' +
       '</div>';
 
-    function setActive(name) {
+    function setActive(n) {
       $$('.theme-pick', host).forEach(function(b) {
-        b.classList.toggle('active', b.dataset.themePick === name);
+        b.classList.toggle('active', b.dataset.themePick === n);
       });
     }
-    setActive(current);
+    setActive(cur);
 
     host.addEventListener('click', function(e) {
-      var btn = e.target.closest('.theme-pick');
-      if (!btn) return;
-      var name = btn.dataset.themePick;
-      document.documentElement.dataset.theme = name;
-      localStorage.setItem('po.v4.theme', name);
-      setActive(name);
+      var b = e.target.closest('.theme-pick');
+      if (!b) return;
+      var n = b.dataset.themePick;
+      document.documentElement.dataset.theme = n;
+      localStorage.setItem('po.v4.theme', n);
+      setActive(n);
       var tb = document.querySelector('.theme-icon');
-      if (tb) tb.textContent = name === 'aurora' ? '☀️' : name === 'cyber' ? '⚡' : '🌙';
+      if (tb) tb.textContent = n === 'aurora' ? '☀️' : n === 'cyber' ? '⚡' : '🌙';
       window.dispatchEvent(new Event('resize'));
     });
   }
@@ -884,269 +738,189 @@
     var dd = document.getElementById('userDropdown');
     var ts = document.getElementById('theme-switcher-host');
     if (!dd || !ts || ts.parentElement === dd) return;
-    var actions = dd.querySelector('.user-actions');
-    if (actions) dd.insertBefore(ts, actions);
-    else dd.appendChild(ts);
+    var a = dd.querySelector('.user-actions');
+    if (a) dd.insertBefore(ts, a); else dd.appendChild(ts);
   }
 
-  /* ============================================================
-     7) STREAK BADGE
-     ============================================================ */
   function calcStreak() {
     var trades = getLS('po.v4.trades', []);
     if (!trades.length) return 0;
-
-    var byDay = {};
+    var bd = {};
     trades.forEach(function(t) {
       if (!t.date) return;
       var p = t.result === 'win' ? Math.abs(+t.amount || 0) :
               t.result === 'loss' ? -Math.abs(+t.amount || 0) : 0;
-      byDay[t.date] = (byDay[t.date] || 0) + p;
+      bd[t.date] = (bd[t.date] || 0) + p;
     });
-
     var today = new Date();
-    var streak = 0;
+    var st = 0;
     for (var i = 0; i < 365; i++) {
       var d = new Date(today);
       d.setDate(d.getDate() - i);
       var iso = d.getFullYear() + '-' +
                 String(d.getMonth() + 1).padStart(2, '0') + '-' +
                 String(d.getDate()).padStart(2, '0');
-      var net = byDay[iso];
-      if (net === undefined) { if (i === 0) continue; break; }
-      if (net > 0) streak++;
-      else break;
+      var n = bd[iso];
+      if (n === undefined) { if (i === 0) continue; break; }
+      if (n > 0) st++; else break;
     }
-    return streak;
+    return st;
   }
 
-  function initStreakBadge() {
-    var brand = document.querySelector('.brand');
-    if (!brand || document.querySelector('.streak-badge')) return;
+  function initStreak() {
+    var br = document.querySelector('.brand');
+    if (!br || document.querySelector('.streak-badge')) return;
     var el = document.createElement('div');
     el.className = 'streak-badge';
-    el.title = 'تعداد روزهایی که پشت سر هم سود کرده‌ای';
-    brand.appendChild(el);
+    el.title = 'روزهای سوددهی متوالی';
+    br.appendChild(el);
 
-    function render() {
+    function r() {
       var s = calcStreak();
       if (s > 0) {
-        el.classList.remove('cold');
-        el.classList.add('hot');
-        el.innerHTML = '<span class="fire">🔥</span><span class="num">' + s + '</span><span class="lbl">روز سوددهی متوالی</span>';
+        el.classList.remove('cold'); el.classList.add('hot');
+        el.innerHTML = '<span class="fire">🔥</span><span class="num">' + s + '</span><span class="lbl">روز سوددهی</span>';
       } else {
-        el.classList.remove('hot');
-        el.classList.add('cold');
-        el.innerHTML = '<span class="fire">❄️</span><span class="lbl">هنوز استریکی نداری</span>';
+        el.classList.remove('hot'); el.classList.add('cold');
+        el.innerHTML = '<span class="fire">❄️</span><span class="lbl">استریک صفر</span>';
       }
     }
-    render();
-    setInterval(render, 30000);
+    r();
+    setInterval(r, 30000);
   }
 
-  /* ============================================================
-     8) CONFETTI
-     ============================================================ */
   function fireConfetti() {
     if (document.querySelector('.confetti-canvas')) return;
-    var canvas = document.createElement('canvas');
-    canvas.className = 'confetti-canvas';
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    document.body.appendChild(canvas);
-
-    var ctx = canvas.getContext('2d');
-    var colors = ['#2ee6a6', '#5b8cff', '#ff5fa2', '#ffb020', '#c78aff', '#f6ff00'];
-    var pieces = [];
-    for (var i = 0; i < 180; i++) {
-      pieces.push({
-        x: Math.random() * canvas.width,
-        y: -20 - Math.random() * canvas.height * 0.5,
+    var cv = document.createElement('canvas');
+    cv.className = 'confetti-canvas';
+    cv.width = window.innerWidth;
+    cv.height = window.innerHeight;
+    document.body.appendChild(cv);
+    var ctx = cv.getContext('2d');
+    var colors = ['#2ee6a6', '#5b8cff', '#ff5fa2', '#ffb020', '#c78aff'];
+    var pcs = [];
+    for (var i = 0; i < 150; i++) {
+      pcs.push({
+        x: Math.random() * cv.width,
+        y: -20 - Math.random() * cv.height * 0.5,
         w: 8 + Math.random() * 8,
         h: 6 + Math.random() * 12,
-        color: colors[Math.floor(Math.random() * colors.length)],
+        c: colors[Math.floor(Math.random() * colors.length)],
         vx: -2 + Math.random() * 4,
         vy: 2 + Math.random() * 5,
-        rot: Math.random() * Math.PI * 2,
+        r: Math.random() * Math.PI * 2,
         vr: -0.18 + Math.random() * 0.36
       });
     }
     var start = Date.now();
-    var duration = 4500;
-    function frame() {
-      var elapsed = Date.now() - start;
-      var alpha = elapsed < duration - 500 ? 1 : Math.max(0, (duration - elapsed) / 500);
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.globalAlpha = alpha;
-      pieces.forEach(function(p) {
-        p.x += p.vx; p.y += p.vy; p.vy += 0.09; p.rot += p.vr;
+    var dur = 4000;
+    function f() {
+      var e = Date.now() - start;
+      var a = e < dur - 500 ? 1 : Math.max(0, (dur - e) / 500);
+      ctx.clearRect(0, 0, cv.width, cv.height);
+      ctx.globalAlpha = a;
+      pcs.forEach(function(p) {
+        p.x += p.vx; p.y += p.vy; p.vy += 0.09; p.r += p.vr;
         ctx.save();
         ctx.translate(p.x, p.y);
-        ctx.rotate(p.rot);
-        ctx.fillStyle = p.color;
+        ctx.rotate(p.r);
+        ctx.fillStyle = p.c;
         ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
         ctx.restore();
       });
-      if (elapsed < duration) requestAnimationFrame(frame);
-      else canvas.remove();
+      if (e < dur) requestAnimationFrame(f);
+      else cv.remove();
     }
-    requestAnimationFrame(frame);
+    requestAnimationFrame(f);
   }
 
-  var lastCelebrated = '';
-  function checkGoalComplete() {
-    var banner = document.querySelector('.goal-banner.success');
-    if (!banner) return;
-    var title = banner.querySelector('.goal-banner-title');
-    if (!title) return;
-    var text = title.textContent;
-    if (text && text !== lastCelebrated) {
-      lastCelebrated = text;
-      fireConfetti();
-    }
+  var lastCel = '';
+  function checkGoal() {
+    var b = document.querySelector('.goal-banner.success');
+    if (!b) return;
+    var t = b.querySelector('.goal-banner-title');
+    if (!t) return;
+    var x = t.textContent;
+    if (x && x !== lastCel) { lastCel = x; fireConfetti(); }
   }
 
-  /* ============================================================
-     9) COMMAND PALETTE
-     ============================================================ */
-  function initCommandPalette() {
+  function initCmdPalette() {
     if (document.querySelector('.cmd-overlay')) return;
-
-    var overlay = document.createElement('div');
-    overlay.className = 'cmd-overlay';
-    overlay.innerHTML =
-      '<div class="cmd-card" role="dialog">' +
+    var ov = document.createElement('div');
+    ov.className = 'cmd-overlay';
+    ov.innerHTML =
+      '<div class="cmd-card">' +
         '<div class="cmd-input-wrap">' +
           '<span class="icon">🔍</span>' +
-          '<input class="cmd-input" type="text" placeholder="جستجو یا دستور..." autocomplete="off" />' +
+          '<input class="cmd-input" type="text" placeholder="جستجو..." autocomplete="off" />' +
         '</div>' +
         '<div class="cmd-list" id="cmdList"></div>' +
-        '<div class="cmd-footer">' +
-          '<span><kbd>↑</kbd><kbd>↓</kbd> حرکت</span>' +
-          '<span><kbd>Enter</kbd> انتخاب • <kbd>Esc</kbd> بستن</span>' +
-        '</div>' +
       '</div>';
-    document.body.appendChild(overlay);
+    document.body.appendChild(ov);
 
-    var input = overlay.querySelector('.cmd-input');
-    var list = overlay.querySelector('#cmdList');
+    var input = ov.querySelector('.cmd-input');
+    var list = ov.querySelector('#cmdList');
     var active = 0;
 
-    function switchTab(name) {
-      var tab = document.querySelector('.tab[data-view="' + name + '"]');
-      if (tab) tab.click();
-    }
-    function setTheme(name) {
-      document.documentElement.dataset.theme = name;
-      localStorage.setItem('po.v4.theme', name);
+    function switchTab(n) { var t = document.querySelector('.tab[data-view="' + n + '"]'); if (t) t.click(); }
+    function setTh(n) {
+      document.documentElement.dataset.theme = n;
+      localStorage.setItem('po.v4.theme', n);
       document.querySelectorAll('.theme-pick').forEach(function(b) {
-        b.classList.toggle('active', b.dataset.themePick === name);
+        b.classList.toggle('active', b.dataset.themePick === n);
       });
       window.dispatchEvent(new Event('resize'));
     }
 
-    var commands = [
-      { emoji: '✍️', label: 'ثبت معامله جدید', action: function() { switchTab('add'); } },
-      { emoji: '📊', label: 'رفتن به آنالیز', action: function() { switchTab('analysis'); } },
-      { emoji: '📅', label: 'رفتن به تقویم', action: function() { switchTab('calendar'); } },
-      { emoji: '📋', label: 'رفتن به معاملات', action: function() { switchTab('trades'); } },
-      { emoji: '⚙️', label: 'رفتن به تنظیمات', action: function() { switchTab('settings'); } },
-      { emoji: '🌙', label: 'تم Obsidian (تیره)', action: function() { setTheme('obsidian'); } },
-      { emoji: '☀️', label: 'تم Aurora (روشن)', action: function() { setTheme('aurora'); } },
-      { emoji: '⚡', label: 'تم Cyber (نئون)', action: function() { setTheme('cyber'); } },
-      { emoji: '🌐', label: 'تغییر زبان', action: function() { var b = document.getElementById('lang-btn'); if (b) b.click(); } },
-      { emoji: '🔄', label: 'همگام‌سازی با سرور', action: function() { if (window.PT_Sync) window.PT_Sync.forcePush(); } },
-      { emoji: '📦', label: 'خروجی JSON', action: function() { var b = document.getElementById('export-btn'); if (b) b.click(); } },
-      { emoji: '🚪', label: 'خروج از حساب', action: function() { if (window.poLogout) window.poLogout(); } }
+    var cmds = [
+      { e: '✍️', l: 'ثبت معامله', a: function() { switchTab('add'); } },
+      { e: '📊', l: 'آنالیز', a: function() { switchTab('analysis'); } },
+      { e: '📅', l: 'تقویم', a: function() { switchTab('calendar'); } },
+      { e: '📋', l: 'معاملات', a: function() { switchTab('trades'); } },
+      { e: '⚙️', l: 'تنظیمات', a: function() { switchTab('settings'); } },
+      { e: '🌙', l: 'تم Obsidian', a: function() { setTh('obsidian'); } },
+      { e: '☀️', l: 'تم Aurora', a: function() { setTh('aurora'); } },
+      { e: '⚡', l: 'تم Cyber', a: function() { setTh('cyber'); } },
+      { e: '🔄', l: 'همگام‌سازی', a: function() { if (window.PT_Sync) window.PT_Sync.forcePush(); } },
+      { e: '🚪', l: 'خروج', a: function() { if (window.poLogout) window.poLogout(); } }
     ];
-
-    var filtered = commands.slice();
+    var f = cmds.slice();
 
     function render() {
-      if (!filtered.length) {
-        list.innerHTML = '<div class="cmd-empty">چیزی پیدا نشد</div>';
-        return;
-      }
-      list.innerHTML = filtered.map(function(c, i) {
+      if (!f.length) { list.innerHTML = '<div class="cmd-empty">نیست</div>'; return; }
+      list.innerHTML = f.map(function(c, i) {
         return '<button class="cmd-item' + (i === active ? ' active' : '') + '" data-i="' + i + '">' +
-          '<span class="emoji">' + c.emoji + '</span>' +
-          '<span class="label">' + c.label + '</span>' +
-        '</button>';
+          '<span class="emoji">' + c.e + '</span><span class="label">' + c.l + '</span></button>';
       }).join('');
     }
-
     function filter(q) {
       q = (q || '').trim().toLowerCase();
-      filtered = !q ? commands.slice() : commands.filter(function(c) {
-        return c.label.toLowerCase().indexOf(q) !== -1;
-      });
-      active = 0;
-      render();
+      f = !q ? cmds.slice() : cmds.filter(function(c) { return c.l.toLowerCase().indexOf(q) !== -1; });
+      active = 0; render();
     }
-
-    function open() {
-      overlay.classList.add('open');
-      input.value = '';
-      filter('');
-      setTimeout(function() { input.focus(); }, 100);
-    }
-    function close() { overlay.classList.remove('open'); }
-    function execute() {
-      if (!filtered[active]) return;
-      var cmd = filtered[active];
-      close();
-      setTimeout(function() { cmd.action(); }, 150);
-    }
+    function open() { ov.classList.add('open'); input.value = ''; filter(''); setTimeout(function() { input.focus(); }, 80); }
+    function close() { ov.classList.remove('open'); }
+    function exec() { if (!f[active]) return; var c = f[active]; close(); setTimeout(function() { c.a(); }, 120); }
 
     input.addEventListener('input', function() { filter(this.value); });
     input.addEventListener('keydown', function(e) {
-      if (e.key === 'ArrowDown') { e.preventDefault(); active = (active + 1) % filtered.length; render(); }
-      else if (e.key === 'ArrowUp') { e.preventDefault(); active = (active - 1 + filtered.length) % filtered.length; render(); }
-      else if (e.key === 'Enter') { e.preventDefault(); execute(); }
+      if (e.key === 'ArrowDown') { e.preventDefault(); active = (active + 1) % f.length; render(); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); active = (active - 1 + f.length) % f.length; render(); }
+      else if (e.key === 'Enter') { e.preventDefault(); exec(); }
       else if (e.key === 'Escape') { e.preventDefault(); close(); }
     });
     list.addEventListener('click', function(e) {
-      var item = e.target.closest('.cmd-item');
-      if (!item) return;
-      active = parseInt(item.dataset.i, 10);
-      execute();
+      var it = e.target.closest('.cmd-item');
+      if (!it) return;
+      active = parseInt(it.dataset.i, 10); exec();
     });
-    overlay.addEventListener('click', function(e) { if (e.target === overlay) close(); });
-
+    ov.addEventListener('click', function(e) { if (e.target === ov) close(); });
     document.addEventListener('keydown', function(e) {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
-        if (overlay.classList.contains('open')) close();
-        else open();
+        if (ov.classList.contains('open')) close(); else open();
       }
     });
-  }
-
-  /* ============================================================
-     10) KBD HINT
-     ============================================================ */
-  function showKbdHint() {
-    if (localStorage.getItem('po.kbdhint.seen') === '1') return;
-    setTimeout(function() {
-      var h = document.createElement('div');
-      h.className = 'kbd-hint';
-      h.innerHTML =
-        '<span>💡</span>' +
-        '<kbd>Ctrl</kbd><kbd>K</kbd>' +
-        '<span>پنل دستور</span>' +
-        '<button class="close">✕</button>';
-      document.body.appendChild(h);
-      h.querySelector('.close').addEventListener('click', function() {
-        h.remove();
-        localStorage.setItem('po.kbdhint.seen', '1');
-      });
-      setTimeout(function() {
-        if (document.body.contains(h)) {
-          h.remove();
-          localStorage.setItem('po.kbdhint.seen', '1');
-        }
-      }, 8000);
-    }, 3500);
   }
 
   /* ============================================================
@@ -1154,33 +928,28 @@
      ============================================================ */
   function init() {
     document.querySelectorAll('.market-clock').forEach(function(c) { c.remove(); });
-
     moveThemeSwitcher();
     setTimeout(moveThemeSwitcher, 500);
     setTimeout(moveThemeSwitcher, 1500);
 
     setTimeout(initMarketClock, 100);
     setTimeout(initMarketClock, 700);
-    setTimeout(initMarketClock, 1500);
 
     renderAssistant();
-    renderGoalsBanner();
+    renderGoals();
     initShare();
     initThemeSwitcher();
-    initStreakBadge();
-    initCommandPalette();
-    showKbdHint();
+    initStreak();
+    initCmdPalette();
 
     setInterval(function() {
       renderAssistant();
-      renderGoalsBanner();
+      renderGoals();
     }, 5000);
-    setInterval(checkGoalComplete, 2000);
+    setInterval(checkGoal, 2000);
 
-    document.querySelectorAll('.tab').forEach(function(tab) {
-      tab.addEventListener('click', function() {
-        setTimeout(initMarketClock, 100);
-      });
+    document.querySelectorAll('.tab').forEach(function(t) {
+      t.addEventListener('click', function() { setTimeout(initMarketClock, 100); });
     });
   }
 
@@ -1191,10 +960,7 @@
   }
 
   window.PT_Assistant = {
-    refresh: function() {
-      renderAssistant();
-      renderGoalsBanner();
-    },
+    refresh: function() { renderAssistant(); renderGoals(); },
     initMarketClock: initMarketClock
   };
   window.PT_Extras = {
