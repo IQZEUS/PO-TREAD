@@ -432,17 +432,19 @@
   /* ══════════════════════════════════════════════════════
      SHARE IMAGE — کیهانی افسانه‌ای
      ══════════════════════════════════════════════════════ */
-  function drawShare() {
+    function drawShare() {
     var trades = getLS('po.v4.trades', []);
     var tier = getTier(trades);
 
-    var W = 900, H = 1400;
+    var W = 900, H = 1650;
     var canvas = document.createElement('canvas');
     canvas.width = W;
     canvas.height = H;
     var ctx = canvas.getContext('2d');
 
-    // ═══ تنظیمات رنگ بر اساس Tier ═══
+    // ══════════════════════════════════════════════════════
+    // تنظیمات رنگ بر اساس Tier
+    // ══════════════════════════════════════════════════════
     var CFG = {
       bronze: {
         bgTop: '#1a0a02', bgMid: '#2a1408', bgBot: '#0a0400',
@@ -483,7 +485,111 @@
     };
     var C = CFG[tier.key] || CFG.bronze;
 
-    // ═══ 1) پس‌زمینه ═══
+    // ══════════════════════════════════════════════════════
+    // 50 نقل قول افسانه‌ای
+    // ══════════════════════════════════════════════════════
+    var QUOTES = {
+      legendary: [
+        { t: 'دقت ورودت مثل برنده‌های وال‌استریته', a: 'پاول تودور جونز' },
+        { t: 'بازار به صبورترین‌ها پاداش می‌ده', a: 'وارن بافت' },
+        { t: 'برنده شدن عادت است، باخت هم', a: 'وینس لومباردی' },
+        { t: 'قهرمان‌ها از تکرار ساخته می‌شن، نه شانس', a: 'محمد علی' },
+        { t: 'موفقیت مجموع تلاش‌های کوچیک روزانه‌ست', a: 'رابرت کولیر' },
+        { t: 'بهترین تریدرها بهترین ژورنال‌نویس‌ها هستن', a: 'مارک داگلاس' },
+        { t: 'بدون داده، فقط حدس می‌زنی — نه ترید', a: 'ری دالیو' },
+        { t: 'دانش قدرت است، اما انضباط پادشاه', a: 'جیم ران' }
+      ],
+      excellent: [
+        { t: 'برنده‌ها می‌دونن کِی وارد شن، قهرمان‌ها کِی خارج', a: 'جسی لیورمور' },
+        { t: 'هر معامله رو مثل آخرین معامله‌ت ببین', a: 'پاول تودور جونز' },
+        { t: 'سیستم داشته باش، نه احساس', a: 'مارک داگلاس' },
+        { t: 'تریدر موفق کسیه که از اشتباهش یاد می‌گیره', a: 'جرج سوروس' },
+        { t: 'سود = احتمال × نسبت ریسک به ریوارد', a: 'ری دالیو' },
+        { t: 'بهترین سرمایه‌گذاری، خودته', a: 'وارن بافت' },
+        { t: 'صبر، کلید ترید موفق', a: 'جسی لیورمور' },
+        { t: 'احساسات دشمن تریدرن', a: 'اد سیکوتا' }
+      ],
+      solid: [
+        { t: 'هر معامله یه درس، هر درس یه قدم', a: 'ری دالیو' },
+        { t: 'شکست تنها راه یادگیری واقعیه', a: 'سام والتون' },
+        { t: 'از اشتباهاتت درس بگیر، نه از موفقیت‌هات', a: 'بیل گیتس' },
+        { t: 'بی‌نظمی، دشمن اول تریدره', a: 'مارک داگلاس' },
+        { t: 'قانون ۱: پول از دست نده. قانون ۲: قانون ۱ یادت باشه', a: 'وارن بافت' },
+        { t: 'زمان در بازار مهم‌تر از زمان‌بندی بازاره', a: 'کن فیشر' },
+        { t: 'بدون شکست، موفقیتی نیست', a: 'میکا جیگر' },
+        { t: 'تریدر خوب، تریدر منظمه', a: 'برت استید' }
+      ],
+      learning: [
+        { t: 'شکست پله‌ی موفقیته، اگه درست استفاده کنی', a: 'هنری فورد' },
+        { t: 'بازار همیشه درست می‌گه، تو باید همراهش بشی', a: 'مارتی شوارتز' },
+        { t: 'هر ضرر یه فرصت یادگیریه', a: 'لری هایت' },
+        { t: 'پول از دست دادن، بخشی از بازیه', a: 'پاول تودور جونز' },
+        { t: 'بدون اشتباه، تجربه‌ای نیست', a: 'تام واتسون' },
+        { t: 'اشتباه نکردن یعنی هیچ کاری نکردن', a: 'جان وودن' },
+        { t: 'باخت بهت یاد می‌ده چطور برنده بشی', a: 'بیب روث' },
+        { t: 'درسی که بدون درد باشه، درسی نیست', a: 'بنجامین فرانکلین' }
+      ],
+      profit: [
+        { t: 'سود یعنی انضباط، نه شانس', a: 'وارن بافت' },
+        { t: 'متواضع باش در سود، صبور در ضرر', a: 'ری دالیو' },
+        { t: 'پول از صبر میاد، نه از فعالیت', a: 'جسی لیورمور' },
+        { t: 'برنده‌ها می‌دونن کِی خارج شن', a: 'جرج سوروس' },
+        { t: 'بازار فرصت‌ها رو به صبورها می‌ده', a: 'بیل گراس' },
+        { t: 'ثروت = زمان × نرخ مرکب', a: 'آلبرت اینشتین' }
+      ],
+      loss: [
+        { t: 'ضرر بخشی از بازیه — زود متوقف کن', a: 'پاول تودور جونز' },
+        { t: 'از ضررهای کوچیک درس بگیر، قبل از ضررهای بزرگ', a: 'جرج سوروس' },
+        { t: 'هر ضرر یه فرصت بازنگریست', a: 'استنلی دراکنمیلر' },
+        { t: 'بدون ریسک، دستاوردی نیست', a: 'نیل آرمسترانگ' },
+        { t: 'شکست، پلی به سمت موفقیته', a: 'زیگ زیگلار' },
+        { t: 'زمین خوردی؟ پاشو. قوی‌تر ادامه بده', a: 'ناشناس' }
+      ],
+      neutral: [
+        { t: 'سربه‌سر یعنی آماده‌ی جهش', a: 'ضرب‌المثل ژاپنی' },
+        { t: 'هر روز فرصت جدیدیه', a: 'ناشناس' },
+        { t: 'زمان و صبر، بهترین دوست تریدرن', a: 'جسی لیورمور' },
+        { t: 'استراحت هم بخشی از تریده', a: 'ناشناس' },
+        { t: 'کonsistنسی از شدت مهم‌تره', a: 'ناشناس' },
+        { t: 'بازار فردا هم بازه', a: 'وارن بافت' }
+      ]
+    };
+
+    // ══════════════════════════════════════════════════════
+    // 1) محاسبه آمار اول
+    // ══════════════════════════════════════════════════════
+    var w = 0, l = 0, net = 0, gp = 0, gl = 0;
+    trades.forEach(function(t) {
+      var p = t.result === 'win' ? Math.abs(+t.amount || 0) :
+              t.result === 'loss' ? -Math.abs(+t.amount || 0) : 0;
+      net += p;
+      if (t.result === 'win') { w++; gp += p; }
+      else if (t.result === 'loss') { l++; gl += Math.abs(p); }
+    });
+    var closed = w + l;
+    var wr = closed ? (w / closed) * 100 : 0;
+    var pf = gl > 0 ? gp / gl : (gp > 0 ? Infinity : 0);
+
+    // ══════════════════════════════════════════════════════
+    // 2) انتخاب نقل قول
+    // ══════════════════════════════════════════════════════
+    var pool;
+    if (net < 0 && wr < 45) pool = QUOTES.loss;
+    else if (net < 0 && wr >= 50) pool = QUOTES.learning;
+    else if (net < 0) pool = QUOTES.learning;
+    else if (net > 0 && wr >= 65) pool = QUOTES.legendary;
+    else if (net > 0 && wr >= 55) pool = QUOTES.excellent;
+    else if (net > 0 && wr >= 45) pool = QUOTES.solid;
+    else if (net > 0) pool = QUOTES.profit;
+    else pool = QUOTES.neutral;
+
+    // انتخاب قوی بر اساس تعداد معاملات (همیشه یکسان بمونه)
+    var pick = (trades.length * 31 + Math.round(wr * 7)) % pool.length;
+    var Q = pool[pick];
+
+    // ══════════════════════════════════════════════════════
+    // 3) پس‌زمینه
+    // ══════════════════════════════════════════════════════
     var bg = ctx.createLinearGradient(0, 0, 0, H);
     bg.addColorStop(0, C.bgTop);
     bg.addColorStop(0.5, C.bgMid);
@@ -491,8 +597,10 @@
     ctx.fillStyle = bg;
     ctx.fillRect(0, 0, W, H);
 
-    // ═══ 2) Nebula ═══
-    function drawNebula(x, y, r, color) {
+    // ══════════════════════════════════════════════════════
+    // 4) Nebula
+    // ══════════════════════════════════════════════════════
+    function nebula(x, y, r, color) {
       var g = ctx.createRadialGradient(x, y, 0, x, y, r);
       g.addColorStop(0, color);
       g.addColorStop(0.4, color.replace(/[\d.]+\)$/, '0.15)'));
@@ -502,12 +610,15 @@
       ctx.arc(x, y, r, 0, Math.PI * 2);
       ctx.fill();
     }
-    drawNebula(150, 200, 550, C.nebula1);
-    drawNebula(W - 100, 450, 500, C.nebula2);
-    drawNebula(W / 2, 1000, 600, C.nebula3);
-    drawNebula(200, 1200, 450, C.nebula1);
+    nebula(150, 200, 550, C.nebula1);
+    nebula(W - 100, 450, 500, C.nebula2);
+    nebula(W / 2, 900, 600, C.nebula3);
+    nebula(200, 1300, 450, C.nebula1);
+    nebula(W - 150, 1500, 500, C.nebula2);
 
-    // ═══ 3) ستاره‌ها ═══
+    // ══════════════════════════════════════════════════════
+    // 5) ستاره‌ها
+    // ══════════════════════════════════════════════════════
     for (var i = 0; i < C.stars; i++) {
       var sx = Math.random() * W;
       var sy = Math.random() * H;
@@ -525,7 +636,9 @@
     ctx.globalAlpha = 1;
     ctx.shadowBlur = 0;
 
-    // ═══ 4) نوار بالا ═══
+    // ══════════════════════════════════════════════════════
+    // 6) نوار بالا
+    // ══════════════════════════════════════════════════════
     var topBar = ctx.createLinearGradient(0, 0, W, 0);
     topBar.addColorStop(0, 'rgba(255,255,255,0)');
     topBar.addColorStop(0.15, C.primary);
@@ -535,10 +648,12 @@
     ctx.fillStyle = topBar;
     ctx.fillRect(0, 0, W, 4);
 
-    // ═══ 5) Tier Badge ═══
+    // ══════════════════════════════════════════════════════
+    // 7) Tier Badge
+    // ══════════════════════════════════════════════════════
     var badgeW = 260, badgeH = 74;
     var badgeX = (W - badgeW) / 2;
-    var badgeY = 55;
+    var badgeY = 40;
 
     ctx.shadowColor = C.glow;
     ctx.shadowBlur = 80;
@@ -561,7 +676,9 @@
     ctx.textBaseline = 'middle';
     ctx.fillText(C.label, W / 2, badgeY + badgeH / 2 + 1);
 
-    // ═══ 6) لوگو ═══
+    // ══════════════════════════════════════════════════════
+    // 8) لوگو PO-TRADE
+    // ══════════════════════════════════════════════════════
     var titleGrad = ctx.createLinearGradient(W / 2 - 320, 0, W / 2 + 320, 0);
     titleGrad.addColorStop(0, C.primary);
     titleGrad.addColorStop(0.5, C.secondary);
@@ -573,40 +690,29 @@
     ctx.font = '900 76px Inter, sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'top';
-    ctx.fillText('PO-TRADE', W / 2, 175);
+    ctx.fillText('PO-TRADE', W / 2, 145);
     ctx.shadowBlur = 0;
 
     ctx.font = '700 13px Inter, sans-serif';
     ctx.fillStyle = 'rgba(200,215,240,0.6)';
     ctx.fillText('◆  PERFORMANCE REPORT  ◆  ' +
-                 new Date().toISOString().slice(0, 10), W / 2, 268);
+                 new Date().toISOString().slice(0, 10), W / 2, 235);
 
-    // ═══ 7) محاسبه آمار ═══
-    var w = 0, l = 0, net = 0, gp = 0, gl = 0;
-    trades.forEach(function(t) {
-      var p = t.result === 'win' ? Math.abs(+t.amount || 0) :
-              t.result === 'loss' ? -Math.abs(+t.amount || 0) : 0;
-      net += p;
-      if (t.result === 'win') { w++; gp += p; }
-      else if (t.result === 'loss') { l++; gl += Math.abs(p); }
-    });
-    var closed = w + l;
-    var wr = closed ? (w / closed) * 100 : 0;
-    var pf = gl > 0 ? gp / gl : (gp > 0 ? Infinity : 0);
-
-    // ═══ 8) NET PNL ═══
+    // ══════════════════════════════════════════════════════
+    // 9) NET PNL
+    // ══════════════════════════════════════════════════════
     var isProfit = net > 0;
     var pnlColor = isProfit ? '#2ee6a6' : net < 0 ? '#ff5674' : '#8697b8';
     var pnlColor2 = isProfit ? '#7bffd0' : net < 0 ? '#ff95a8' : '#c7d3ea';
     var sgn = net > 0 ? '+' : net < 0 ? '-' : '';
     var nTxt = sgn + '$' + Math.abs(net).toLocaleString('en-US', { maximumFractionDigits: 2 });
 
-    var halo = ctx.createRadialGradient(W / 2, 450, 0, W / 2, 450, 400);
+    var halo = ctx.createRadialGradient(W / 2, 430, 0, W / 2, 430, 400);
     halo.addColorStop(0, isProfit ? 'rgba(46,230,166,0.4)' : 'rgba(255,86,116,0.4)');
     halo.addColorStop(0.5, isProfit ? 'rgba(46,230,166,0.1)' : 'rgba(255,86,116,0.1)');
     halo.addColorStop(1, 'rgba(0,0,0,0)');
     ctx.fillStyle = halo;
-    ctx.fillRect(0, 250, W, 450);
+    ctx.fillRect(0, 250, W, 420);
 
     var numGrad = ctx.createLinearGradient(W / 2 - 350, 0, W / 2 + 350, 0);
     numGrad.addColorStop(0, pnlColor);
@@ -619,19 +725,21 @@
     ctx.fillStyle = numGrad;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(nTxt, W / 2, 450);
+    ctx.fillText(nTxt, W / 2, 430);
     ctx.shadowBlur = 0;
 
     ctx.font = '900 14px Inter, sans-serif';
     ctx.fillStyle = 'rgba(200,215,240,0.55)';
     ctx.textBaseline = 'top';
-    ctx.fillText('N E T   P R O F I T   /   L O S S', W / 2, 545);
+    ctx.fillText('N E T   P R O F I T   /   L O S S', W / 2, 520);
 
-    // ═══ 9) 4 کارت آمار ═══
+    // ══════════════════════════════════════════════════════
+    // 10) 4 کارت آمار
+    // ══════════════════════════════════════════════════════
     var cw = 195, ch = 120, gap = 10;
     var tw = cw * 4 + gap * 3;
     var sx = (W - tw) / 2;
-    var cy = 610;
+    var cy = 580;
 
     function statCard(x, y, label, val, clr, ico) {
       ctx.shadowColor = 'rgba(0,0,0,0.7)';
@@ -686,7 +794,9 @@
     statCard(sx + (cw + gap) * 2, cy, 'WINS', w + '', '#2ee6a6', '✅');
     statCard(sx + (cw + gap) * 3, cy, 'LOSSES', l + '', '#ff5674', '❌');
 
-    // ═══ 10) نمودار رشد ═══
+    // ══════════════════════════════════════════════════════
+    // 11) Equity Curve
+    // ══════════════════════════════════════════════════════
     var sorted = trades.slice().sort(function(a, b) {
       return (a.createdAt || 0) - (b.createdAt || 0);
     });
@@ -699,7 +809,7 @@
     });
 
     if (points.length > 1) {
-      var chartY = 830;
+      var chartY = 800;
       var chartH = 130;
       var chartX = 70;
       var chartW = W - 140;
@@ -792,8 +902,10 @@
                    chartX + chartW, chartY - 25);
     }
 
-    // ═══ 11) Win Rate Bar ═══
-    var barY = 1050;
+    // ══════════════════════════════════════════════════════
+    // 12) Win Rate Bar
+    // ══════════════════════════════════════════════════════
+    var barY = 1000;
     var barX = 70, barW = W - 140, barH = 16;
 
     ctx.fillStyle = 'rgba(0,0,0,0.5)';
@@ -838,7 +950,107 @@
     ctx.fillStyle = pf >= 1.5 ? '#2ee6a6' : pf < 1 ? '#ff5674' : '#ffb020';
     ctx.fillText('PROFIT FACTOR ' + pfT, barX + barW, barY - 10);
 
-    // ═══ 12) Top Strategies ═══
+    // ══════════════════════════════════════════════════════
+    // 13) کارت نقل قول — NEW!
+    // ══════════════════════════════════════════════════════
+    var qY = 1070;
+    var qH = 200;
+    var qX = 60;
+    var qW = W - 120;
+
+    // سایه + glow
+    ctx.shadowColor = C.glow;
+    ctx.shadowBlur = 60;
+
+    // Background با گرادیانت
+    var qGrad = ctx.createLinearGradient(qX, qY, qX + qW, qY + qH);
+    qGrad.addColorStop(0, 'rgba(20,25,45,0.9)');
+    qGrad.addColorStop(0.5, 'rgba(15,20,38,0.9)');
+    qGrad.addColorStop(1, 'rgba(10,14,28,0.9)');
+    ctx.fillStyle = qGrad;
+    rr(ctx, qX, qY, qW, qH, 22);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    // Border گرادیانت
+    var borderGrad = ctx.createLinearGradient(qX, qY, qX + qW, qY);
+    borderGrad.addColorStop(0, 'rgba(255,255,255,0.05)');
+    borderGrad.addColorStop(0.5, C.primary);
+    borderGrad.addColorStop(1, 'rgba(255,255,255,0.05)');
+    ctx.strokeStyle = borderGrad;
+    ctx.lineWidth = 2;
+    rr(ctx, qX, qY, qW, qH, 22);
+    ctx.stroke();
+
+    // علامت نقل قول بزرگ (چپ بالا)
+    ctx.font = '900 120px Georgia, serif';
+    ctx.fillStyle = C.primary;
+    ctx.globalAlpha = 0.15;
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'top';
+    ctx.fillText('"', qX + 25, qY + 5);
+    ctx.globalAlpha = 1;
+
+    // علامت نقل قول بزرگ (راست پایین)
+    ctx.font = '900 120px Georgia, serif';
+    ctx.fillStyle = C.primary;
+    ctx.globalAlpha = 0.15;
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'bottom';
+    ctx.fillText('"', qX + qW - 25, qY + qH - 5);
+    ctx.globalAlpha = 1;
+
+    // متن نقل قول — وسط
+    ctx.font = '900 22px Vazirmatn, Inter, sans-serif';
+    ctx.fillStyle = '#f0f4ff';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.direction = 'rtl';
+
+    // word wrap برای متن طولانی
+    var maxChars = 42;
+    var words = Q.t.split(' ');
+    var lines = [];
+    var line = '';
+    words.forEach(function(word) {
+      var test = line ? line + ' ' + word : word;
+      if (test.length > maxChars) {
+        lines.push(line);
+        line = word;
+      } else {
+        line = test;
+      }
+    });
+    if (line) lines.push(line);
+
+    var lineHeight = 34;
+    var totalH = lines.length * lineHeight;
+    var startY = qY + 55 + (qH - 110 - totalH) / 2;
+
+    // glow متن
+    ctx.shadowColor = C.glow;
+    ctx.shadowBlur = 15;
+    lines.forEach(function(ln, idx) {
+      ctx.fillText(ln, W / 2, startY + idx * lineHeight);
+    });
+    ctx.shadowBlur = 0;
+    ctx.direction = 'ltr';
+
+    // اسم نویسنده
+    ctx.font = '700 14px Vazirmatn, Inter, sans-serif';
+    ctx.fillStyle = C.primary;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'bottom';
+    ctx.direction = 'rtl';
+    ctx.shadowColor = C.glow;
+    ctx.shadowBlur = 10;
+    ctx.fillText('— ' + Q.a + ' —', W / 2, qY + qH - 22);
+    ctx.shadowBlur = 0;
+    ctx.direction = 'ltr';
+
+    // ══════════════════════════════════════════════════════
+    // 14) Top Strategies
+    // ══════════════════════════════════════════════════════
     var bs = {};
     trades.forEach(function(t) {
       var s = t.strategy || '—';
@@ -851,7 +1063,7 @@
       return { name: k, net: bs[k] };
     }).sort(function(a, b) { return b.net - a.net; });
 
-    var sY = 1110;
+    var sY = 1310;
 
     var hLine = ctx.createLinearGradient(W / 2 - 200, 0, W / 2 + 200, 0);
     hLine.addColorStop(0, 'rgba(255,255,255,0)');
@@ -909,17 +1121,19 @@
       ctx.shadowBlur = 0;
     });
 
-    // ═══ 13) Footer ═══
-    var footY = H - 45;
+    // ══════════════════════════════════════════════════════
+    // 15) Footer — فقط PO-TRADE، بدون گیت
+    // ══════════════════════════════════════════════════════
+    var footY = H - 50;
 
     var fLine = ctx.createLinearGradient(150, 0, W - 150, 0);
     fLine.addColorStop(0, 'rgba(255,255,255,0)');
     fLine.addColorStop(0.5, C.primary);
     fLine.addColorStop(1, 'rgba(255,255,255,0)');
     ctx.fillStyle = fLine;
-    ctx.fillRect(150, footY - 22, W - 300, 1);
+    ctx.fillRect(150, footY - 25, W - 300, 1);
 
-    ctx.font = '900 14px Inter, sans-serif';
+    ctx.font = '900 18px Inter, sans-serif';
     var footG = ctx.createLinearGradient(W / 2 - 100, 0, W / 2 + 100, 0);
     footG.addColorStop(0, C.primary);
     footG.addColorStop(1, C.secondary);
@@ -931,14 +1145,12 @@
     ctx.fillText('◆  PO-TRADE  ◆', W / 2, footY);
     ctx.shadowBlur = 0;
 
-    ctx.font = '700 10px Inter, sans-serif';
-    ctx.fillStyle = 'rgba(200,215,240,0.4)';
-    ctx.fillText('github.com/IQZEUS/PO-TREAD', W / 2, footY + 20);
-
-    // ═══ 14) Vignette ═══
-    var vig = ctx.createRadialGradient(W / 2, H / 2, 500, W / 2, H / 2, 900);
+    // ══════════════════════════════════════════════════════
+    // 16) Vignette
+    // ══════════════════════════════════════════════════════
+    var vig = ctx.createRadialGradient(W / 2, H / 2, 500, W / 2, H / 2, 950);
     vig.addColorStop(0, 'rgba(0,0,0,0)');
-    vig.addColorStop(1, 'rgba(0,0,0,0.65)');
+    vig.addColorStop(1, 'rgba(0,0,0,0.7)');
     ctx.fillStyle = vig;
     ctx.fillRect(0, 0, W, H);
 
