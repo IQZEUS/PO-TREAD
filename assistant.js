@@ -1,11 +1,12 @@
 /* ============================================================
-   PO-TRADE Assistant v4.0 — ULTIMATE EDITION
-   ✅ Market Clock INSIDE Analysis (top)
+   PO-TRADE Assistant v5.0 — ULTIMATE EDITION
+   ✅ Market Clock INSIDE Analysis (فقط داخل صفحه)
    ✅ Tier System (Bronze/Silver/Gold/Diamond)
    ✅ Enhanced Assistant
    ✅ Epic Share Image
    ✅ Clear Streak Badge
    ✅ Confetti, Command Palette
+   ✅ Theme Switcher (inside dropdown)
    ============================================================ */
 (function() {
   'use strict';
@@ -13,6 +14,9 @@
   var $ = function(s, r) { return (r || document).querySelector(s); };
   var $$ = function(s, r) { return Array.from((r || document).querySelectorAll(s)); };
 
+  /* ============================================================
+     HELPERS
+     ============================================================ */
   function getLS(key, fallback) {
     try {
       var v = localStorage.getItem(key);
@@ -48,9 +52,10 @@
   }
 
   /* ============================================================
-     1) MARKET CLOCK — INSIDE Analysis Page
+     1) MARKET CLOCK — فقط داخل صفحه آنالیز
      ============================================================ */
-  var clockInterval = null;
+  var clockTickInterval = null;
+  var clockSessionInterval = null;
 
   function getSessionData() {
     var now = new Date();
@@ -111,33 +116,37 @@
   }
 
   function initMarketClock() {
+    // پاک کردن ساعت‌های قدیمی که ممکنه مونده باشن
+    document.querySelectorAll('.market-clock').forEach(function(c) { c.remove(); });
+
     var analysisPage = document.getElementById('page-analysis');
     if (!analysisPage) return;
-    if (document.getElementById('market-clock-host')) return;
-
-    // Insert host at the very top of analysis page
-    var host = document.createElement('div');
-    host.id = 'market-clock-host';
-    var firstChild = analysisPage.firstElementChild;
-    if (firstChild) {
-      analysisPage.insertBefore(host, firstChild);
+    if (document.getElementById('market-clock-host')) {
+      // اگه هست، فقط دوباره رندر کن
+      var existing = document.getElementById('market-clock-host');
+      existing.innerHTML = buildMarketClockHTML();
     } else {
-      analysisPage.appendChild(host);
+      var host = document.createElement('div');
+      host.id = 'market-clock-host';
+      var firstChild = analysisPage.firstElementChild;
+      if (firstChild) {
+        analysisPage.insertBefore(host, firstChild);
+      } else {
+        analysisPage.appendChild(host);
+      }
+      host.innerHTML = buildMarketClockHTML();
     }
 
-    host.innerHTML = buildMarketClockHTML();
-
-    // Update time every second
     function tick() {
       var clock = document.getElementById('pmcClock');
       if (clock) clock.textContent = formatUTC();
     }
     tick();
-    if (clockInterval) clearInterval(clockInterval);
-    clockInterval = setInterval(tick, 1000);
+    if (clockTickInterval) clearInterval(clockTickInterval);
+    clockTickInterval = setInterval(tick, 1000);
 
-    // Refresh sessions every minute (in case status changes)
-    setInterval(function() {
+    if (clockSessionInterval) clearInterval(clockSessionInterval);
+    clockSessionInterval = setInterval(function() {
       var body = document.getElementById('pmcBody');
       if (!body) return;
       var sessions = getSessionData();
@@ -234,7 +243,7 @@
   }
 
   /* ============================================================
-     3) ASSISTANT — Analysis
+     3) ANALYSIS ASSISTANT
      ============================================================ */
   function analyzePerformance(trades) {
     if (!trades || !trades.length) {
@@ -581,6 +590,7 @@
     canvas.height = H;
     var ctx = canvas.getContext('2d');
 
+    // پس‌زمینه
     var bgGrad = ctx.createLinearGradient(0, 0, W, H);
     bgGrad.addColorStop(0, '#02030a');
     bgGrad.addColorStop(0.5, '#050a18');
@@ -588,6 +598,7 @@
     ctx.fillStyle = bgGrad;
     ctx.fillRect(0, 0, W, H);
 
+    // Nebula orbs
     function drawOrb(x, y, r, color) {
       var g = ctx.createRadialGradient(x, y, 0, x, y, r);
       g.addColorStop(0, color);
@@ -602,6 +613,7 @@
     drawOrb(500, 750, 350, 'rgba(255,95,162,0.22)');
     drawOrb(850, 300, 300, 'rgba(186,104,255,0.28)');
 
+    // Stars
     for (var i = 0; i < 220; i++) {
       ctx.globalAlpha = Math.random() * 0.8 + 0.2;
       ctx.fillStyle = '#ffffff';
@@ -611,6 +623,7 @@
     }
     ctx.globalAlpha = 1;
 
+    // Grid
     ctx.strokeStyle = 'rgba(120,150,200,0.05)';
     ctx.lineWidth = 1;
     for (var x = 0; x < W; x += 50) {
@@ -620,6 +633,7 @@
       ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
     }
 
+    // Top bar
     var topBar = ctx.createLinearGradient(0, 0, W, 0);
     topBar.addColorStop(0, 'rgba(46,230,166,0)');
     topBar.addColorStop(0.2, '#2ee6a6');
@@ -719,6 +733,7 @@
     ctx.textBaseline = 'top';
     ctx.fillText('NET PROFIT / LOSS', W / 2, 630);
 
+    // Star sparks around PnL
     for (var k = 0; k < 28; k++) {
       var angle = (k / 28) * Math.PI * 2;
       var radius = 340 + Math.random() * 90;
@@ -858,6 +873,7 @@
     ctx.fillStyle = 'rgba(134,151,184,0.55)';
     ctx.fillText('Generated by PO-TRADE  •  github.com/IQZEUS/PO-TREAD', W / 2, H - 40);
 
+    // Vignette
     var vignette = ctx.createRadialGradient(W / 2, H / 2, 400, W / 2, H / 2, 900);
     vignette.addColorStop(0, 'rgba(0,0,0,0)');
     vignette.addColorStop(1, 'rgba(0,0,0,0.6)');
@@ -974,7 +990,7 @@
   }
 
   /* ============================================================
-     7) STREAK BADGE — شفاف
+     7) STREAK BADGE
      ============================================================ */
   function calcStreak() {
     var trades = getLS('po.v4.trades', []);
@@ -1206,6 +1222,9 @@
     });
   }
 
+  /* ============================================================
+     10) KBD HINT
+     ============================================================ */
   function showKbdHint() {
     if (localStorage.getItem('po.kbdhint.seen') === '1') return;
     setTimeout(function() {
@@ -1234,14 +1253,20 @@
      INIT
      ============================================================ */
   function init() {
+    // پاک‌سازی ساعت‌های قدیمی فوری
+    document.querySelectorAll('.market-clock').forEach(function(c) { c.remove(); });
+
+    // تم
     moveThemeSwitcher();
     setTimeout(moveThemeSwitcher, 500);
     setTimeout(moveThemeSwitcher, 1500);
 
-    // Market clock goes inside analysis page
+    // ساعت داخل آنالیز (چند بار برای اطمینان)
     setTimeout(initMarketClock, 100);
-    setTimeout(initMarketClock, 800);
+    setTimeout(initMarketClock, 700);
+    setTimeout(initMarketClock, 1500);
 
+    // بقیه اجزا
     renderAssistant();
     renderGoalsBanner();
     initShare();
@@ -1250,11 +1275,19 @@
     initCommandPalette();
     showKbdHint();
 
+    // به‌روزرسانی دوره‌ای
     setInterval(function() {
       renderAssistant();
       renderGoalsBanner();
     }, 5000);
     setInterval(checkGoalComplete, 2000);
+
+    // اگه کاربر تب رو عوض کرد، ساعت رو دوباره چک کن
+    document.querySelectorAll('.tab').forEach(function(tab) {
+      tab.addEventListener('click', function() {
+        setTimeout(initMarketClock, 100);
+      });
+    });
   }
 
   if (document.readyState === 'loading') {
@@ -1267,7 +1300,8 @@
     refresh: function() {
       renderAssistant();
       renderGoalsBanner();
-    }
+    },
+    initMarketClock: initMarketClock
   };
   window.PT_Extras = {
     confetti: fireConfetti,
