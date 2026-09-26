@@ -1,11 +1,10 @@
 /* ============================================================
-   PO-TRADE Assistant v6.0 — ULTIMATE STABLE
-   ✅ بدون لرزش، بدون پرش
-   ✅ آیکن‌های SVG (نه ایموجی)
-   ✅ Tier با 4 سطح (BRONZE/SILVER/GOLD/DIAMOND)
+   PO-TRADE Assistant v7.0 — FINAL STABLE
+   ✅ بدون لرزش
+   ✅ عکس اشتراک‌گذاری سبک (JPEG 800×1100 ~ 150KB)
+   ✅ Tier System (BRONZE/SILVER/GOLD/DIAMOND)
    ✅ Market Clock داخل آنالیز
-   ✅ Share Image 1000×1500
-   ✅ Confetti, Command Palette
+   ✅ Command Palette + Confetti
    ============================================================ */
 (function() {
   'use strict';
@@ -48,7 +47,7 @@
   }
 
   /* ============================================================
-     1) MARKET CLOCK — داخل آنالیز
+     1) MARKET CLOCK
      ============================================================ */
   var clockTickInterval = null;
   var clockSessionInterval = null;
@@ -152,7 +151,7 @@
   }
 
   /* ============================================================
-     2) TIER SYSTEM — بدون ایموجی، با داده data-tier
+     2) TIER SYSTEM
      ============================================================ */
   function calculateTier(trades) {
     var now = new Date();
@@ -231,7 +230,7 @@
   }
 
   /* ============================================================
-     3) ANALYSIS ASSISTANT
+     3) ASSISTANT — تحلیل
      ============================================================ */
   function analyzePerformance(trades) {
     if (!trades || !trades.length) {
@@ -566,22 +565,22 @@
   }
 
   /* ============================================================
-     5) SHARE IMAGE — EPIC
+     5) SHARE IMAGE — سبک و خفن
      ============================================================ */
   function drawShareImage() {
     var trades = getLS('po.v4.trades', []);
     var tier = calculateTier(trades);
 
-    var W = 1000, H = 1500;
+    var W = 800, H = 1100;
     var canvas = document.createElement('canvas');
     canvas.width = W;
     canvas.height = H;
     var ctx = canvas.getContext('2d');
 
-    var bgGrad = ctx.createLinearGradient(0, 0, W, H);
-    bgGrad.addColorStop(0, '#02030a');
-    bgGrad.addColorStop(0.5, '#050a18');
-    bgGrad.addColorStop(1, '#02030a');
+    var bgGrad = ctx.createLinearGradient(0, 0, 0, H);
+    bgGrad.addColorStop(0, '#0a0f1e');
+    bgGrad.addColorStop(0.5, '#050810');
+    bgGrad.addColorStop(1, '#0a0f1e');
     ctx.fillStyle = bgGrad;
     ctx.fillRect(0, 0, W, H);
 
@@ -594,262 +593,192 @@
       ctx.arc(x, y, r, 0, Math.PI * 2);
       ctx.fill();
     }
-    drawOrb(150, 200, 400, 'rgba(46,230,166,0.35)');
-    drawOrb(880, 1300, 450, 'rgba(91,140,255,0.35)');
-    drawOrb(500, 750, 350, 'rgba(255,95,162,0.22)');
-    drawOrb(850, 300, 300, 'rgba(186,104,255,0.28)');
-
-    for (var i = 0; i < 220; i++) {
-      ctx.globalAlpha = Math.random() * 0.8 + 0.2;
-      ctx.fillStyle = '#ffffff';
-      ctx.beginPath();
-      ctx.arc(Math.random() * W, Math.random() * H, Math.random() * 1.8 + 0.3, 0, Math.PI * 2);
-      ctx.fill();
-    }
-    ctx.globalAlpha = 1;
-
-    ctx.strokeStyle = 'rgba(120,150,200,0.05)';
-    ctx.lineWidth = 1;
-    for (var x = 0; x < W; x += 50) {
-      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
-    }
-    for (var y = 0; y < H; y += 50) {
-      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
-    }
+    drawOrb(120, 100, 260, 'rgba(46,230,166,0.22)');
+    drawOrb(700, 1000, 300, 'rgba(91,140,255,0.22)');
 
     var topBar = ctx.createLinearGradient(0, 0, W, 0);
-    topBar.addColorStop(0, 'rgba(46,230,166,0)');
-    topBar.addColorStop(0.2, '#2ee6a6');
+    topBar.addColorStop(0, '#2ee6a6');
     topBar.addColorStop(0.5, '#5b8cff');
-    topBar.addColorStop(0.8, '#ba68ff');
-    topBar.addColorStop(1, 'rgba(255,95,162,0)');
+    topBar.addColorStop(1, '#ff5fa2');
     ctx.fillStyle = topBar;
     ctx.fillRect(0, 0, W, 4);
 
     var tierColors = {
-      bronze:  { main: '#cd7f32', soft: 'rgba(205,127,50,0.2)' },
-      silver:  { main: '#c0c0d2', soft: 'rgba(192,192,210,0.2)' },
-      gold:    { main: '#ffc828', soft: 'rgba(255,200,40,0.2)' },
-      diamond: { main: '#7dd8ff', soft: 'rgba(120,220,255,0.2)' }
+      bronze:  { main: '#cd7f32', soft: 'rgba(205,127,50,0.15)' },
+      silver:  { main: '#c0c0d2', soft: 'rgba(192,192,210,0.15)' },
+      gold:    { main: '#ffc828', soft: 'rgba(255,200,40,0.15)' },
+      diamond: { main: '#7dd8ff', soft: 'rgba(120,220,255,0.15)' }
     };
     var tc = tierColors[tier.key] || tierColors.bronze;
 
-    var badgeW = 260, badgeH = 82;
+    var badgeW = 200, badgeH = 56;
     var badgeX = (W - badgeW) / 2;
-    var badgeY = 70;
+    var badgeY = 32;
 
-    ctx.shadowColor = tc.main;
-    ctx.shadowBlur = 60;
     ctx.fillStyle = tc.soft;
-    roundRect(ctx, badgeX, badgeY, badgeW, badgeH, 41);
+    roundRect(ctx, badgeX, badgeY, badgeW, badgeH, 28);
     ctx.fill();
-    ctx.shadowBlur = 0;
 
     ctx.strokeStyle = tc.main;
-    ctx.lineWidth = 3;
-    roundRect(ctx, badgeX, badgeY, badgeW, badgeH, 41);
+    ctx.lineWidth = 2;
+    roundRect(ctx, badgeX, badgeY, badgeW, badgeH, 28);
     ctx.stroke();
 
     ctx.fillStyle = tc.main;
-    ctx.font = '900 28px Inter, sans-serif';
+    ctx.font = '900 22px Inter, sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(tier.name, W / 2, badgeY + badgeH / 2 + 2);
+    ctx.fillText(tier.name, W / 2, badgeY + badgeH / 2 + 1);
 
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'top';
-    var titleGrad = ctx.createLinearGradient(200, 0, 800, 0);
+    var titleGrad = ctx.createLinearGradient(200, 0, 600, 0);
     titleGrad.addColorStop(0, '#2ee6a6');
     titleGrad.addColorStop(0.5, '#5b8cff');
     titleGrad.addColorStop(1, '#ff5fa2');
     ctx.fillStyle = titleGrad;
-    ctx.font = '900 72px Inter, sans-serif';
-    ctx.fillText('PO-TRADE', W / 2, 200);
+    ctx.font = '900 54px Inter, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    ctx.fillText('PO-TRADE', W / 2, 110);
 
-    ctx.font = '700 15px Inter, sans-serif';
+    ctx.font = '700 12px Inter, sans-serif';
     ctx.fillStyle = 'rgba(134,151,184,1)';
-    ctx.fillText('PERFORMANCE REPORT  •  ' + new Date().toISOString().slice(0, 10), W / 2, 290);
+    ctx.fillText('PERFORMANCE REPORT  •  ' + new Date().toISOString().slice(0, 10), W / 2, 178);
 
-    var wins = 0, losses = 0, be = 0, net = 0, gp = 0, gl = 0;
-    var bestTrade = 0, worstTrade = 0;
+    var wins = 0, losses = 0, net = 0, gp = 0, gl = 0;
     trades.forEach(function(t) {
       var p = t.result === 'win' ? Math.abs(+t.amount || 0) :
               t.result === 'loss' ? -Math.abs(+t.amount || 0) : 0;
       net += p;
-      if (t.result === 'win') { wins++; gp += p; if (p > bestTrade) bestTrade = p; }
-      else if (t.result === 'loss') { losses++; gl += Math.abs(p); if (p < worstTrade) worstTrade = p; }
-      else be++;
+      if (t.result === 'win') { wins++; gp += p; }
+      else if (t.result === 'loss') { losses++; gl += Math.abs(p); }
     });
     var closed = wins + losses;
     var winRate = closed ? (wins / closed) * 100 : 0;
     var pf = gl > 0 ? gp / gl : (gp > 0 ? Infinity : 0);
-    var avgWin = wins ? gp / wins : 0;
-    var avgLoss = losses ? gl / losses : 0;
 
     var pnlColor = net > 0 ? '#2ee6a6' : net < 0 ? '#ff5674' : '#8697b8';
     var sign = net > 0 ? '+' : net < 0 ? '-' : '';
     var netTxt = sign + '$' + Math.abs(net).toLocaleString('en-US', { maximumFractionDigits: 2 });
 
-    var pnlGlow = ctx.createRadialGradient(W / 2, 520, 0, W / 2, 520, 420);
-    pnlGlow.addColorStop(0, net > 0 ? 'rgba(46,230,166,0.3)' : 'rgba(255,86,116,0.3)');
-    pnlGlow.addColorStop(1, 'rgba(0,0,0,0)');
-    ctx.fillStyle = pnlGlow;
-    ctx.fillRect(0, 320, W, 500);
-
     ctx.shadowColor = pnlColor;
-    ctx.shadowBlur = 80;
-    ctx.font = '900 138px Inter, sans-serif';
+    ctx.shadowBlur = 40;
+    ctx.font = '900 78px Inter, sans-serif';
     ctx.fillStyle = pnlColor;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(netTxt, W / 2, 520);
+    ctx.fillText(netTxt, W / 2, 280);
     ctx.shadowBlur = 0;
 
-    ctx.font = '800 16px Inter, sans-serif';
+    ctx.font = '800 13px Inter, sans-serif';
     ctx.fillStyle = 'rgba(134,151,184,1)';
     ctx.textBaseline = 'top';
-    ctx.fillText('NET PROFIT / LOSS', W / 2, 630);
+    ctx.fillText('NET PROFIT / LOSS', W / 2, 335);
 
-    for (var k = 0; k < 28; k++) {
-      var angle = (k / 28) * Math.PI * 2;
-      var radius = 340 + Math.random() * 90;
-      var sx = W / 2 + Math.cos(angle) * radius;
-      var sy = 520 + Math.sin(angle) * radius * 0.65;
-      ctx.fillStyle = k % 3 === 0 ? tc.main : 'rgba(255,255,255,0.55)';
-      ctx.globalAlpha = 0.7;
-      ctx.beginPath();
-      ctx.arc(sx, sy, Math.random() * 2.5 + 1, 0, Math.PI * 2);
-      ctx.fill();
-    }
-    ctx.globalAlpha = 1;
-
-    var cardW = 210, cardH = 140, gap = 24;
-    var totalW = cardW * 2 + gap;
+    var cardW = 165, cardH = 100, gap = 12;
+    var totalW = cardW * 4 + gap * 3;
     var startX = (W - totalW) / 2;
-    var cardY = 720;
+    var cardY = 400;
 
-    function statCard(x, y, label, value, color, icon) {
-      ctx.shadowColor = 'rgba(0,0,0,0.8)';
-      ctx.shadowBlur = 32;
-      ctx.shadowOffsetY = 12;
-
-      var g = ctx.createLinearGradient(x, y, x, y + cardH);
-      g.addColorStop(0, 'rgba(20,29,51,0.95)');
-      g.addColorStop(1, 'rgba(8,12,25,0.95)');
-      ctx.fillStyle = g;
-      roundRect(ctx, x, y, cardW, cardH, 22);
+    function statCard(x, y, label, value, color) {
+      ctx.fillStyle = 'rgba(20,29,51,0.9)';
+      roundRect(ctx, x, y, cardW, cardH, 14);
       ctx.fill();
 
-      ctx.shadowBlur = 0;
-      ctx.shadowOffsetY = 0;
-
-      var accent = ctx.createLinearGradient(x + 20, 0, x + cardW - 20, 0);
-      accent.addColorStop(0, color);
-      accent.addColorStop(1, 'rgba(0,0,0,0)');
-      ctx.fillStyle = accent;
-      ctx.fillRect(x + 20, y, cardW - 40, 3);
-
-      ctx.strokeStyle = 'rgba(120,150,200,0.3)';
-      ctx.lineWidth = 1.5;
-      roundRect(ctx, x, y, cardW, cardH, 22);
+      ctx.strokeStyle = 'rgba(120,150,200,0.25)';
+      ctx.lineWidth = 1;
+      roundRect(ctx, x, y, cardW, cardH, 14);
       ctx.stroke();
 
-      ctx.font = '26px Inter, sans-serif';
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'top';
       ctx.fillStyle = color;
-      ctx.fillText(icon, x + 18, y + 16);
+      ctx.fillRect(x + 15, y, cardW - 30, 2);
 
-      ctx.font = '900 40px Inter, sans-serif';
+      ctx.font = '900 26px Inter, sans-serif';
       ctx.fillStyle = color;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText(value, x + cardW / 2, y + 78);
+      ctx.fillText(value, x + cardW / 2, y + 40);
 
-      ctx.font = '800 12px Inter, sans-serif';
+      ctx.font = '800 10px Inter, sans-serif';
       ctx.fillStyle = 'rgba(134,151,184,1)';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(label, x + cardW / 2, y + 116);
+      ctx.fillText(label, x + cardW / 2, y + 72);
     }
 
-    statCard(startX, cardY, 'TOTAL TRADES', trades.length + '', '#eef3ff', '📊');
+    statCard(startX, cardY, 'TRADES', trades.length + '', '#eef3ff');
     statCard(startX + cardW + gap, cardY, 'WIN RATE', winRate.toFixed(1) + '%',
-             winRate >= 50 ? '#2ee6a6' : '#ff5674', '🎯');
-    statCard(startX, cardY + cardH + gap, 'WINS', wins + '', '#2ee6a6', '✅');
-    statCard(startX + cardW + gap, cardY + cardH + gap, 'LOSSES', losses + '', '#ff5674', '❌');
+             winRate >= 50 ? '#2ee6a6' : '#ff5674');
+    statCard(startX + (cardW + gap) * 2, cardY, 'WINS', wins + '', '#2ee6a6');
+    statCard(startX + (cardW + gap) * 3, cardY, 'LOSSES', losses + '', '#ff5674');
 
-    var barY = cardY + cardH * 2 + gap + 70;
-    var barX = 80, barW = W - 160, barH = 16;
+    var barY = 555;
+    var barX = 60, barW = W - 120, barH = 12;
 
-    ctx.fillStyle = 'rgba(0,0,0,0.4)';
-    roundRect(ctx, barX, barY, barW, barH, 10);
+    ctx.fillStyle = 'rgba(120,150,200,0.15)';
+    roundRect(ctx, barX, barY, barW, barH, 6);
     ctx.fill();
-
-    ctx.strokeStyle = 'rgba(120,150,200,0.2)';
-    ctx.lineWidth = 1;
-    roundRect(ctx, barX, barY, barW, barH, 10);
-    ctx.stroke();
 
     var fillW = (winRate / 100) * barW;
     var fillGrad = ctx.createLinearGradient(barX, 0, barX + fillW, 0);
     fillGrad.addColorStop(0, '#2ee6a6');
-    fillGrad.addColorStop(0.5, '#5b8cff');
-    fillGrad.addColorStop(1, '#ba68ff');
+    fillGrad.addColorStop(1, '#5b8cff');
     ctx.fillStyle = fillGrad;
-    ctx.shadowColor = '#2ee6a6';
-    ctx.shadowBlur = 32;
-    roundRect(ctx, barX, barY, Math.max(fillW, 12), barH, 10);
+    roundRect(ctx, barX, barY, Math.max(fillW, 8), barH, 6);
     ctx.fill();
-    ctx.shadowBlur = 0;
 
-    ctx.font = '900 13px Inter, sans-serif';
+    ctx.font = '900 11px Inter, sans-serif';
     ctx.fillStyle = 'rgba(134,151,184,1)';
     ctx.textAlign = 'left';
     ctx.textBaseline = 'bottom';
-    ctx.fillText('WIN RATE', barX, barY - 12);
+    ctx.fillText('WIN RATE ' + winRate.toFixed(1) + '%', barX, barY - 8);
 
     var pfTxt = isFinite(pf) ? pf.toFixed(2) : '∞';
     ctx.textAlign = 'right';
     ctx.fillStyle = pf >= 1.5 ? '#2ee6a6' : pf < 1 ? '#ff5674' : '#ffb020';
-    ctx.fillText('PROFIT FACTOR ' + pfTxt, barX + barW, barY - 12);
+    ctx.fillText('PF ' + pfTxt, barX + barW, barY - 8);
 
-    var miniY = barY + 70;
-    var miniW = (W - 160) / 3;
+    // استراتژی‌ها
+    var byStrategy = {};
+    trades.forEach(function(t) {
+      var s = t.strategy || '—';
+      var p = t.result === 'win' ? Math.abs(+t.amount || 0) :
+              t.result === 'loss' ? -Math.abs(+t.amount || 0) : 0;
+      if (!byStrategy[s]) byStrategy[s] = { net: 0, count: 0 };
+      byStrategy[s].net += p;
+      byStrategy[s].count++;
+    });
+    var strategies = Object.keys(byStrategy).map(function(k) {
+      return { name: k, net: byStrategy[k].net };
+    }).sort(function(a, b) { return b.net - a.net; });
 
-    function miniStat(x, label, value, color) {
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'top';
-      ctx.font = '900 26px Inter, sans-serif';
+    var summaryY = 620;
+    ctx.font = '900 13px Inter, sans-serif';
+    ctx.fillStyle = 'rgba(255,255,255,0.85)';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    ctx.fillText('TOP STRATEGIES', W / 2, summaryY);
+
+    ctx.font = '700 13px Inter, sans-serif';
+    strategies.slice(0, 4).forEach(function(s, i) {
+      var y = summaryY + 32 + i * 28;
+      var color = s.net > 0 ? '#2ee6a6' : s.net < 0 ? '#ff5674' : '#8697b8';
+      var txt = s.net > 0 ? '+$' + s.net.toFixed(0) : '-$' + Math.abs(s.net).toFixed(0);
+      var sign = s.net > 0 ? '▲' : s.net < 0 ? '▼' : '●';
+
+      ctx.textAlign = 'left';
+      ctx.fillStyle = 'rgba(200,215,240,0.9)';
+      ctx.fillText(sign + ' ' + s.name, 100, y);
+
+      ctx.textAlign = 'right';
       ctx.fillStyle = color;
-      ctx.fillText(value, x, miniY);
-      ctx.font = '800 12px Inter, sans-serif';
-      ctx.fillStyle = 'rgba(134,151,184,1)';
-      ctx.fillText(label, x, miniY + 34);
-    }
+      ctx.font = '900 13px Inter, sans-serif';
+      ctx.fillText(txt, W - 100, y);
+      ctx.font = '700 13px Inter, sans-serif';
+    });
 
-    miniStat(80 + miniW / 2, 'AVG WIN', '+$' + avgWin.toFixed(0), '#2ee6a6');
-    miniStat(80 + miniW * 1.5, 'AVG LOSS', '-$' + avgLoss.toFixed(0), '#ff5674');
-    miniStat(80 + miniW * 2.5, 'BEST', '+$' + bestTrade.toFixed(0), '#ffc828');
-
+    ctx.font = '700 10px Inter, sans-serif';
+    ctx.fillStyle = 'rgba(134,151,184,0.5)';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'bottom';
-
-    var footerLine = ctx.createLinearGradient(200, 0, 800, 0);
-    footerLine.addColorStop(0, 'rgba(46,230,166,0)');
-    footerLine.addColorStop(0.5, 'rgba(120,150,200,0.4)');
-    footerLine.addColorStop(1, 'rgba(255,95,162,0)');
-    ctx.fillStyle = footerLine;
-    ctx.fillRect(200, H - 90, 600, 1);
-
-    ctx.font = '700 12px Inter, sans-serif';
-    ctx.fillStyle = 'rgba(134,151,184,0.55)';
-    ctx.fillText('Generated by PO-TRADE  •  github.com/IQZEUS/PO-TREAD', W / 2, H - 40);
-
-    var vignette = ctx.createRadialGradient(W / 2, H / 2, 400, W / 2, H / 2, 900);
-    vignette.addColorStop(0, 'rgba(0,0,0,0)');
-    vignette.addColorStop(1, 'rgba(0,0,0,0.6)');
-    ctx.fillStyle = vignette;
-    ctx.fillRect(0, 0, W, H);
+    ctx.fillText('Generated by PO-TRADE  •  github.com/IQZEUS/PO-TREAD', W / 2, H - 20);
 
     return canvas;
   }
@@ -887,14 +816,14 @@
         wrap.appendChild(c2);
         wrap.classList.add('show');
       } else if (act === 'download') {
-        var url = canvas.toDataURL('image/png');
+        var url = canvas.toDataURL('image/jpeg', 0.92);
         var a = document.createElement('a');
         a.href = url;
-        a.download = 'po-trade-report-' + new Date().toISOString().slice(0, 10) + '.png';
+        a.download = 'po-trade-report-' + new Date().toISOString().slice(0, 10) + '.jpg';
         a.click();
       } else if (act === 'share') {
         canvas.toBlob(async function(blob) {
-          var file = new File([blob], 'po-trade-report.png', { type: 'image/png' });
+          var file = new File([blob], 'po-trade-report.jpg', { type: 'image/jpeg' });
           if (navigator.canShare && navigator.canShare({ files: [file] })) {
             try {
               await navigator.share({
@@ -908,7 +837,7 @@
           } else {
             alert('مرورگرت از اشتراک‌گذاری مستقیم پشتیبانی نمی‌کند. از «دانلود عکس» استفاده کن.');
           }
-        });
+        }, 'image/jpeg', 0.92);
       }
     });
   }
@@ -1224,20 +1153,16 @@
      INIT
      ============================================================ */
   function init() {
-    // پاک‌سازی ساعت‌های قدیمی
     document.querySelectorAll('.market-clock').forEach(function(c) { c.remove(); });
 
-    // تم
     moveThemeSwitcher();
     setTimeout(moveThemeSwitcher, 500);
     setTimeout(moveThemeSwitcher, 1500);
 
-    // ساعت بازار داخل آنالیز
     setTimeout(initMarketClock, 100);
     setTimeout(initMarketClock, 700);
     setTimeout(initMarketClock, 1500);
 
-    // اجزا
     renderAssistant();
     renderGoalsBanner();
     initShare();
@@ -1252,7 +1177,6 @@
     }, 5000);
     setInterval(checkGoalComplete, 2000);
 
-    // اگه کاربر تب رو عوض کرد
     document.querySelectorAll('.tab').forEach(function(tab) {
       tab.addEventListener('click', function() {
         setTimeout(initMarketClock, 100);
