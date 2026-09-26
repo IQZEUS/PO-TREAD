@@ -637,3 +637,350 @@
     }
   };
 })();
+/* ============================================================
+   EXTRAS — Market Clock, Streak, Confetti, Command Palette
+   ============================================================ */
+(function() {
+  'use strict';
+
+  // انتقال تم‌سوییچر به داخل منوی کاربر
+  function moveThemeSwitcher() {
+    var dd = document.getElementById('userDropdown');
+    var ts = document.getElementById('theme-switcher-host');
+    if (!dd || !ts || ts.parentElement === dd) return;
+    var actions = dd.querySelector('.user-actions');
+    if (actions) dd.insertBefore(ts, actions);
+    else dd.appendChild(ts);
+  }
+
+  // ===== Market Clock =====
+  function initMarketClock() {
+    if (document.querySelector('.market-clock')) return;
+
+    function isOpen(start, end) {
+      var now = new Date();
+      var utcHour = now.getUTCHours() + now.getUTCMinutes() / 60;
+      if (start < end) return utcHour >= start && utcHour < end;
+      return utcHour >= start || utcHour < end;
+    }
+    function formatUTC() {
+      var d = new Date();
+      return String(d.getUTCHours()).padStart(2, '0') + ':' +
+             String(d.getUTCMinutes()).padStart(2, '0') + ':' +
+             String(d.getUTCSeconds()).padStart(2, '0');
+    }
+
+    var el = document.createElement('div');
+    el.className = 'market-clock';
+    el.innerHTML =
+      '<div class="mc-header">' +
+        '<div class="mc-title">🌍 بازار جهانی</div>' +
+        '<div class="mc-utc" id="mcUtc">--:--:--</div>' +
+        '<button class="mc-toggle" type="button">◀</button>' +
+      '</div>' +
+      '<div class="mc-body" id="mcBody"></div>';
+    document.body.appendChild(el);
+
+    if (localStorage.getItem('po.clock.min') === '1') {
+      el.classList.add('minimized');
+      el.querySelector('.mc-toggle').textContent = '▶';
+    }
+    el.querySelector('.mc-toggle').addEventListener('click', function() {
+      el.classList.toggle('minimized');
+      localStorage.setItem('po.clock.min', el.classList.contains('minimized') ? '1' : '0');
+      this.textContent = el.classList.contains('minimized') ? '▶' : '◀';
+    });
+
+    function render() {
+      var u = document.getElementById('mcUtc');
+      if (u) u.textContent = formatUTC();
+      var b = document.getElementById('mcBody');
+      if (!b) return;
+      var sessions = [
+        { flag: '🇦🇺', name: 'Sydney',   open: isOpen(22, 7) },
+        { flag: '🇯🇵', name: 'Tokyo',    open: isOpen(0, 9) },
+        { flag: '🇬🇧', name: 'London',   open: isOpen(8, 17) },
+        { flag: '🇺🇸', name: 'New York', open: isOpen(13, 22) }
+      ];
+      b.innerHTML = sessions.map(function(s) {
+        return '<div class="mc-session ' + (s.open ? 'open' : 'closed') + '">' +
+          '<span class="flag">' + s.flag + '</span>' +
+          '<span class="name">' + s.name + '</span>' +
+          '<span class="status">' + (s.open ? 'باز' : 'بسته') + '</span>' +
+        '</div>';
+      }).join('');
+    }
+    render();
+    setInterval(render, 1000);
+  }
+
+  // ===== Streak =====
+  function calcStreak() {
+    var trades = [];
+    try { trades = JSON.parse(localStorage.getItem('po.v4.trades') || '[]'); } catch (e) {}
+    if (!trades.length) return 0;
+
+    var byDay = {};
+    trades.forEach(function(t) {
+      if (!t.date) return;
+      var p = t.result === 'win' ? Math.abs(+t.amount || 0) :
+              t.result === 'loss' ? -Math.abs(+t.amount || 0) : 0;
+      byDay[t.date] = (byDay[t.date] || 0) + p;
+    });
+
+    var today = new Date();
+    var streak = 0;
+    for (var i = 0; i < 365; i++) {
+      var d = new Date(today);
+      d.setDate(d.getDate() - i);
+      var iso = d.getFullYear() + '-' +
+                String(d.getMonth() + 1).padStart(2, '0') + '-' +
+                String(d.getDate()).padStart(2, '0');
+      var net = byDay[iso];
+      if (net === undefined) { if (i === 0) continue; break; }
+      if (net > 0) streak++;
+      else break;
+    }
+    return streak;
+  }
+
+  function initStreakBadge() {
+    var brand = document.querySelector('.brand');
+    if (!brand || document.querySelector('.streak-badge')) return;
+    var el = document.createElement('div');
+    el.className = 'streak-badge';
+    brand.appendChild(el);
+
+    function render() {
+      var s = calcStreak();
+      if (s > 0) {
+        el.classList.remove('cold');
+        el.innerHTML = '<span class="fire">🔥</span><span>' + s + ' روز</span>';
+      } else {
+        el.classList.add('cold');
+        el.innerHTML = '<span>❄️</span><span>استریک صفر</span>';
+      }
+    }
+    render();
+    setInterval(render, 30000);
+  }
+
+  // ===== Confetti =====
+  function fireConfetti() {
+    if (document.querySelector('.confetti-canvas')) return;
+    var canvas = document.createElement('canvas');
+    canvas.className = 'confetti-canvas';
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    document.body.appendChild(canvas);
+
+    var ctx = canvas.getContext('2d');
+    var colors = ['#2ee6a6', '#5b8cff', '#ff5fa2', '#ffb020', '#c78aff', '#f6ff00'];
+    var pieces = [];
+    for (var i = 0; i < 150; i++) {
+      pieces.push({
+        x: Math.random() * canvas.width,
+        y: -20 - Math.random() * canvas.height * 0.5,
+        w: 8 + Math.random() * 6,
+        h: 6 + Math.random() * 10,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        vx: -2 + Math.random() * 4,
+        vy: 2 + Math.random() * 4,
+        rot: Math.random() * Math.PI * 2,
+        vr: -0.15 + Math.random() * 0.3
+      });
+    }
+    var start = Date.now();
+    var duration = 4000;
+    function frame() {
+      var elapsed = Date.now() - start;
+      var alpha = elapsed < duration - 500 ? 1 : Math.max(0, (duration - elapsed) / 500);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.globalAlpha = alpha;
+      pieces.forEach(function(p) {
+        p.x += p.vx; p.y += p.vy; p.vy += 0.08; p.rot += p.vr;
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rot);
+        ctx.fillStyle = p.color;
+        ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+        ctx.restore();
+      });
+      if (elapsed < duration) requestAnimationFrame(frame);
+      else canvas.remove();
+    }
+    requestAnimationFrame(frame);
+  }
+
+  var lastCelebrated = '';
+  function checkGoalComplete() {
+    var banner = document.querySelector('.goal-banner.success');
+    if (!banner) return;
+    var title = banner.querySelector('.goal-banner-title');
+    if (!title) return;
+    var text = title.textContent;
+    if (text && text !== lastCelebrated) {
+      lastCelebrated = text;
+      fireConfetti();
+    }
+  }
+
+  // ===== Command Palette =====
+  function initCommandPalette() {
+    if (document.querySelector('.cmd-overlay')) return;
+
+    var overlay = document.createElement('div');
+    overlay.className = 'cmd-overlay';
+    overlay.innerHTML =
+      '<div class="cmd-card" role="dialog">' +
+        '<div class="cmd-input-wrap">' +
+          '<span class="icon">🔍</span>' +
+          '<input class="cmd-input" type="text" placeholder="جستجو یا دستور..." autocomplete="off" />' +
+        '</div>' +
+        '<div class="cmd-list" id="cmdList"></div>' +
+        '<div class="cmd-footer">' +
+          '<span><kbd>↑</kbd><kbd>↓</kbd> حرکت</span>' +
+          '<span><kbd>Enter</kbd> انتخاب • <kbd>Esc</kbd> بستن</span>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(overlay);
+
+    var input = overlay.querySelector('.cmd-input');
+    var list = overlay.querySelector('#cmdList');
+    var active = 0;
+
+    function switchTab(name) {
+      var tab = document.querySelector('.tab[data-view="' + name + '"]');
+      if (tab) tab.click();
+    }
+    function setTheme(name) {
+      document.documentElement.dataset.theme = name;
+      localStorage.setItem('po.v4.theme', name);
+      document.querySelectorAll('.theme-pick').forEach(function(b) {
+        b.classList.toggle('active', b.dataset.themePick === name);
+      });
+      window.dispatchEvent(new Event('resize'));
+    }
+
+    var commands = [
+      { emoji: '✍️', label: 'ثبت معامله جدید', action: function() { switchTab('add'); } },
+      { emoji: '📊', label: 'رفتن به آنالیز', action: function() { switchTab('analysis'); } },
+      { emoji: '📅', label: 'رفتن به تقویم', action: function() { switchTab('calendar'); } },
+      { emoji: '📋', label: 'رفتن به معاملات', action: function() { switchTab('trades'); } },
+      { emoji: '⚙️', label: 'رفتن به تنظیمات', action: function() { switchTab('settings'); } },
+      { emoji: '🌙', label: 'تم Obsidian (تیره)', action: function() { setTheme('obsidian'); } },
+      { emoji: '☀️', label: 'تم Aurora (روشن)', action: function() { setTheme('aurora'); } },
+      { emoji: '⚡', label: 'تم Cyber (نئون)', action: function() { setTheme('cyber'); } },
+      { emoji: '🌐', label: 'تغییر زبان', action: function() { var b = document.getElementById('lang-btn'); if (b) b.click(); } },
+      { emoji: '🔄', label: 'همگام‌سازی با سرور', action: function() { if (window.PT_Sync) window.PT_Sync.forcePush(); } },
+      { emoji: '📦', label: 'خروجی JSON', action: function() { var b = document.getElementById('export-btn'); if (b) b.click(); } },
+      { emoji: '🚪', label: 'خروج از حساب', action: function() { if (window.poLogout) window.poLogout(); } }
+    ];
+
+    var filtered = commands.slice();
+
+    function render() {
+      if (!filtered.length) {
+        list.innerHTML = '<div class="cmd-empty">چیزی پیدا نشد</div>';
+        return;
+      }
+      list.innerHTML = filtered.map(function(c, i) {
+        return '<button class="cmd-item' + (i === active ? ' active' : '') + '" data-i="' + i + '">' +
+          '<span class="emoji">' + c.emoji + '</span>' +
+          '<span class="label">' + c.label + '</span>' +
+        '</button>';
+      }).join('');
+    }
+
+    function filter(q) {
+      q = (q || '').trim().toLowerCase();
+      filtered = !q ? commands.slice() : commands.filter(function(c) {
+        return c.label.toLowerCase().indexOf(q) !== -1;
+      });
+      active = 0;
+      render();
+    }
+
+    function open() {
+      overlay.classList.add('open');
+      input.value = '';
+      filter('');
+      setTimeout(function() { input.focus(); }, 100);
+    }
+    function close() { overlay.classList.remove('open'); }
+    function execute() {
+      if (!filtered[active]) return;
+      var cmd = filtered[active];
+      close();
+      setTimeout(function() { cmd.action(); }, 150);
+    }
+
+    input.addEventListener('input', function() { filter(this.value); });
+    input.addEventListener('keydown', function(e) {
+      if (e.key === 'ArrowDown') { e.preventDefault(); active = (active + 1) % filtered.length; render(); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); active = (active - 1 + filtered.length) % filtered.length; render(); }
+      else if (e.key === 'Enter') { e.preventDefault(); execute(); }
+      else if (e.key === 'Escape') { e.preventDefault(); close(); }
+    });
+    list.addEventListener('click', function(e) {
+      var item = e.target.closest('.cmd-item');
+      if (!item) return;
+      active = parseInt(item.dataset.i, 10);
+      execute();
+    });
+    overlay.addEventListener('click', function(e) { if (e.target === overlay) close(); });
+
+    document.addEventListener('keydown', function(e) {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        if (overlay.classList.contains('open')) close();
+        else open();
+      }
+    });
+  }
+
+  // ===== Kbd Hint =====
+  function showKbdHint() {
+    if (localStorage.getItem('po.kbdhint.seen') === '1') return;
+    setTimeout(function() {
+      var h = document.createElement('div');
+      h.className = 'kbd-hint';
+      h.innerHTML =
+        '<span>💡</span>' +
+        '<kbd>Ctrl</kbd><kbd>K</kbd>' +
+        '<span>پنل دستور</span>' +
+        '<button class="close">✕</button>';
+      document.body.appendChild(h);
+      h.querySelector('.close').addEventListener('click', function() {
+        h.remove();
+        localStorage.setItem('po.kbdhint.seen', '1');
+      });
+      setTimeout(function() {
+        if (document.body.contains(h)) {
+          h.remove();
+          localStorage.setItem('po.kbdhint.seen', '1');
+        }
+      }, 8000);
+    }, 3500);
+  }
+
+  // ===== Init =====
+  function initExtras() {
+    moveThemeSwitcher();
+    setTimeout(moveThemeSwitcher, 500);
+    setTimeout(moveThemeSwitcher, 1500);
+    initMarketClock();
+    initStreakBadge();
+    initCommandPalette();
+    showKbdHint();
+    setInterval(checkGoalComplete, 2000);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() { setTimeout(initExtras, 500); });
+  } else {
+    setTimeout(initExtras, 500);
+  }
+
+  window.PT_Extras = { confetti: fireConfetti, streak: calcStreak };
+})();
