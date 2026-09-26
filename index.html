@@ -1,16 +1,14 @@
 <!DOCTYPE html>
-<html lang="fa" dir="rtl" data-theme="dark">
+<html lang="fa" dir="rtl" data-theme="obsidian">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="theme-color" content="#05070f" />
 <title>PO-TRADE | ژورنال معاملات</title>
 <link rel="stylesheet" href="style.css" />
+<link rel="stylesheet" href="themes.css" />
 
 <style>
-  /* ============================================================
-     BANNER STYLES v22
-     ============================================================ */
   #banner-host {
     position: fixed; top: 0; left: 0; right: 0;
     padding: calc(12px + env(safe-area-inset-top, 0px)) 14px 14px;
@@ -124,9 +122,6 @@
     .pt-banner-progress-fill { animation-duration: .01ms; }
   }
 
-  /* ============================================================
-     USER ACCOUNT PANEL — ULTRA PREMIUM v5
-     ============================================================ */
   @property --angle {
     syntax: '<angle>';
     initial-value: 0deg;
@@ -230,6 +225,7 @@
     isolation: isolate;
     will-change: transform, opacity;
   }
+  [data-theme="aurora"] .user-dropdown,
   [data-theme="light"] .user-dropdown {
     background: #ffffff;
     border-color: rgba(80,110,170,.2);
@@ -653,9 +649,6 @@
     }
   }
 
-  /* ============================================================
-     CHANGE PASSWORD MODAL
-     ============================================================ */
   .cp-overlay{
     position:fixed;
     inset:0;
@@ -1064,6 +1057,8 @@
         </div>
       </div>
 
+      <div id="theme-switcher-host"></div>
+
       <button class="lang-btn" id="lang-btn" title="Language / زبان">
         <span id="lang-label">EN</span>
       </button>
@@ -1183,6 +1178,8 @@
   </section>
 
   <section class="page" id="page-analysis">
+    <div id="assistant-host"></div>
+    <div id="goals-banner-host"></div>
     <div id="rules-banner"></div>
 
     <div class="card toolbar">
@@ -1248,6 +1245,8 @@
         <div class="table-wrap" id="daily-table"></div>
       </div>
     </div>
+
+    <div id="share-host"></div>
   </section>
 
   <section class="page" id="page-calendar">
@@ -1422,7 +1421,6 @@
       <div class="rules-status" id="rules-status"></div>
     </div>
 
-    <!-- ========== NEW: CHECKLIST MANAGER ========== -->
     <div class="card">
       <div class="card-head">
         <h2 data-i18n="checklist_settings">✅ مدیریت چک‌لیست</h2>
@@ -1437,17 +1435,14 @@
       <div class="cl-items" id="cl-items"></div>
       <span class="msg" id="cl-msg"></span>
     </div>
-    <!-- ========== /CHECKLIST MANAGER ========== -->
   </section>
 
 </div>
 
-<!-- ========== DATALISTS (autocomplete) ========== -->
 <datalist id="dl-symbols"></datalist>
 <datalist id="dl-strategies"></datalist>
 <datalist id="dl-tags"></datalist>
 
-<!-- ========== CHANGE PASSWORD MODAL ========== -->
 <div class="cp-overlay" id="cpOverlay">
   <div class="cp-card">
     <div class="cp-head">
@@ -1531,21 +1526,15 @@
   const userWrap = document.getElementById('userWrap');
   const userBackdrop = document.getElementById('userBackdrop');
 
-  function isMobile(){
-    return window.matchMedia('(max-width: 640px)').matches;
-  }
+  function isMobile(){ return window.matchMedia('(max-width: 640px)').matches; }
 
   let isOpen = false;
-
   function openDropdown(){
     if (isOpen) return;
     isOpen = true;
     userDropdown.classList.add('open');
-    if (isMobile()) {
-      userBackdrop.classList.add('show');
-    }
+    if (isMobile()) userBackdrop.classList.add('show');
   }
-
   function closeDropdown(){
     if (!isOpen) return;
     isOpen = false;
@@ -1554,45 +1543,29 @@
     userDropdown.style.transform = '';
     userDropdown.style.transition = '';
   }
-
   userBtn.addEventListener('click', (e) => {
     e.stopPropagation();
-    if (isOpen) closeDropdown();
-    else openDropdown();
+    if (isOpen) closeDropdown(); else openDropdown();
   });
-
   userBackdrop.addEventListener('click', closeDropdown);
-
   document.addEventListener('click', (e) => {
     if (isMobile()) return;
-    if (!userWrap.contains(e.target) && isOpen) {
-      closeDropdown();
-    }
+    if (!userWrap.contains(e.target) && isOpen) closeDropdown();
   });
-
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && isOpen) closeDropdown();
   });
+  userDropdown.addEventListener('click', (e) => e.stopPropagation());
 
-  userDropdown.addEventListener('click', (e) => {
-    e.stopPropagation();
-  });
-
-  let touchStartY = 0;
-  let touchCurrentY = 0;
-  let isSwiping = false;
-
+  let touchStartY = 0, touchCurrentY = 0, isSwiping = false;
   userDropdown.addEventListener('touchstart', (e) => {
     if (!isMobile()) return;
     const rect = userDropdown.getBoundingClientRect();
     const touchY = e.touches[0].clientY;
     if (touchY - rect.top < 60) {
-      touchStartY = touchY;
-      touchCurrentY = touchY;
-      isSwiping = true;
+      touchStartY = touchY; touchCurrentY = touchY; isSwiping = true;
     }
   }, { passive: true });
-
   userDropdown.addEventListener('touchmove', (e) => {
     if (!isSwiping || !touchStartY) return;
     touchCurrentY = e.touches[0].clientY;
@@ -1602,28 +1575,13 @@
       userDropdown.style.transition = 'none';
     }
   }, { passive: true });
-
   userDropdown.addEventListener('touchend', () => {
     if (!isSwiping) return;
     const diff = touchCurrentY - touchStartY;
     userDropdown.style.transition = '';
-    if (diff > 80) {
-      closeDropdown();
-    } else {
-      userDropdown.style.transform = '';
-    }
-    touchStartY = 0;
-    touchCurrentY = 0;
-    isSwiping = false;
-  });
-
-  let lastMobileState = isMobile();
-  window.addEventListener('resize', () => {
-    const nowMobile = isMobile();
-    if (nowMobile !== lastMobileState) {
-      closeDropdown();
-      lastMobileState = nowMobile;
-    }
+    if (diff > 80) closeDropdown();
+    else userDropdown.style.transform = '';
+    touchStartY = 0; touchCurrentY = 0; isSwiping = false;
   });
 
   function getInitial(name, email){
@@ -1631,18 +1589,15 @@
     if (email) return email.charAt(0).toUpperCase();
     return '?';
   }
-
   function formatJoined(dateStr){
     if (!dateStr) return '—';
     try {
       const d = new Date(dateStr);
-      const y = d.getFullYear();
-      const m = String(d.getMonth() + 1).padStart(2, '0');
-      const dd = String(d.getDate()).padStart(2, '0');
-      return y + '/' + m + '/' + dd;
+      return d.getFullYear() + '/' +
+             String(d.getMonth() + 1).padStart(2, '0') + '/' +
+             String(d.getDate()).padStart(2, '0');
     } catch(e){ return '—'; }
   }
-
   function getUserTradesCount(){
     try {
       const raw = localStorage.getItem('po.v4.trades');
@@ -1651,7 +1606,6 @@
       return Array.isArray(arr) ? arr.length : 0;
     } catch(e){ return 0; }
   }
-
   function updateAccountUI(user){
     if (!user) return;
     const metadata = user.user_metadata || {};
@@ -1670,19 +1624,15 @@
     document.getElementById('userJoined').textContent = formatJoined(user.created_at);
     document.getElementById('userTradesCount').textContent = getUserTradesCount().toLocaleString('fa-IR');
   }
-
   window.addEventListener('storage', (e) => {
     if (e.key === 'po.v4.trades') {
       const el = document.getElementById('userTradesCount');
       if (el) el.textContent = getUserTradesCount().toLocaleString('fa-IR');
     }
   });
-
   setInterval(() => {
     const el = document.getElementById('userTradesCount');
-    if (el && isOpen) {
-      el.textContent = getUserTradesCount().toLocaleString('fa-IR');
-    }
+    if (el && isOpen) el.textContent = getUserTradesCount().toLocaleString('fa-IR');
   }, 5000);
 
   sb.auth.getSession().then(({ data }) => {
@@ -1696,70 +1646,40 @@
         uid: user.id
       };
       updateAccountUI(user);
-      console.log('✅ Logged in:', user.email);
     }
   });
-
   sb.auth.onAuthStateChange((event, session) => {
-    if (!session) {
-      location.replace('auth.html');
-    } else {
-      updateAccountUI(session.user);
-    }
+    if (!session) location.replace('auth.html');
+    else updateAccountUI(session.user);
   });
 })();
 </script>
 
 <script>
-/* ============================================================
-   CHANGE PASSWORD LOGIC
-   ============================================================ */
 (function(){
   'use strict';
-
   const sb = window.__PT_SB;
-  if (!sb) {
-    console.error('[ChangePass] Supabase client not found');
-    return;
-  }
-
+  if (!sb) return;
   const $ = id => document.getElementById(id);
   const overlay = $('cpOverlay');
   if (!overlay) return;
 
   window.openChangePassword = function() {
-    $('cpCurrent').value = '';
-    $('cpNew').value = '';
-    $('cpNew2').value = '';
-    $('cpErrMsg').classList.remove('show');
-    $('cpOkMsg').classList.remove('show');
-    $('cpMeter').style.display = 'none';
-    $('cpRules').style.display = 'none';
+    $('cpCurrent').value = ''; $('cpNew').value = ''; $('cpNew2').value = '';
+    $('cpErrMsg').classList.remove('show'); $('cpOkMsg').classList.remove('show');
+    $('cpMeter').style.display = 'none'; $('cpRules').style.display = 'none';
     document.querySelectorAll('.cp-rule').forEach(el => el.classList.remove('ok','bad'));
     ['cp1','cp2','cp3','cp4','cp5'].forEach(id => $(id).className = '');
-
-    const dd = document.getElementById('userDropdown');
-    if (dd) dd.classList.remove('open');
-    const bd = document.getElementById('userBackdrop');
-    if (bd) bd.classList.remove('show');
-
+    document.getElementById('userDropdown').classList.remove('open');
+    document.getElementById('userBackdrop').classList.remove('show');
     overlay.classList.add('show');
     setTimeout(() => $('cpCurrent').focus(), 300);
   };
-
-  window.closeChangePassword = function() {
-    overlay.classList.remove('show');
-  };
-
-  overlay.addEventListener('click', (e) => {
-    if (e.target === overlay) closeChangePassword();
-  });
+  window.closeChangePassword = function() { overlay.classList.remove('show'); };
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) closeChangePassword(); });
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && overlay.classList.contains('show')) {
-      closeChangePassword();
-    }
+    if (e.key === 'Escape' && overlay.classList.contains('show')) closeChangePassword();
   });
-
   document.querySelectorAll('.cp-toggle').forEach(btn => {
     btn.addEventListener('click', () => {
       const inp = $(btn.dataset.target);
@@ -1767,34 +1687,24 @@
       btn.textContent = inp.type === 'password' ? '👁️' : '🙈';
     });
   });
-
   function checkPassword(pass) {
     return {
-      length:  pass.length >= 8,
-      lower:   /[a-z]/.test(pass),
-      upper:   /[A-Z]/.test(pass),
-      number:  /[0-9]/.test(pass),
+      length: pass.length >= 8,
+      lower: /[a-z]/.test(pass),
+      upper: /[A-Z]/.test(pass),
+      number: /[0-9]/.test(pass),
       special: /[^A-Za-z0-9]/.test(pass)
     };
   }
-
   function renderStrength(pass) {
-    const meter = $('cpMeter');
-    const rules = $('cpRules');
-    const label = $('cpLabel');
-    if (!pass) {
-      meter.style.display = 'none';
-      rules.style.display = 'none';
-      return;
-    }
-    meter.style.display = '';
-    rules.style.display = '';
+    const meter = $('cpMeter'), rules = $('cpRules'), label = $('cpLabel');
+    if (!pass) { meter.style.display = 'none'; rules.style.display = 'none'; return; }
+    meter.style.display = ''; rules.style.display = '';
     const c = checkPassword(pass);
     const score = Object.values(c).filter(Boolean).length;
-    const segs = [$('cp1'), $('cp2'), $('cp3'), $('cp4'), $('cp5')];
+    const segs = [$('cp1'),$('cp2'),$('cp3'),$('cp4'),$('cp5')];
     segs.forEach(s => s.className = '');
-    let level = 'weak';
-    let onCls = 'on-weak';
+    let level = 'weak', onCls = 'on-weak';
     if (score >= 5 && pass.length >= 10) { level = 'strong'; onCls = 'on-strong'; }
     else if (score >= 3) { level = 'medium'; onCls = 'on-medium'; }
     const fillCount = level === 'strong' ? 5 : level === 'medium' ? 3 : Math.max(1, score);
@@ -1808,93 +1718,54 @@
       el.classList.toggle('bad', pass.length > 0 && !ok);
     });
   }
-
   $('cpNew').addEventListener('input', e => renderStrength(e.target.value));
-
-  function showErr(m) {
-    $('cpErrText').textContent = m;
-    $('cpErrMsg').classList.add('show');
-    $('cpOkMsg').classList.remove('show');
-  }
-  function showOk(m) {
-    $('cpOkText').textContent = m;
-    $('cpOkMsg').classList.add('show');
-    $('cpErrMsg').classList.remove('show');
-  }
+  function showErr(m) { $('cpErrText').textContent = m; $('cpErrMsg').classList.add('show'); $('cpOkMsg').classList.remove('show'); }
+  function showOk(m) { $('cpOkText').textContent = m; $('cpOkMsg').classList.add('show'); $('cpErrMsg').classList.remove('show'); }
 
   $('cpSaveBtn').addEventListener('click', async () => {
     const currentPass = $('cpCurrent').value;
     const newPass = $('cpNew').value;
     const newPass2 = $('cpNew2').value;
-
     if (!currentPass) return showErr('رمز فعلی رو وارد کن');
     if (!newPass) return showErr('رمز جدید رو وارد کن');
-
     const c = checkPassword(newPass);
     const missing = [];
-    if (!c.length)  missing.push('۸ کاراکتر');
-    if (!c.lower)   missing.push('حرف کوچک');
-    if (!c.upper)   missing.push('حرف بزرگ');
-    if (!c.number)  missing.push('عدد');
+    if (!c.length) missing.push('۸ کاراکتر');
+    if (!c.lower) missing.push('حرف کوچک');
+    if (!c.upper) missing.push('حرف بزرگ');
+    if (!c.number) missing.push('عدد');
     if (!c.special) missing.push('علامت خاص');
     if (missing.length) return showErr('رمز ضعیفه — این‌ها لازمه: ' + missing.join('، '));
-
     if (newPass !== newPass2) return showErr('رمزهای جدید یکسان نیستند');
     if (currentPass === newPass) return showErr('رمز جدید باید با رمز فعلی فرق داشته باشه');
 
     const btn = $('cpSaveBtn');
     btn.classList.add('loading');
     btn.disabled = true;
-
     try {
       const { data: { session } } = await sb.auth.getSession();
-      if (!session || !session.user) {
-        throw new Error('نشست منقضی شده. دوباره وارد شو.');
-      }
+      if (!session || !session.user) throw new Error('نشست منقضی شده. دوباره وارد شو.');
       const email = session.user.email;
-
-      const { error: signInErr } = await sb.auth.signInWithPassword({
-        email: email,
-        password: currentPass
-      });
-
+      const { error: signInErr } = await sb.auth.signInWithPassword({ email: email, password: currentPass });
       if (signInErr) {
-        btn.classList.remove('loading');
-        btn.disabled = false;
-        if (signInErr.message.includes('Invalid login credentials')) {
-          return showErr('رمز فعلی اشتباهه');
-        }
-        return showErr(mapError(signInErr.message));
+        btn.classList.remove('loading'); btn.disabled = false;
+        if (signInErr.message.includes('Invalid login credentials')) return showErr('رمز فعلی اشتباهه');
+        return showErr(signInErr.message);
       }
-
       const { error: updateErr } = await sb.auth.updateUser({ password: newPass });
       if (updateErr) throw updateErr;
-
       showOk('✅ رمز عبور با موفقیت تغییر کرد!');
       setTimeout(() => {
         closeChangePassword();
         btn.classList.remove('loading');
         btn.disabled = false;
       }, 1800);
-
     } catch (err) {
       btn.classList.remove('loading');
       btn.disabled = false;
-      showErr(mapError(err.message));
+      showErr(err.message || 'خطا رخ داد');
     }
   });
-
-  function mapError(msg) {
-    const m = {
-      'New password should be different from the old password': 'رمز جدید باید متفاوت از قبلی باشه',
-      'Password should be at least 6 characters': 'رمز باید حداقل ۶ کاراکتر باشه',
-      'Auth session missing': 'نشست منقضی شده. دوباره وارد شو',
-      'User not found': 'کاربر پیدا نشد',
-      'Invalid login credentials': 'رمز فعلی اشتباهه'
-    };
-    for (const k in m) if (msg && msg.includes(k)) return m[k];
-    return msg || 'خطا رخ داد';
-  }
 })();
 </script>
 
@@ -1915,7 +1786,7 @@
   var T_REF = 4000, T_FILE = 8000, CACHE_TTL = 3 * 60 * 1000;
   var KEY_SEEN='pt.banner.seen',KEY_DISMISSED='pt.banner.dismissed',KEY_REF='pt.banner.ref',KEY_TXT='pt.banner.txt',KEY_LASTCHECK='pt.banner.lastCheck';
   var host = document.getElementById('banner-host');
-  if (!host) { console.warn('[Banner] #banner-host not found'); return; }
+  if (!host) return;
   var countedThisLoad = {}, currentRef = '', globalAutoMs = 0;
   function log(m){ try { console.log('[Banner]', m); } catch(e){} }
   function lsGet(k){ try { return localStorage.getItem(k) || ''; } catch(e){ return ''; } }
@@ -1952,7 +1823,7 @@
       });
   }
   function getRef() {
-    if (typeof Promise.any === 'function') { return Promise.any([getRefFromGitHub(), getRefFromJsDelivr()]); }
+    if (typeof Promise.any === 'function') return Promise.any([getRefFromGitHub(), getRefFromJsDelivr()]);
     return getRefFromGitHub().catch(function(){ return getRefFromJsDelivr(); });
   }
   function buildSources(ref) {
@@ -1987,7 +1858,6 @@
               if (settled) return;
               if (!res.txt || res.txt.indexOf('PT_BANNER_CONFIG') === -1) throw new Error('invalid content');
               settled = true;
-              log('✅ ' + s.name + ' → ' + res.txt.length + 'B');
               resolve({ text: res.txt, source: s.name, sha: res.sha });
             })
             .catch(function(e){
@@ -2052,7 +1922,7 @@
     var autoMs = getAutoCloseMs(b);
     var showProgress = b.showProgress === true && autoMs > 0;
     var inner = '';
-    if (hasImage && imgPos === 'left') { inner += '<div class="pt-banner-side-img" style="background-image:url(\'' + b.image + '\')"></div>'; }
+    if (hasImage && imgPos === 'left') inner += '<div class="pt-banner-side-img" style="background-image:url(\'' + b.image + '\')"></div>';
     if (b.icon) inner += '<div class="pt-banner-icon">' + esc(b.icon) + '</div>';
     inner += '<div class="pt-banner-body">';
     if (title) inner += '<div class="pt-banner-title">' + esc(title) + '</div>';
@@ -2063,12 +1933,12 @@
       var ctaText = (b.colors && b.colors.ctaText) || '#14140f';
       inner += '<a class="pt-banner-cta" href="' + esc(b.ctaUrl) + '" target="_blank" rel="noopener" style="background:' + ctaBg + ';color:' + ctaText + ';">' + esc(cta) + '</a>';
     }
-    if (hasImage && imgPos === 'right') { inner += '<div class="pt-banner-side-img" style="background-image:url(\'' + b.image + '\')"></div>'; }
-    if (b.dismissible !== false) { inner += '<button class="pt-banner-close" type="button" aria-label="بستن">✕</button>'; }
-    if (showProgress) { inner += '<div class="pt-banner-progress"><div class="pt-banner-progress-fill" style="animation-duration:' + autoMs + 'ms"></div></div>'; }
+    if (hasImage && imgPos === 'right') inner += '<div class="pt-banner-side-img" style="background-image:url(\'' + b.image + '\')"></div>';
+    if (b.dismissible !== false) inner += '<button class="pt-banner-close" type="button" aria-label="بستن">✕</button>';
+    if (showProgress) inner += '<div class="pt-banner-progress"><div class="pt-banner-progress-fill" style="animation-duration:' + autoMs + 'ms"></div></div>';
     el.innerHTML = inner;
     var closeBtn = el.querySelector('.pt-banner-close');
-    if (closeBtn) { closeBtn.addEventListener('click', function(){ closeBanner(el, b.id, true); }); }
+    if (closeBtn) closeBtn.addEventListener('click', function(){ closeBanner(el, b.id, true); });
     host.appendChild(el);
     if (autoMs > 0) {
       var pauseOnHover = b.pauseOnHover !== false;
@@ -2130,8 +2000,7 @@
       skel.style.opacity = '0';
       setTimeout(function(){ if (skel && skel.parentNode) skel.remove(); }, 320);
     }
-
-    if (config.settings && config.settings.autoDismissAfter != null) { globalAutoMs = Number(config.settings.autoDismissAfter) || 0; }
+    if (config.settings && config.settings.autoDismissAfter != null) globalAutoMs = Number(config.settings.autoDismissAfter) || 0;
     var dismissed = getJSON(KEY_DISMISSED, {});
     var seen = getJSON(KEY_SEEN, {});
     var list = (config.banners || []).filter(function(b){
@@ -2148,10 +2017,9 @@
     list.sort(function(a,b){ return (b.priority||0) - (a.priority||0); });
     var max = getMaxVisible(config.settings);
     if (max > 0) list = list.slice(0, max);
-    log('📋 active: ' + list.length + ' (max=' + max + ')');
-    if (!list.length) { log('⚠️ no banners'); return; }
+    if (!list.length) return;
     list.forEach(function(b, i){
-      if (host.querySelector('.pt-banner[data-id="' + b.id + '"]')) { log('⏭️ already rendered: ' + b.id); return; }
+      if (host.querySelector('.pt-banner[data-id="' + b.id + '"]')) return;
       setTimeout(function(){
         if (host.querySelector('.pt-banner[data-id="' + b.id + '"]')) return;
         renderBanner(b);
@@ -2166,17 +2034,15 @@
   }
   function applyConfig(text, refToSave, cachedTxt) {
     if (text === cachedTxt) {
-      log('✅ content unchanged');
       lsSet(KEY_LASTCHECK, String(Date.now()));
       if (refToSave) lsSet(KEY_REF, refToSave);
       return;
     }
     var cfg;
     try { cfg = parseConfig(text); }
-    catch (e) { log('❌ ' + e.message); return; }
+    catch (e) { return; }
     var oldRef = lsGet(KEY_REF);
     if (refToSave && refToSave !== oldRef && oldRef) {
-      log('🔄 ref changed');
       var seen = getJSON(KEY_SEEN, {});
       (cfg.banners || []).forEach(function(b){ if (b && b.id) seen[b.id] = 0; });
       setJSON(KEY_SEEN, seen);
@@ -2186,23 +2052,20 @@
     if (refToSave) lsSet(KEY_REF, refToSave);
     lsSet(KEY_LASTCHECK, String(Date.now()));
     renderConfig(cfg);
-    log('🏁 applied');
   }
   function fetchLatest(cachedTxt, cachedRef) {
     getRef()
       .then(function(ref){
         currentRef = ref;
-        log('🔎 ref: ' + ref.slice(0,7));
-        if (ref === cachedRef && cachedTxt) { log('✅ ref unchanged — skip download'); lsSet(KEY_LASTCHECK, String(Date.now())); return; }
+        if (ref === cachedRef && cachedTxt) { lsSet(KEY_LASTCHECK, String(Date.now())); return; }
         downloadConfig(ref)
           .then(function(res){ applyConfig(res.text, res.sha || ref, cachedTxt); })
-          .catch(function(e){ log('❌ download failed: ' + e.message); });
+          .catch(function(e){});
       })
       .catch(function(e){
-        log('⚠️ ref unavailable — direct download');
         downloadConfig(null)
           .then(function(res){ applyConfig(res.text, res.sha, cachedTxt); })
-          .catch(function(e2){ log('❌ download failed: ' + e2.message); });
+          .catch(function(e2){});
       });
   }
   function isLoaderVisible() {
@@ -2222,7 +2085,6 @@
   function init() {
     countedThisLoad = {};
     host.innerHTML = '';
-    log('🚀 start');
     var cachedRef = lsGet(KEY_REF);
     var cachedTxt = lsGet(KEY_TXT);
     var lastCheck = parseInt(lsGet(KEY_LASTCHECK) || '0', 10);
@@ -2230,8 +2092,8 @@
     var alreadyRendered = false;
     whenLoaderHidden(function(){
       if (cachedTxt) {
-        try { renderConfig(parseConfig(cachedTxt)); alreadyRendered = true; log('📦 cache rendered'); }
-        catch (e) { log('⚠️ bad cache: ' + e.message); lsSet(KEY_TXT, ''); }
+        try { renderConfig(parseConfig(cachedTxt)); alreadyRendered = true; }
+        catch (e) { lsSet(KEY_TXT, ''); }
       }
       if (!alreadyRendered) {
         host.innerHTML = '<div class="pt-banner-skeleton"></div>';
@@ -2241,12 +2103,11 @@
             skel.style.transition = 'opacity .3s ease';
             skel.style.opacity = '0';
             setTimeout(function(){ if (skel && skel.parentNode) skel.remove(); }, 320);
-            log('⏱️ skeleton removed after 5s timeout');
           }
         }, 5000);
       }
-      if (!navigator.onLine) { log('📴 offline'); if (!alreadyRendered) host.innerHTML = ''; return; }
-      if (fresh && alreadyRendered) { log('✅ cache fresh — skip network'); return; }
+      if (!navigator.onLine) { if (!alreadyRendered) host.innerHTML = ''; return; }
+      if (fresh && alreadyRendered) return;
       fetchLatest(cachedTxt, cachedRef);
     });
   }
@@ -2258,9 +2119,11 @@
       init();
     }
   };
-  if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', init); }
-  else { init(); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
 })();
 </script>
+
+<script src="assistant.js"></script>
 </body>
 </html>
