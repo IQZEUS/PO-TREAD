@@ -5941,3 +5941,70 @@ html, body {
   .assistant-title { font-size: 13px !important; }
   .assistant-text { font-size: 11.5px !important; }
 }
+/* ============================================================
+   🔄 UNDO OVERFLOW FIX — برگردون به حالت عادی
+   ============================================================ */
+
+html, body {
+  overflow-x: hidden !important;
+  max-width: 100% !important;
+}
+
+/* حذف محدودیت‌های اضافی که گذاشتم */
+#page-analysis,
+#page-analysis > *,
+#assistant-host,
+#goals-banner-host,
+#market-clock-host,
+#rules-banner,
+#share-host,
+#kpis,
+.chart-card,
+.tier-card,
+.assistant,
+.goal-banner,
+.share-card,
+.pt-market-clock,
+.toolbar,
+.kpi,
+.pmc-session,
+.tier-stat,
+.tier-step,
+.goal-banner-stat,
+.share-btn,
+.assistant-inner,
+.tier-head,
+.goal-banner-head,
+.share-head,
+.pmc-head,
+.pmc-title,
+.pmc-time,
+.assistant-body,
+.tier-info,
+.pmc-info,
+.app,
+#page-analysis::before {
+  max-width: none !important;
+  min-width: 0 !important;
+  width: auto !important;
+  overflow: visible !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  left: auto !important;
+  right: auto !important;
+  box-sizing: border-box !important;
+  display: revert !important;
+  flex-wrap: revert !important;
+  grid-template-columns: revert !important;
+}
+
+/* فیکس padding کارت‌ها */
+.tier-card { padding: 18px 16px !important; }
+.assistant { padding: 16px 16px !important; }
+.kpi { padding: 13px 12px !important; }
+.goal-banner { padding: 16px 14px !important; }
+.share-card { padding: 16px 14px !important; }
+.chart-card { padding: 14px !important; }
+.pt-market-clock { padding: 0 !important; }
