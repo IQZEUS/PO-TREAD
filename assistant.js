@@ -1,8 +1,8 @@
 /* ============================================================
-   PO-TRADE Assistant v10.0 — STABLE COSMIC
-   ✅ موبایل کامل OK
-   ✅ بدون overflow
-   ✅ عکس خروجی متفاوت برای هر سطح
+   PO-TRADE Assistant v11.0 — COSMIC ULTIMATE
+   🎨 عکس خروجی کیهانی
+   📈 نمودار رشد
+   ✅ موبایل-پرفکت
    ============================================================ */
 (function() {
   'use strict';
@@ -430,151 +430,158 @@
   }
 
   /* ══════════════════════════════════════════════════════
-     SHARE IMAGE — متفاوت برای هر سطح
+     SHARE IMAGE — کیهانی افسانه‌ای
      ══════════════════════════════════════════════════════ */
   function drawShare() {
     var trades = getLS('po.v4.trades', []);
     var tier = getTier(trades);
 
-    var W = 800, H = 1200;
+    var W = 900, H = 1400;
     var canvas = document.createElement('canvas');
     canvas.width = W;
     canvas.height = H;
     var ctx = canvas.getContext('2d');
 
     // ═══ تنظیمات رنگ بر اساس Tier ═══
-    var config = {
+    var CFG = {
       bronze: {
-        bg1: '#1a0f08', bg2: '#2a1810', bg3: '#0f0704',
-        primary: '#cd7f32', secondary: '#e8a370', accent: '#f5d5b0',
-        glow: 'rgba(205,127,50,0.5)', label: 'BRONZE',
-        starColors: ['#cd7f32', '#f0a96c'],
-        orbColors: ['rgba(205,127,50,0.25)', 'rgba(240,169,108,0.15)']
+        bgTop: '#1a0a02', bgMid: '#2a1408', bgBot: '#0a0400',
+        primary: '#ff9d3f', secondary: '#ffd9a8', accent: '#cd7f32',
+        glow: 'rgba(255,157,63,0.9)', softGlow: 'rgba(255,157,63,0.35)',
+        nebula1: 'rgba(255,157,63,0.35)', nebula2: 'rgba(205,127,50,0.25)',
+        nebula3: 'rgba(255,200,140,0.2)',
+        label: 'BRONZE', stars: 80,
+        starColors: ['#ff9d3f', '#ffd9a8', '#cd7f32']
       },
       silver: {
-        bg1: '#0f121e', bg2: '#1a2030', bg3: '#08090f',
-        primary: '#c0c0d2', secondary: '#e0e0f0', accent: '#ffffff',
-        glow: 'rgba(192,192,210,0.5)', label: 'SILVER',
-        starColors: ['#c0c0d2', '#ffffff'],
-        orbColors: ['rgba(192,192,210,0.25)', 'rgba(224,224,240,0.15)']
+        bgTop: '#0a0d18', bgMid: '#151a30', bgBot: '#050710',
+        primary: '#7d9eff', secondary: '#e8ecff', accent: '#c0c0d2',
+        glow: 'rgba(125,158,255,0.9)', softGlow: 'rgba(125,158,255,0.35)',
+        nebula1: 'rgba(125,158,255,0.3)', nebula2: 'rgba(200,210,230,0.25)',
+        nebula3: 'rgba(160,170,220,0.2)',
+        label: 'SILVER', stars: 120,
+        starColors: ['#7d9eff', '#ffffff', '#c0c0d2']
       },
       gold: {
-        bg1: '#1a1404', bg2: '#2a2008', bg3: '#0f0c02',
-        primary: '#ffc828', secondary: '#fff9c4', accent: '#ffd94a',
-        glow: 'rgba(255,200,40,0.55)', label: 'GOLD',
-        starColors: ['#ffc828', '#ffd94a', '#fff9c4'],
-        orbColors: ['rgba(255,200,40,0.3)', 'rgba(255,217,74,0.15)']
+        bgTop: '#1a0f02', bgMid: '#2e1e04', bgBot: '#0a0500',
+        primary: '#ffd54a', secondary: '#fff9c4', accent: '#ffaa00',
+        glow: 'rgba(255,213,74,0.95)', softGlow: 'rgba(255,213,74,0.4)',
+        nebula1: 'rgba(255,213,74,0.4)', nebula2: 'rgba(255,170,0,0.3)',
+        nebula3: 'rgba(255,240,180,0.25)',
+        label: 'GOLD', stars: 180,
+        starColors: ['#ffd54a', '#fff9c4', '#ffaa00']
       },
       diamond: {
-        bg1: '#050a1e', bg2: '#0a1430', bg3: '#020510',
-        primary: '#7dd8ff', secondary: '#ffffff', accent: '#ba68ff',
-        glow: 'rgba(120,220,255,0.6)', label: 'DIAMOND',
-        starColors: ['#7dd8ff', '#ffffff', '#ba68ff'],
-        orbColors: ['rgba(120,220,255,0.3)', 'rgba(186,104,255,0.2)']
+        bgTop: '#02030f', bgMid: '#0a0d28', bgBot: '#010105',
+        primary: '#00e5ff', secondary: '#ffffff', accent: '#ba68ff',
+        glow: 'rgba(0,229,255,1)', softGlow: 'rgba(0,229,255,0.4)',
+        nebula1: 'rgba(0,229,255,0.35)', nebula2: 'rgba(186,104,255,0.35)',
+        nebula3: 'rgba(120,220,255,0.25)',
+        label: 'DIAMOND', stars: 280,
+        starColors: ['#00e5ff', '#ffffff', '#ba68ff', '#7dd8ff']
       }
     };
-    var C = config[tier.key] || config.bronze;
+    var C = CFG[tier.key] || CFG.bronze;
 
-    // ═══ پس‌زمینه ═══
-    var bg = ctx.createLinearGradient(0, 0, W, H);
-    bg.addColorStop(0, C.bg1);
-    bg.addColorStop(0.5, C.bg2);
-    bg.addColorStop(1, C.bg3);
+    // ═══ 1) پس‌زمینه ═══
+    var bg = ctx.createLinearGradient(0, 0, 0, H);
+    bg.addColorStop(0, C.bgTop);
+    bg.addColorStop(0.5, C.bgMid);
+    bg.addColorStop(1, C.bgBot);
     ctx.fillStyle = bg;
     ctx.fillRect(0, 0, W, H);
 
-    // ═══ ستاره‌ها (فقط برای DIAMOND بیشتر) ═══
-    var starCount = tier.key === 'diamond' ? 200 :
-                    tier.key === 'gold' ? 100 :
-                    tier.key === 'silver' ? 60 : 30;
-    for (var i = 0; i < starCount; i++) {
-      var sx = Math.random() * W;
-      var sy = Math.random() * H;
-      var sr = Math.random() * 1.6 + 0.3;
-      var sa = Math.random() * 0.7 + 0.2;
-      var sc = C.starColors[Math.floor(Math.random() * C.starColors.length)];
-      ctx.globalAlpha = sa;
-      ctx.fillStyle = sc;
-      ctx.beginPath();
-      ctx.arc(sx, sy, sr, 0, Math.PI * 2);
-      ctx.fill();
-    }
-    ctx.globalAlpha = 1;
-
-    // ═══ Orbs (Nebula) ═══
-    function orb(x, y, r, color) {
+    // ═══ 2) Nebula ═══
+    function drawNebula(x, y, r, color) {
       var g = ctx.createRadialGradient(x, y, 0, x, y, r);
       g.addColorStop(0, color);
+      g.addColorStop(0.4, color.replace(/[\d.]+\)$/, '0.15)'));
       g.addColorStop(1, 'rgba(0,0,0,0)');
       ctx.fillStyle = g;
       ctx.beginPath();
       ctx.arc(x, y, r, 0, Math.PI * 2);
       ctx.fill();
     }
-    orb(150, 180, 400, C.orbColors[0]);
-    orb(W - 100, H - 250, 450, C.orbColors[1]);
+    drawNebula(150, 200, 550, C.nebula1);
+    drawNebula(W - 100, 450, 500, C.nebula2);
+    drawNebula(W / 2, 1000, 600, C.nebula3);
+    drawNebula(200, 1200, 450, C.nebula1);
 
-    // ═══ نوار رنگی بالا ═══
-    var topBar = ctx.createLinearGradient(0, 0, W, 0);
-    topBar.addColorStop(0, 'rgba(255,255,255,0)');
-    topBar.addColorStop(0.2, C.primary);
-    topBar.addColorStop(0.5, C.secondary);
-    topBar.addColorStop(0.8, C.primary);
-    topBar.addColorStop(1, 'rgba(255,255,255,0)');
-    ctx.fillStyle = topBar;
-    ctx.fillRect(0, 0, W, 5);
-
-    // ═══ نشان Tier (Badge) ═══
-    var bw = 240, bh = 70;
-    var bx = (W - bw) / 2;
-    var by = 50;
-
-    // Glow پشت
-    ctx.shadowColor = C.glow;
-    ctx.shadowBlur = 60;
-    ctx.fillStyle = C.primary;
-    ctx.globalAlpha = 0.3;
-    rr(ctx, bx, by, bw, bh, 35);
-    ctx.fill();
+    // ═══ 3) ستاره‌ها ═══
+    for (var i = 0; i < C.stars; i++) {
+      var sx = Math.random() * W;
+      var sy = Math.random() * H;
+      var sr = Math.random() * 1.8 + 0.3;
+      var sa = Math.random() * 0.85 + 0.15;
+      var sc = C.starColors[Math.floor(Math.random() * C.starColors.length)];
+      ctx.globalAlpha = sa;
+      ctx.fillStyle = sc;
+      ctx.shadowColor = sc;
+      ctx.shadowBlur = sr > 1.2 ? 8 : 0;
+      ctx.beginPath();
+      ctx.arc(sx, sy, sr, 0, Math.PI * 2);
+      ctx.fill();
+    }
     ctx.globalAlpha = 1;
     ctx.shadowBlur = 0;
 
-    // کادر اصلی با گرادیانت
-    var badgeGrad = ctx.createLinearGradient(bx, by, bx + bw, by + bh);
+    // ═══ 4) نوار بالا ═══
+    var topBar = ctx.createLinearGradient(0, 0, W, 0);
+    topBar.addColorStop(0, 'rgba(255,255,255,0)');
+    topBar.addColorStop(0.15, C.primary);
+    topBar.addColorStop(0.5, C.secondary);
+    topBar.addColorStop(0.85, C.primary);
+    topBar.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = topBar;
+    ctx.fillRect(0, 0, W, 4);
+
+    // ═══ 5) Tier Badge ═══
+    var badgeW = 260, badgeH = 74;
+    var badgeX = (W - badgeW) / 2;
+    var badgeY = 55;
+
+    ctx.shadowColor = C.glow;
+    ctx.shadowBlur = 80;
+    ctx.fillStyle = C.softGlow;
+    rr(ctx, badgeX, badgeY, badgeW, badgeH, 37);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    var badgeGrad = ctx.createLinearGradient(badgeX, badgeY, badgeX + badgeW, badgeY + badgeH);
     badgeGrad.addColorStop(0, C.primary);
     badgeGrad.addColorStop(0.5, C.secondary);
     badgeGrad.addColorStop(1, C.primary);
     ctx.fillStyle = badgeGrad;
-    rr(ctx, bx, by, bw, bh, 35);
+    rr(ctx, badgeX, badgeY, badgeW, badgeH, 37);
     ctx.fill();
 
-    // متن Tier
-    ctx.fillStyle = C.bg1;
-    ctx.font = '900 26px Inter, sans-serif';
+    ctx.fillStyle = C.bgTop;
+    ctx.font = '900 28px Inter, sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(C.label, W / 2, by + bh / 2 + 1);
+    ctx.fillText(C.label, W / 2, badgeY + badgeH / 2 + 1);
 
-    // ═══ لوگو ═══
-    var titleGrad = ctx.createLinearGradient(W / 2 - 250, 0, W / 2 + 250, 0);
+    // ═══ 6) لوگو ═══
+    var titleGrad = ctx.createLinearGradient(W / 2 - 320, 0, W / 2 + 320, 0);
     titleGrad.addColorStop(0, C.primary);
     titleGrad.addColorStop(0.5, C.secondary);
     titleGrad.addColorStop(1, C.primary);
+
+    ctx.shadowColor = C.glow;
+    ctx.shadowBlur = 50;
     ctx.fillStyle = titleGrad;
-    ctx.font = '900 68px Inter, sans-serif';
+    ctx.font = '900 76px Inter, sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'top';
-    ctx.shadowColor = C.glow;
-    ctx.shadowBlur = 40;
-    ctx.fillText('PO-TRADE', W / 2, 165);
+    ctx.fillText('PO-TRADE', W / 2, 175);
     ctx.shadowBlur = 0;
 
     ctx.font = '700 13px Inter, sans-serif';
-    ctx.fillStyle = 'rgba(200,215,240,0.7)';
+    ctx.fillStyle = 'rgba(200,215,240,0.6)';
     ctx.fillText('◆  PERFORMANCE REPORT  ◆  ' +
-                 new Date().toISOString().slice(0, 10) + '  ◆', W / 2, 255);
+                 new Date().toISOString().slice(0, 10), W / 2, 268);
 
-    // ═══ محاسبه آمار ═══
+    // ═══ 7) محاسبه آمار ═══
     var w = 0, l = 0, net = 0, gp = 0, gl = 0;
     trades.forEach(function(t) {
       var p = t.result === 'win' ? Math.abs(+t.amount || 0) :
@@ -587,95 +594,215 @@
     var wr = closed ? (w / closed) * 100 : 0;
     var pf = gl > 0 ? gp / gl : (gp > 0 ? Infinity : 0);
 
-    // ═══ Net PnL بزرگ ═══
-    var pnlColor = net > 0 ? '#2ee6a6' : net < 0 ? '#ff5674' : '#8697b8';
-    var pnlColor2 = net > 0 ? '#7bffd0' : net < 0 ? '#ff95a8' : '#c7d3ea';
+    // ═══ 8) NET PNL ═══
+    var isProfit = net > 0;
+    var pnlColor = isProfit ? '#2ee6a6' : net < 0 ? '#ff5674' : '#8697b8';
+    var pnlColor2 = isProfit ? '#7bffd0' : net < 0 ? '#ff95a8' : '#c7d3ea';
     var sgn = net > 0 ? '+' : net < 0 ? '-' : '';
     var nTxt = sgn + '$' + Math.abs(net).toLocaleString('en-US', { maximumFractionDigits: 2 });
 
-    // هاله
-    var halo = ctx.createRadialGradient(W / 2, 420, 0, W / 2, 420, 340);
-    halo.addColorStop(0, net > 0 ? 'rgba(46,230,166,0.35)' : 'rgba(255,86,116,0.35)');
+    var halo = ctx.createRadialGradient(W / 2, 450, 0, W / 2, 450, 400);
+    halo.addColorStop(0, isProfit ? 'rgba(46,230,166,0.4)' : 'rgba(255,86,116,0.4)');
+    halo.addColorStop(0.5, isProfit ? 'rgba(46,230,166,0.1)' : 'rgba(255,86,116,0.1)');
     halo.addColorStop(1, 'rgba(0,0,0,0)');
     ctx.fillStyle = halo;
-    ctx.fillRect(0, 280, W, 320);
+    ctx.fillRect(0, 250, W, 450);
 
-    // عدد با گرادیانت
-    var numGrad = ctx.createLinearGradient(W / 2 - 300, 0, W / 2 + 300, 0);
+    var numGrad = ctx.createLinearGradient(W / 2 - 350, 0, W / 2 + 350, 0);
     numGrad.addColorStop(0, pnlColor);
     numGrad.addColorStop(0.5, pnlColor2);
     numGrad.addColorStop(1, pnlColor);
 
     ctx.shadowColor = pnlColor;
-    ctx.shadowBlur = 90;
-    ctx.font = '900 118px Inter, sans-serif';
+    ctx.shadowBlur = 100;
+    ctx.font = '900 142px Inter, sans-serif';
     ctx.fillStyle = numGrad;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(nTxt, W / 2, 420);
+    ctx.fillText(nTxt, W / 2, 450);
     ctx.shadowBlur = 0;
 
     ctx.font = '900 14px Inter, sans-serif';
-    ctx.fillStyle = 'rgba(200,215,240,0.7)';
+    ctx.fillStyle = 'rgba(200,215,240,0.55)';
     ctx.textBaseline = 'top';
-    ctx.fillText('N E T   P R O F I T   /   L O S S', W / 2, 500);
+    ctx.fillText('N E T   P R O F I T   /   L O S S', W / 2, 545);
 
-    // ═══ ۴ کارت آمار ═══
-    var cw = 175, ch = 110, gap = 10;
+    // ═══ 9) 4 کارت آمار ═══
+    var cw = 195, ch = 120, gap = 10;
     var tw = cw * 4 + gap * 3;
     var sx = (W - tw) / 2;
-    var cy = 570;
+    var cy = 610;
 
-    function statCard(x, y, label, val, clr) {
-      // Background
-      ctx.fillStyle = 'rgba(15,20,35,0.85)';
-      rr(ctx, x, y, cw, ch, 16);
+    function statCard(x, y, label, val, clr, ico) {
+      ctx.shadowColor = 'rgba(0,0,0,0.7)';
+      ctx.shadowBlur = 30;
+      ctx.shadowOffsetY = 10;
+
+      var g = ctx.createLinearGradient(x, y, x, y + ch);
+      g.addColorStop(0, 'rgba(20,25,45,0.95)');
+      g.addColorStop(1, 'rgba(8,10,22,0.95)');
+      ctx.fillStyle = g;
+      rr(ctx, x, y, cw, ch, 18);
       ctx.fill();
 
-      // Border
+      ctx.shadowBlur = 0;
+      ctx.shadowOffsetY = 0;
+
       ctx.strokeStyle = 'rgba(200,215,240,0.15)';
       ctx.lineWidth = 1;
-      rr(ctx, x, y, cw, ch, 16);
+      rr(ctx, x, y, cw, ch, 18);
       ctx.stroke();
 
-      // Top accent
-      var ag = ctx.createLinearGradient(x, 0, x + cw, 0);
+      var ag = ctx.createLinearGradient(x + 20, 0, x + cw - 20, 0);
       ag.addColorStop(0, clr);
+      ag.addColorStop(0.5, clr);
       ag.addColorStop(1, 'rgba(0,0,0,0)');
       ctx.fillStyle = ag;
-      ctx.fillRect(x + 20, y, cw - 40, 2);
+      ctx.fillRect(x + 20, y, cw - 40, 2.5);
 
-      // Value
-      ctx.font = '900 30px Inter, sans-serif';
+      ctx.font = '22px Inter, sans-serif';
       ctx.fillStyle = clr;
       ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(val, x + cw / 2, y + 45);
+      ctx.textBaseline = 'top';
+      ctx.fillText(ico, x + cw / 2, y + 14);
 
-      // Label
-      ctx.font = '900 10px Inter, sans-serif';
-      ctx.fillStyle = 'rgba(200,215,240,0.6)';
+      ctx.font = '900 34px Inter, sans-serif';
+      ctx.fillStyle = clr;
       ctx.textBaseline = 'middle';
-      ctx.fillText(label, x + cw / 2, y + 85);
+      ctx.shadowColor = clr;
+      ctx.shadowBlur = 16;
+      ctx.fillText(val, x + cw / 2, y + 62);
+      ctx.shadowBlur = 0;
+
+      ctx.font = '900 10px Inter, sans-serif';
+      ctx.fillStyle = 'rgba(200,215,240,0.55)';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(label, x + cw / 2, y + 98);
     }
 
-    statCard(sx, cy, 'TOTAL TRADES', trades.length + '', C.primary);
+    statCard(sx, cy, 'TOTAL TRADES', trades.length + '', C.primary, '📊');
     statCard(sx + cw + gap, cy, 'WIN RATE', wr.toFixed(1) + '%',
-             wr >= 50 ? '#2ee6a6' : '#ff5674');
-    statCard(sx + (cw + gap) * 2, cy, 'WINS', w + '', '#2ee6a6');
-    statCard(sx + (cw + gap) * 3, cy, 'LOSSES', l + '', '#ff5674');
+             wr >= 50 ? '#2ee6a6' : '#ff5674', '🎯');
+    statCard(sx + (cw + gap) * 2, cy, 'WINS', w + '', '#2ee6a6', '✅');
+    statCard(sx + (cw + gap) * 3, cy, 'LOSSES', l + '', '#ff5674', '❌');
 
-    // ═══ نوار Win Rate ═══
-    var barY = 730;
-    var barX = 60, barW = W - 120, barH = 14;
+    // ═══ 10) نمودار رشد ═══
+    var sorted = trades.slice().sort(function(a, b) {
+      return (a.createdAt || 0) - (b.createdAt || 0);
+    });
+    var cum = 0;
+    var points = sorted.map(function(t) {
+      var p = t.result === 'win' ? Math.abs(+t.amount || 0) :
+              t.result === 'loss' ? -Math.abs(+t.amount || 0) : 0;
+      cum += p;
+      return cum;
+    });
+
+    if (points.length > 1) {
+      var chartY = 830;
+      var chartH = 130;
+      var chartX = 70;
+      var chartW = W - 140;
+
+      ctx.fillStyle = 'rgba(0,0,0,0.4)';
+      rr(ctx, chartX - 15, chartY - 35, chartW + 30, chartH + 60, 16);
+      ctx.fill();
+
+      ctx.strokeStyle = 'rgba(200,215,240,0.12)';
+      ctx.lineWidth = 1;
+      rr(ctx, chartX - 15, chartY - 35, chartW + 30, chartH + 60, 16);
+      ctx.stroke();
+
+      ctx.font = '900 12px Inter, sans-serif';
+      ctx.fillStyle = C.secondary;
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'top';
+      ctx.fillText('◆  EQUITY CURVE', chartX, chartY - 25);
+
+      var maxV = Math.max.apply(null, points.concat([0]));
+      var minV = Math.min.apply(null, points.concat([0]));
+      var range = maxV - minV || 1;
+      var zeroY = chartY + chartH * (maxV / range);
+
+      ctx.strokeStyle = 'rgba(200,215,240,0.15)';
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.moveTo(chartX, zeroY);
+      ctx.lineTo(chartX + chartW, zeroY);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      var stepX = chartW / (points.length - 1);
+      var pts = points.map(function(v, i) {
+        return {
+          x: chartX + i * stepX,
+          y: chartY + chartH - ((v - minV) / range) * chartH
+        };
+      });
+
+      var isPositiveEnd = points[points.length - 1] >= 0;
+      var areaColor = isPositiveEnd ? 'rgba(46,230,166,0.2)' : 'rgba(255,86,116,0.2)';
+      var areaFade = ctx.createLinearGradient(0, chartY, 0, chartY + chartH);
+      areaFade.addColorStop(0, areaColor);
+      areaFade.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = areaFade;
+      ctx.beginPath();
+      ctx.moveTo(pts[0].x, zeroY);
+      pts.forEach(function(p) { ctx.lineTo(p.x, p.y); });
+      ctx.lineTo(pts[pts.length - 1].x, zeroY);
+      ctx.closePath();
+      ctx.fill();
+
+      var lineGrad = ctx.createLinearGradient(chartX, 0, chartX + chartW, 0);
+      lineGrad.addColorStop(0, '#2ee6a6');
+      lineGrad.addColorStop(0.5, C.primary);
+      lineGrad.addColorStop(1, C.secondary);
+      ctx.strokeStyle = lineGrad;
+      ctx.lineWidth = 3;
+      ctx.lineJoin = 'round';
+      ctx.lineCap = 'round';
+      ctx.shadowColor = C.glow;
+      ctx.shadowBlur = 20;
+      ctx.beginPath();
+      pts.forEach(function(p, i) {
+        if (i === 0) ctx.moveTo(p.x, p.y);
+        else ctx.lineTo(p.x, p.y);
+      });
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+
+      var last = pts[pts.length - 1];
+      ctx.fillStyle = C.secondary;
+      ctx.shadowColor = C.glow;
+      ctx.shadowBlur = 20;
+      ctx.beginPath();
+      ctx.arc(last.x, last.y, 6, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+      ctx.strokeStyle = C.bgTop;
+      ctx.lineWidth = 2.5;
+      ctx.stroke();
+
+      var finalV = points[points.length - 1];
+      ctx.font = '900 12px Inter, sans-serif';
+      ctx.fillStyle = finalV >= 0 ? '#2ee6a6' : '#ff5674';
+      ctx.textAlign = 'right';
+      ctx.textBaseline = 'top';
+      ctx.fillText((finalV >= 0 ? '+' : '') + '$' + finalV.toFixed(0),
+                   chartX + chartW, chartY - 25);
+    }
+
+    // ═══ 11) Win Rate Bar ═══
+    var barY = 1050;
+    var barX = 70, barW = W - 140, barH = 16;
 
     ctx.fillStyle = 'rgba(0,0,0,0.5)';
-    rr(ctx, barX, barY, barW, barH, 7);
+    rr(ctx, barX, barY, barW, barH, 8);
     ctx.fill();
 
     ctx.strokeStyle = 'rgba(200,215,240,0.15)';
     ctx.lineWidth = 1;
-    rr(ctx, barX, barY, barW, barH, 7);
+    rr(ctx, barX, barY, barW, barH, 8);
     ctx.stroke();
 
     var fw = (wr / 100) * barW;
@@ -687,13 +814,21 @@
       ctx.fillStyle = fg;
       ctx.shadowColor = C.glow;
       ctx.shadowBlur = 30;
-      rr(ctx, barX, barY, Math.max(fw, 14), barH, 7);
+      rr(ctx, barX, barY, Math.max(fw, 16), barH, 8);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+
+      ctx.fillStyle = '#ffffff';
+      ctx.shadowColor = '#ffffff';
+      ctx.shadowBlur = 20;
+      ctx.beginPath();
+      ctx.arc(barX + fw - 8, barY + barH / 2, 5, 0, Math.PI * 2);
       ctx.fill();
       ctx.shadowBlur = 0;
     }
 
     ctx.font = '900 12px Inter, sans-serif';
-    ctx.fillStyle = 'rgba(200,215,240,0.7)';
+    ctx.fillStyle = 'rgba(200,215,240,0.65)';
     ctx.textAlign = 'left';
     ctx.textBaseline = 'bottom';
     ctx.fillText('WIN RATE ' + wr.toFixed(1) + '%', barX, barY - 10);
@@ -703,7 +838,7 @@
     ctx.fillStyle = pf >= 1.5 ? '#2ee6a6' : pf < 1 ? '#ff5674' : '#ffb020';
     ctx.fillText('PROFIT FACTOR ' + pfT, barX + barW, barY - 10);
 
-    // ═══ Top Strategies ═══
+    // ═══ 12) Top Strategies ═══
     var bs = {};
     trades.forEach(function(t) {
       var s = t.strategy || '—';
@@ -716,66 +851,73 @@
       return { name: k, net: bs[k] };
     }).sort(function(a, b) { return b.net - a.net; });
 
-    var sY = 790;
+    var sY = 1110;
 
-    // Header خط
     var hLine = ctx.createLinearGradient(W / 2 - 200, 0, W / 2 + 200, 0);
     hLine.addColorStop(0, 'rgba(255,255,255,0)');
     hLine.addColorStop(0.5, C.primary);
     hLine.addColorStop(1, 'rgba(255,255,255,0)');
     ctx.fillStyle = hLine;
-    ctx.fillRect(W / 2 - 200, sY, 400, 1);
+    ctx.fillRect(W / 2 - 200, sY, 400, 1.5);
 
-    ctx.font = '900 16px Inter, sans-serif';
+    ctx.font = '900 15px Inter, sans-serif';
     ctx.fillStyle = C.secondary;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'top';
-    ctx.fillText('◆  TOP STRATEGIES  ◆', W / 2, sY + 14);
+    ctx.shadowColor = C.glow;
+    ctx.shadowBlur = 12;
+    ctx.fillText('◆  TOP STRATEGIES  ◆', W / 2, sY + 12);
+    ctx.shadowBlur = 0;
 
     strats.slice(0, 4).forEach(function(s, i) {
-      var y = sY + 50 + i * 42;
+      var y = sY + 48 + i * 42;
       var isP = s.net > 0;
       var color = isP ? '#2ee6a6' : s.net < 0 ? '#ff5674' : '#8697b8';
       var sign = isP ? '▲' : s.net < 0 ? '▼' : '●';
       var txt = isP ? '+$' + s.net.toFixed(0) : '-$' + Math.abs(s.net).toFixed(0);
 
-      // Row background
-      var rowG = ctx.createLinearGradient(80, 0, W - 80, 0);
-      rowG.addColorStop(0, isP ? 'rgba(46,230,166,0.06)' : 'rgba(255,86,116,0.06)');
+      var rowG = ctx.createLinearGradient(70, 0, W - 70, 0);
+      rowG.addColorStop(0, isP ? 'rgba(46,230,166,0.08)' : 'rgba(255,86,116,0.08)');
       rowG.addColorStop(1, 'rgba(0,0,0,0)');
       ctx.fillStyle = rowG;
-      rr(ctx, 60, y - 12, W - 120, 34, 10);
+      rr(ctx, 55, y - 14, W - 110, 36, 10);
       ctx.fill();
 
-      // Rank
+      ctx.fillStyle = color;
+      ctx.fillRect(55, y - 14, 3, 36);
+
       ctx.font = '900 16px Inter, sans-serif';
       ctx.fillStyle = C.primary;
       ctx.textAlign = 'left';
       ctx.textBaseline = 'middle';
-      ctx.fillText('#' + (i + 1), 85, y + 5);
+      ctx.fillText('#' + (i + 1), 78, y + 4);
 
-      // Name
-      ctx.font = '800 15px Inter, sans-serif';
+      ctx.fillStyle = color;
+      ctx.fillText(sign, 108, y + 4);
+
+      ctx.font = '800 14px Inter, sans-serif';
       ctx.fillStyle = 'rgba(230,240,255,0.9)';
-      var nm = s.name.length > 22 ? s.name.substring(0, 20) + '...' : s.name;
-      ctx.fillText(nm, 130, y + 5);
+      var nm = s.name.length > 20 ? s.name.substring(0, 18) + '...' : s.name;
+      ctx.fillText(nm, 135, y + 4);
 
-      // PnL
       ctx.font = '900 17px Inter, sans-serif';
       ctx.fillStyle = color;
       ctx.textAlign = 'right';
-      ctx.fillText(txt, W - 90, y + 5);
+      ctx.shadowColor = color;
+      ctx.shadowBlur = 10;
+      ctx.fillText(txt, W - 80, y + 4);
+      ctx.shadowBlur = 0;
     });
 
-    // ═══ Footer ═══
-    var footY = H - 55;
+    // ═══ 13) Footer ═══
+    var footY = H - 45;
 
     var fLine = ctx.createLinearGradient(150, 0, W - 150, 0);
     fLine.addColorStop(0, 'rgba(255,255,255,0)');
-    fLine.addColorStop(0.5, 'rgba(200,215,240,0.3)');
+    fLine.addColorStop(0.5, C.primary);
     fLine.addColorStop(1, 'rgba(255,255,255,0)');
     ctx.fillStyle = fLine;
-    ctx.fillRect(150, footY - 15, W - 300, 1);
+    ctx.fillRect(150, footY - 22, W - 300, 1);
 
     ctx.font = '900 14px Inter, sans-serif';
     var footG = ctx.createLinearGradient(W / 2 - 100, 0, W / 2 + 100, 0);
@@ -784,11 +926,21 @@
     ctx.fillStyle = footG;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
+    ctx.shadowColor = C.glow;
+    ctx.shadowBlur = 15;
     ctx.fillText('◆  PO-TRADE  ◆', W / 2, footY);
+    ctx.shadowBlur = 0;
 
-    ctx.font = '600 10px Inter, sans-serif';
-    ctx.fillStyle = 'rgba(200,215,240,0.5)';
-    ctx.fillText('github.com/IQZEUS/PO-TREAD', W / 2, footY + 22);
+    ctx.font = '700 10px Inter, sans-serif';
+    ctx.fillStyle = 'rgba(200,215,240,0.4)';
+    ctx.fillText('github.com/IQZEUS/PO-TREAD', W / 2, footY + 20);
+
+    // ═══ 14) Vignette ═══
+    var vig = ctx.createRadialGradient(W / 2, H / 2, 500, W / 2, H / 2, 900);
+    vig.addColorStop(0, 'rgba(0,0,0,0)');
+    vig.addColorStop(1, 'rgba(0,0,0,0.65)');
+    ctx.fillStyle = vig;
+    ctx.fillRect(0, 0, W, H);
 
     return canvas;
   }
