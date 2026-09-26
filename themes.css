@@ -5703,3 +5703,241 @@ html[dir="ltr"] .kpi .val { text-align: left; }
   .chart-box { height: 300px; }
   .pmc-clock { font-size: 32px; }
 }
+/* ============================================================
+   🚨 OVERFLOW FIX — جلوگیری از کشیده شدن افقی
+   ============================================================ */
+
+/* ریشه مشکل — html و body */
+html, body {
+  overflow-x: hidden !important;
+  max-width: 100vw !important;
+  width: 100% !important;
+  position: relative;
+}
+
+/* همه عناصر */
+*, *::before, *::after {
+  box-sizing: border-box !important;
+  max-width: 100%;
+}
+
+/* حذف ::before آفست‌دار که باعث overflow می‌شه */
+#page-analysis::before {
+  display: none !important;
+}
+
+/* جلوگیری از overflow در همه کانتینرهای آنالیز */
+#page-analysis,
+#page-analysis > *,
+#assistant-host,
+#goals-banner-host,
+#market-clock-host,
+#rules-banner,
+#share-host,
+#kpis,
+.chart-card,
+.tier-card,
+.assistant,
+.goal-banner,
+.share-card,
+.pt-market-clock,
+.toolbar {
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+}
+
+/* همه grid ها با minmax(0, 1fr) */
+.kpis,
+.pmc-body,
+.tier-stats,
+.tier-ladder,
+.goal-banner-body,
+.share-actions,
+#page-analysis .toolbar .seg,
+#page-analysis .toolbar .tools {
+  display: grid !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+/* هر child گرید - min-width: 0 تا از overflow جلوگیری کنه */
+.kpi,
+.pmc-session,
+.tier-stat,
+.tier-step,
+.goal-banner-stat,
+.share-btn {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+}
+
+/* فیکس flex items */
+.assistant-inner,
+.tier-head,
+.goal-banner-head,
+.share-head,
+.pmc-head,
+.pmc-title,
+.pmc-time {
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+
+.assistant-body,
+.tier-info,
+.pmc-info,
+.goal-banner-head > div:last-child {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+}
+
+/* متن‌ها همه truncate */
+.pmc-name,
+.pmc-hours,
+.tier-name,
+.tier-sub,
+.tier-stat .v,
+.tier-stat .l,
+.tier-step .nm,
+.kpi .lbl,
+.kpi .val,
+.goal-banner-title,
+.goal-banner-sub,
+.goal-banner-stat .v,
+.goal-banner-stat .l,
+.assistant-title,
+.assistant-text,
+.assistant-badge,
+.share-head h3,
+.share-btn,
+.chart-card .card-head h2 {
+  max-width: 100% !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis;
+}
+
+/* فیکس flex containers */
+.assistant-inner,
+.tier-head,
+.goal-banner-head,
+.pmc-head {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  align-items: center;
+}
+
+/* کانتینر اصلی اپ */
+.app {
+  max-width: 100vw !important;
+  overflow-x: hidden !important;
+}
+
+/* رفع مشکل padding منفی */
+#page-analysis {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+/* نمودار */
+.chart-box {
+  max-width: 100% !important;
+  overflow: hidden !important;
+}
+
+/* جداول */
+.table-wrap {
+  max-width: 100% !important;
+  overflow-x: auto !important;
+}
+
+/* ═══ موبایل — فقط ۱ ستون گرید ═══ */
+@media (max-width: 640px) {
+  /* KPI ها ۲ ستون بمونن ولی با فاصله کمتر */
+  .kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 6px !important;
+  }
+
+  /* بازار جهانی ۲×۲ */
+  .pmc-body {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  /* نردبان Tier ۴ ستون */
+  .tier-ladder {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 4px !important;
+  }
+
+  /* نوار رنج */
+  #page-analysis .toolbar .seg {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  }
+
+  /* دکمه‌های تولبار */
+  #page-analysis .toolbar .tools {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  }
+
+  /* دکمه‌های اشتراک */
+  .share-actions {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 5px !important;
+  }
+
+  /* پدینگ کارت‌ها کمتر */
+  .card,
+  .tier-card,
+  .assistant,
+  .goal-banner,
+  .share-card,
+  .chart-card {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  /* آمار Tier */
+  .tier-stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 5px !important;
+  }
+
+  /* آمار بنر هدف */
+  .goal-banner-body {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 5px !important;
+  }
+
+  /* Tier icon کوچیک‌تر */
+  .tier-icon-wrap, .tier-icon {
+    width: 56px !important;
+    height: 56px !important;
+  }
+
+  .tier-icon-wrap {
+    flex: 0 0 56px !important;
+  }
+
+  /* فونت‌های کوچیک‌تر */
+  .tier-name { font-size: 20px !important; }
+  .kpi .val { font-size: 15px !important; }
+  .pmc-clock { font-size: 20px !important; }
+  .pmc-flag { font-size: 22px !important; }
+  .goal-banner-stat .v { font-size: 13px !important; }
+  .tier-stat .v { font-size: 13px !important; }
+}
+
+/* ═══ موبایل کوچیک ═══ */
+@media (max-width: 380px) {
+  .tier-name { font-size: 18px !important; }
+  .kpi .val { font-size: 13px !important; }
+  .pmc-clock { font-size: 18px !important; }
+  .pmc-flag { font-size: 20px !important; }
+  .assistant-title { font-size: 13px !important; }
+  .assistant-text { font-size: 11.5px !important; }
+}
