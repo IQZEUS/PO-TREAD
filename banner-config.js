@@ -67,7 +67,7 @@ window.PT_BANNER_CONFIG = {
       id: "maintenance",
       enabled: true,
       priority: 20,
-      maxShows: 10,
+      maxShows: 2,
       icon: "⚠️",
       title: "نسخه جدید ",
       title_en: "Server Maintenance",
@@ -76,7 +76,7 @@ window.PT_BANNER_CONFIG = {
       cta: "",
       ctaUrl: "",
       image: "https://cdn.imgurl.ir/uploads/p054843_photo_2026-09-26_19-40-35.jpg",
-      dismissible: false,
+      dismissible: true,
       size: "medium",
       colors: {
         border: "rgba(255, 176, 32, 0.5)",
