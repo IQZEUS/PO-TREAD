@@ -12,10 +12,11 @@
   var SUPABASE_URL = 'https://rodguhcuatixdbzwjfvy.supabase.co';
   var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJvZGd1aGN1YXRpeGRiendqZnZ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk5MTgyMTMsImV4cCI6MjEwNTQ5NDIxM30.oXGyCA3jOcsS5inqsXuSOhELZLoUG7pYagZox1SEmhY';
 
+  if (typeof supabase === 'undefined' || !supabase.createClient) { try { console.warn('[sync] Supabase library not loaded - cloud sync disabled, local mode active'); } catch (e) {} return; }
   var sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   var TRADES_KEY    = 'po.v4.trades';
-  var SETTINGS_KEYS = ['po.v4.goal', 'po.v4.rules', 'po.v4.checklist', 'po.v4.theme', 'po.v4.preset', 'po.lang'];
+  var SETTINGS_KEYS = ['po.v4.goal', 'po.v4.rules', 'po.v4.checklist', 'po.v4.theme', 'po.v4.preset', 'po.lang', 'po.v4.alerts'];
   var PENDING_KEY   = 'po.v4.pending';
   var LAST_UID_KEY  = 'po.v4.lastUid';
   var SETTINGS_TABLE = 'user_settings';

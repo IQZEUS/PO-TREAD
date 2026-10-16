@@ -231,6 +231,11 @@
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c =>
     ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
 
+  /* 🔒 Only allow real raster data-URLs as screenshots (blocks attribute-injection / XSS via import or sync) */
+  const SAFE_IMG = /^data:image\/(?:jpeg|jpg|png|webp|gif);base64,[A-Za-z0-9+\/=]+$/;
+  const safeImg = v => (typeof v === 'string' && v.length < 3000000 && SAFE_IMG.test(v)) ? v : null;
+  const safeId  = v => { const x = String(v == null ? '' : v); return /^[\w.-]{1,64}$/.test(x) ? x : null; };
+
   const toISO = d => {
     const y = d.getFullYear();
     const m = String(d.getMonth() + 1).padStart(2, '0');
@@ -1285,7 +1290,7 @@ function applyTheme(th) {
     const lb = document.createElement('div');
     lb.className = 'lightbox';
     lb.innerHTML = '<button class="lightbox-close">✕</button><img alt="" />';
-    lb.querySelector('img').src = src;
+    lb.querySelector('img').src = safeImg(src) || '';
     lb.addEventListener('click', e => {
       if (e.target === lb || e.target.classList.contains('lightbox-close')) lb.remove();
     });
@@ -1399,8 +1404,9 @@ function applyTheme(th) {
     const rmTxt = rm != null ? ((rm > 0 ? '+' : '') + rm + 'R') : '';
     const SIDE = { buy: t('buy'), sell: t('sell') };
     const tags = (tr.tags || []).slice(0, 4);
-    const thumb = tr.screenshot
-      ? '<div class="ti-thumb" data-thumb="' + esc(tr.id) + '"><img src="' + tr.screenshot + '" alt="" loading="lazy" /></div>'
+    const shot = safeImg(tr.screenshot);
+    const thumb = shot
+      ? '<div class="ti-thumb" data-thumb="' + esc(tr.id) + '"><img src="' + esc(shot) + '" alt="" loading="lazy" /></div>'
       : '';
 
     return '' +
@@ -1947,6 +1953,8 @@ function applyTheme(th) {
     if (el.pageCalendar.classList.contains('active')) renderCalendar();
     if (el.pageTrades.classList.contains('active')) renderAllTrades();
     if (el.pageSettings.classList.contains('active')) renderSettingsPage();
+    try { if (window.POAlerts) window.POAlerts.check(getGoalProgress(), checkRules()); } catch (e) {}
+    try { if (window.POPlus) window.POPlus.render(); } catch (e) {}
   }
 
   /* ============================ DATALISTS ============================ */
@@ -2026,7 +2034,7 @@ function applyTheme(th) {
         let added = 0;
         for (const raw of parsed) {
           if (!raw || typeof raw !== 'object') continue;
-          const id = raw.id || uid();
+          const id = safeId(raw.id) || uid();
           if (existing.has(id)) continue;
           trades.push({
             id,
@@ -2037,10 +2045,10 @@ function applyTheme(th) {
             result: ['win','loss','be'].indexOf(raw.result) > -1 ? raw.result : 'be',
             amount: Math.abs(Number(raw.amount) || 0),
             risk: raw.risk != null ? Math.abs(Number(raw.risk)) : null,
-            tags: Array.isArray(raw.tags) ? raw.tags.slice(0, 8) : [],
+            tags: Array.isArray(raw.tags) ? raw.tags.slice(0, 8).map(g => String(g).slice(0, 32)) : [],
             emotion: EMOTIONS[raw.emotion] ? raw.emotion : 'calm',
             checklist: raw.checklist && typeof raw.checklist === 'object' ? raw.checklist : {},
-            screenshot: typeof raw.screenshot === 'string' ? raw.screenshot : null,
+            screenshot: safeImg(raw.screenshot),
             note: String(raw.note || '').slice(0, 500),
             createdAt: Number(raw.createdAt) || Date.now()
           });

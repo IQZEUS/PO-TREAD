@@ -7,6 +7,8 @@
 <title>PO-TRADE | ژورنال معاملات</title>
 <link rel="stylesheet" href="style.css" />
 <link rel="stylesheet" href="themes.css" />
+<link rel="stylesheet" href="legend.css" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;700;800;900&family=Inter:wght@400;600;700;800;900&display=swap" media="print" onload="this.media='all'" />
 
 <style>
   #banner-host {
@@ -1200,6 +1202,7 @@
       </div>
     </div>
 
+    <div id="plus-host"></div>
     <div class="kpis" id="kpis"></div>
 
     <div class="card goals-mini" id="goals-mini-card">
@@ -1506,6 +1509,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>if(!window.supabase){document.write('<script src="https://fastly.jsdelivr.net/npm/@supabase/supabase-js@2"><\/script>');document.write('<script src="https://unpkg.com/@supabase/supabase-js@2"><\/script>');}</script>
 <script>
 (function(){
   'use strict';
@@ -2124,6 +2128,8 @@
 })();
 </script>
 
+<script src="alerts.js"></script>
+<script src="analysis-plus.js"></script>
 <script src="assistant.js"></script>
 </body>
 </html>

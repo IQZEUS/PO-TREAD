@@ -436,7 +436,7 @@
     var trades = getLS('po.v4.trades', []);
     var tier = getTier(trades);
 
-    var W = 900, H = 1650;
+    var W = 900, EX = 262, H = 1650 + EX; /* EX = room for the PRO dashboard block */
     var canvas = document.createElement('canvas');
     canvas.width = W;
     canvas.height = H;
@@ -953,6 +953,67 @@
     // ══════════════════════════════════════════════════════
     // 13) کارت نقل قول — NEW!
     // ══════════════════════════════════════════════════════
+
+    // ═══════════════════════════════════════════
+    // 12b) PRO DASHBOARD — rings + mini stats (added)
+    // ═══════════════════════════════════════════
+    (function () {
+      var sortedD = trades.slice().sort(function (a, b) { return (a.createdAt || 0) - (b.createdAt || 0); });
+      var eq = 0, pk = 0, dd = 0, days = {}, dW = 0, dL = 0, gW = 0, gL = 0;
+      sortedD.forEach(function (t) {
+        var v = Math.abs(+t.amount || 0), p = t.result === 'win' ? v : t.result === 'loss' ? -v : 0;
+        eq += p; if (eq > pk) pk = eq; if (pk - eq > dd) dd = pk - eq;
+        if (t.result === 'win') { dW++; gW += v; } else if (t.result === 'loss') { dL++; gL += v; }
+        var k = String(t.date || ''); days[k] = (days[k] || 0) + p;
+      });
+      var dk = Object.keys(days), best = 0, worst = 0;
+      dk.forEach(function (k) { if (days[k] > best) best = days[k]; if (days[k] < worst) worst = days[k]; });
+      var avgW = dW ? gW / dW : 0, avgL = dL ? gL / dL : 0;
+      var rrv = avgL > 0 ? avgW / avgL : 0;
+      var score = Math.round(Math.max(0, Math.min(100, wr * 0.35 + Math.min(isFinite(pf) ? pf : 3, 3) / 3 * 100 * 0.35 + (net > 0 ? 20 : 0) + (net > 0 && dd < net ? 10 : 0))));
+      var money0 = function (v) { var r = Math.round(v); if (!r) return '$0'; return (r < 0 ? '-' : '+') + '$' + Math.abs(r).toLocaleString('en-US'); };
+      var y0 = 1052;
+
+      function ring(cx, cy, r, frac, clr, txt, lbl) {
+        frac = Math.max(0, Math.min(1, frac || 0));
+        ctx.lineWidth = 12; ctx.lineCap = 'round';
+        ctx.strokeStyle = 'rgba(200,215,240,0.12)';
+        ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.stroke();
+        if (frac > 0) {
+          var g = ctx.createLinearGradient(cx - r, cy - r, cx + r, cy + r);
+          g.addColorStop(0, clr); g.addColorStop(1, C.secondary);
+          ctx.strokeStyle = g; ctx.shadowColor = clr; ctx.shadowBlur = 22;
+          ctx.beginPath(); ctx.arc(cx, cy, r, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * frac); ctx.stroke();
+          ctx.shadowBlur = 0;
+        }
+        ctx.lineCap = 'butt';
+        ctx.font = '900 30px Inter, sans-serif'; ctx.fillStyle = '#ffffff';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.shadowColor = clr; ctx.shadowBlur = 14; ctx.fillText(txt, cx, cy); ctx.shadowBlur = 0;
+        ctx.font = '900 11px Inter, sans-serif'; ctx.fillStyle = 'rgba(200,215,240,0.6)';
+        ctx.fillText(lbl, cx, cy + r + 26);
+      }
+      var rc = 62, cyR = y0 + 78;
+      ring(165, cyR, rc, isFinite(pf) ? pf / 3 : 1, pf >= 1.5 ? '#2ee6a6' : pf < 1 ? '#ff5674' : '#ffb020', isFinite(pf) ? pf.toFixed(2) : '\u221e', 'PROFIT FACTOR');
+      ring(450, cyR, rc, score / 100, C.primary, String(score), 'EDGE SCORE');
+      ring(735, cyR, rc, rrv / 3, rrv >= 1 ? '#2ee6a6' : '#ff5674', avgL > 0 ? rrv.toFixed(2) : '\u2014', 'REWARD : RISK');
+
+      var mw = 205, mh = 62, mg = 10, mx = (W - (mw * 4 + mg * 3)) / 2, my = y0 + 190;
+      [['BEST DAY', money0(best), '#2ee6a6'], ['WORST DAY', money0(worst), '#ff5674'], ['AVG WIN', money0(avgW), '#2ee6a6'], ['AVG LOSS', money0(-avgL), '#ff5674']].forEach(function (m, i) {
+        var x = mx + i * (mw + mg);
+        var g2 = ctx.createLinearGradient(x, my, x, my + mh);
+        g2.addColorStop(0, 'rgba(20,25,45,0.9)'); g2.addColorStop(1, 'rgba(8,10,22,0.9)');
+        ctx.fillStyle = g2; rr(ctx, x, my, mw, mh, 14); ctx.fill();
+        ctx.strokeStyle = 'rgba(200,215,240,0.14)'; ctx.lineWidth = 1; rr(ctx, x, my, mw, mh, 14); ctx.stroke();
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.font = '900 20px Inter, sans-serif'; ctx.fillStyle = m[2]; ctx.shadowColor = m[2]; ctx.shadowBlur = 10;
+        ctx.fillText(m[1], x + mw / 2, my + 26); ctx.shadowBlur = 0;
+        ctx.font = '900 10px Inter, sans-serif'; ctx.fillStyle = 'rgba(200,215,240,0.55)';
+        ctx.fillText(m[0], x + mw / 2, my + 47);
+      });
+    })();
+    ctx.save(); ctx.translate(0, EX); /* everything from the quote card to the strategies moves down */
+
     var qY = 1070;
     var qH = 200;
     var qX = 60;
@@ -1124,6 +1185,7 @@
     // ══════════════════════════════════════════════════════
     // 15) Footer — فقط PO-TRADE، بدون گیت
     // ══════════════════════════════════════════════════════
+    ctx.restore();
     var footY = H - 50;
 
     var fLine = ctx.createLinearGradient(150, 0, W - 150, 0);
