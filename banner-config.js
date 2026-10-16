@@ -107,6 +107,29 @@ window.PT_BANNER_CONFIG = {
         ctaBg: "#000000",
         ctaText: "#14140f"
       }
+    },
+
+    /* === بنر 5 === */
+    {
+      id: "banner-2b5d3q",
+      enabled: true,
+      priority: 5,
+      maxShows: -1,
+      icon: "✨",
+      title: "بنر جدید",
+      title_en: "New Banner",
+      message: "متن پیام رو اینجا بنویس",
+      message_en: "Write your message here",
+      cta: "مشاهده",
+      cta_en: "View",
+      ctaUrl: "https://github.com/IQZEUS/PO-TREAD",
+      dismissible: true,
+      size: "large",
+      colors: {
+        border: "rgba(214, 163, 92, 0.4)",
+        ctaBg: "#d6a35c",
+        ctaText: "#14140f"
+      }
     }
 
   ]
