@@ -69,7 +69,7 @@ window.PT_BANNER_CONFIG = {
       priority: 20,
       maxShows: 2,
       icon: "⚠️",
-      title: "نسخه جدید ",
+      title: "نسخه جدید به زودی ",
       title_en: "Server Maintenance",
       message: "امکانات جدید در راه است ",
       message_en: "Service unavailable tonight 2-4 AM",
