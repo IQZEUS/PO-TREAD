@@ -69,14 +69,14 @@ window.PT_BANNER_CONFIG = {
       priority: 20,
       maxShows: 10,
       icon: "⚠️",
-      title: "درحال بروزرسانی ",
+      title: "نسخه جدید ",
       title_en: "Server Maintenance",
       message: "امکانات جدید در راه است ",
       message_en: "Service unavailable tonight 2-4 AM",
       cta: "",
       ctaUrl: "",
-      image: "https://www.beytoote.com/images/stories/fun/profile-pictures02-7.jpg",
-      dismissible: true,
+      image: "https://cdn.imgurl.ir/uploads/p054843_photo_2026-09-26_19-40-35.jpg",
+      dismissible: false,
       size: "medium",
       colors: {
         border: "rgba(255, 176, 32, 0.5)",
@@ -88,7 +88,7 @@ window.PT_BANNER_CONFIG = {
     /* === بنر 4 === */
     {
       id: "banner-bjcccp",
-      enabled: true,
+      enabled: false,
       priority: 5,
       maxShows: 2,
       icon: "✨",
@@ -100,7 +100,7 @@ window.PT_BANNER_CONFIG = {
       cta_en: "View",
       ctaUrl: "https://github.com/IQZEUS/PO-TREAD",
       image: "https://cdn.imgurl.ir/uploads/p054843_photo_2026-09-26_19-40-35.jpg",
-      dismissible: true,
+      dismissible: false,
       size: "small",
       colors: {
         border: "#000000",
