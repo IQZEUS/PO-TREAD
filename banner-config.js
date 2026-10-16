@@ -1,6 +1,6 @@
 /* ============================================================
    PO-TRADE Banner Config
-   آخرین بروزرسانی: 2026-09-20
+   آخرین بروزرسانی: 2026-10-16
    ============================================================ */
 
 window.PT_BANNER_CONFIG = {
@@ -88,22 +88,23 @@ window.PT_BANNER_CONFIG = {
     /* === بنر 4 === */
     {
       id: "banner-bjcccp",
-      enabled: false,
+      enabled: true,
       priority: 5,
-      maxShows: 5,
+      maxShows: 2,
       icon: "✨",
-      title: "بنر جدید",
+      title: "",
       title_en: "New Banner",
-      message: "متن پیام رو اینجا بنویس",
+      message: "",
       message_en: "Write your message here",
       cta: "مشاهده",
       cta_en: "View",
       ctaUrl: "https://github.com/IQZEUS/PO-TREAD",
-      dismissible: false,
-      size: "large",
+      image: "https://cdn.imgurl.ir/uploads/p054843_photo_2026-09-26_19-40-35.jpg",
+      dismissible: true,
+      size: "small",
       colors: {
-        border: "rgba(214, 163, 92, 0.4)",
-        ctaBg: "#d6a35c",
+        border: "#000000",
+        ctaBg: "#000000",
         ctaText: "#14140f"
       }
     }
