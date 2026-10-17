@@ -1762,6 +1762,30 @@ function applyTheme(th) {
         '<option value="' + k + '">' + EMOTIONS[k].ico + ' ' + esc(emoLabel(k)) + '</option>'
       ).join('');
   }
+  /* ---- paged trades list: 40 at a time + auto-load on scroll (fast on phones, even with thousands of trades) ---- */
+  const TL_PAGE = 40;
+  let tlSorted = [], tlShown = 0, tlSig = '', tlIO = null;
+  function tlMore() {
+    const host = el.allTradesList;
+    const old = host.querySelector('.tl-more'); if (old) old.remove();
+    if (tlIO) { tlIO.disconnect(); tlIO = null; }
+    const chunk = tlSorted.slice(tlShown, tlShown + TL_PAGE);
+    if (chunk.length) host.insertAdjacentHTML('beforeend', chunk.map(tr => renderTradeItem(tr)).join(''));
+    tlShown += chunk.length;
+    const left = tlSorted.length - tlShown;
+    if (left > 0) {
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'btn ghost tl-more';
+      b.textContent = (lang === 'en' ? 'Show more' : '\u0646\u0645\u0627\u06CC\u0634 \u0628\u06CC\u0634\u062A\u0631') + ' (' + left + ')';
+      b.addEventListener('click', tlMore);
+      host.appendChild(b);
+      if ('IntersectionObserver' in window) {
+        tlIO = new IntersectionObserver(es => { if (es[0] && es[0].isIntersecting) tlMore(); }, { rootMargin: '700px 0px' });
+        tlIO.observe(b);
+      }
+    }
+  }
+
   function renderAllTrades() {
     populateFilterOptions();
     el.fltStrategy.value = filters.strategy;
@@ -1783,7 +1807,12 @@ function applyTheme(th) {
       el.allTradesList.innerHTML = '<div class="empty">' + t('no_filter') + '</div>';
       return;
     }
-    el.allTradesList.innerHTML = sorted.map(tr => renderTradeItem(tr)).join('');
+    /* keep the same number of rows while the filters are unchanged (e.g. after delete/edit), reset on a new filter */
+    const sig = JSON.stringify(filters);
+    const keep = (sig === tlSig) ? Math.max(TL_PAGE, tlShown) : TL_PAGE;
+    tlSig = sig; tlSorted = sorted; tlShown = 0;
+    el.allTradesList.innerHTML = '';
+    while (tlShown < Math.min(keep, sorted.length)) tlMore();
   }
 
   /* ============================ RENDER: CHECKLIST MANAGER ============================ */
@@ -2348,6 +2377,8 @@ function applyTheme(th) {
     const pct = document.getElementById('loader-pct');
     const sub = document.getElementById('loader-sub');
     if (!loader) return Promise.resolve();
+    /* the real-ready splash (index.html) replaces this fake-progress loader, which only delayed startup by ~3s */
+    if (document.getElementById('po-splash')) { loader.style.display = 'none'; return Promise.resolve(); }
 
     const messagesFa = ['اتصال به بازار…', 'دریافت داده‌ها…', 'آماده‌سازی نمودارها…', 'آماده!'];
     const messagesEn = ['Connecting to markets…', 'Fetching data…', 'Preparing charts…', 'Ready!'];

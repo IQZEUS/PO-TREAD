@@ -10,8 +10,7 @@ body{padding-bottom:env(safe-area-inset-bottom);-webkit-tap-highlight-color:tran
 .card::before{content:"";position:absolute;inset:0 0 auto 0;height:2px;border-radius:var(--lg-r) var(--lg-r) 0 0;
   background:linear-gradient(90deg,transparent,var(--blue),var(--green),transparent);opacity:.7;pointer-events:none}
 @media(hover:hover){.card:hover,.kpi:hover{transform:translateY(-3px);box-shadow:var(--lg-glow);border-color:rgba(91,140,255,.4)}}
-.card-head h2{font-weight:900;letter-spacing:.2px;background:linear-gradient(90deg,var(--text),var(--blue));
-  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:var(--text)}
+.card-head h2{font-weight:900;letter-spacing:.2px;color:var(--text);text-shadow:0 0 22px rgba(91,140,255,.35)} /* solid text: gradient-clip turned emoji into blobs */
 
 /* KPI tiles */
 .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
@@ -187,3 +186,73 @@ img,canvas,svg{max-width:100%}
 /* fix: don't let form-label styling break the original .switch toggles */
 .field label.switch{display:flex;align-items:center;gap:10px;margin-bottom:0;font-size:inherit;color:var(--text);font-weight:700}
 .field label.switch .switch-track{display:block}
+
+/* ===== Paged trades list ===== */
+.tl-more{display:block;width:100%;margin:12px 0;min-height:48px;border-radius:16px;font-weight:800}
+.trade-item{content-visibility:auto;contain-intrinsic-size:auto 96px}
+
+/* ===== Risk calculator card (tools.js) — normal inline card, nothing floats ===== */
+.cx-card{padding:0;overflow:hidden}
+.cx-card summary{cursor:pointer;list-style:none;padding:16px 18px;font-weight:900;font-size:16px;display:flex;align-items:center;justify-content:space-between;min-height:52px}
+.cx-card summary::-webkit-details-marker{display:none}
+.cx-card summary::after{content:"\25BE";font-size:18px;color:var(--muted);transition:transform .25s}
+.cx-card[open] summary::after{transform:rotate(180deg)}
+.cx-body{padding:0 18px 18px}
+.cx-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cx-field label{display:block;font-size:12px;font-weight:800;color:var(--muted);margin-bottom:5px}
+.cx-field input{width:100%;box-sizing:border-box;text-align:center;font-weight:800;font-variant-numeric:tabular-nums;background:rgba(120,150,200,.08);border:1px solid var(--line);color:var(--text)}
+.cx-field small{display:block;margin-top:4px;color:var(--muted);font-size:11px;line-height:1.5}
+.cx-chips{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:12px 0;color:var(--muted);font-size:12px}
+.cx-chip{min-height:36px;padding:6px 12px;border-radius:99px;border:1px solid var(--line);background:rgba(120,150,200,.1);color:var(--text);font-weight:800;cursor:pointer}
+.cx-outs{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cx-out{padding:14px 10px;border-radius:18px;text-align:center;border:1px solid var(--line);background:rgba(120,150,200,.07)}
+.cx-out.main{grid-column:1/-1;border-color:rgba(46,230,166,.5);background:linear-gradient(135deg,rgba(46,230,166,.18),rgba(91,140,255,.1))}
+.cx-v{font-size:24px;font-weight:900;font-variant-numeric:tabular-nums}.cx-out.main .cx-v{font-size:36px;color:var(--green);text-shadow:0 0 24px rgba(46,230,166,.5)}
+.cx-out.neg .cx-v{color:var(--red)}.cx-out.pos .cx-v{color:var(--green)}
+.cx-l{font-size:12px;color:var(--muted);font-weight:800;margin-top:2px}
+.cx-note{min-height:20px;margin-top:12px;color:var(--gold,#ffb020);font-size:13px;font-weight:700;line-height:1.7}
+
+/* ===== Mobile performance: lighter effects, smoother scrolling ===== */
+html{scroll-behavior:auto}
+body{touch-action:manipulation} /* keeps Android pull-to-refresh working */
+@media(max-width:760px),(hover:none){
+  .card,.kpi,.card::before{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+  .card:hover,.kpi:hover{transform:none;box-shadow:var(--shadow-lg)}
+  .kpi::after{display:none}
+  .orb{filter:blur(46px)!important;animation:none!important;opacity:.35}
+  .card,.kpi{box-shadow:0 8px 22px -14px rgba(0,0,0,.65)}
+  .goal-progress-fill::after,.goal-ico,.upload-ico{animation:none}
+  .market-clock,.pt-market-clock{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+}
+@media(max-width:380px){.cx-grid,.cx-outs{grid-template-columns:1fr}}
+
+/* ===== Analysis+ v2 panels ===== */
+.pl-grid2{display:grid;grid-template-columns:1fr;gap:14px;margin-top:14px}
+@media(min-width:900px){.pl-grid2{grid-template-columns:1fr 1fr}.pl-grid2 .card:first-child{grid-column:1/-1}}
+.pl-card2{padding-bottom:12px}
+.pl-sub{font-size:13px;font-weight:900;color:var(--green);font-variant-numeric:tabular-nums}
+.pl-svg{display:block;width:100%;height:auto;overflow:visible;direction:ltr;unicode-bidi:isolate} /* charts stay LTR inside RTL pages */
+.pl-svg .pl-t{font-size:10px;font-weight:800;fill:var(--muted);font-family:inherit}
+.pl-svg .pl-t.pos{fill:#2ee6a6}.pl-svg .pl-t.neg{fill:#ff5674}
+.pl-strip{display:flex;flex-wrap:wrap;gap:5px;padding:6px 2px 4px}
+.pl-cell{flex:1 1 calc(10% - 5px);min-width:20px;height:30px;border-radius:9px;display:block}
+.pl-cell.win{background:linear-gradient(180deg,#2ee6a6,#0fa876);box-shadow:0 0 10px rgba(46,230,166,.35)}
+.pl-cell.loss{background:linear-gradient(180deg,#ff5674,#c23352);box-shadow:0 0 10px rgba(255,86,116,.3)}
+.pl-cell.be{background:rgba(150,170,220,.3)}
+.pl-srows{display:flex;flex-direction:column;gap:12px}
+.pl-sh{display:flex;justify-content:space-between;gap:8px;font-size:14px}.pl-sh b{font-weight:900;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pl-sh .pos{color:var(--green);font-weight:900}.pl-sh .neg{color:var(--red);font-weight:900}
+.pl-sbar{height:10px;border-radius:99px;background:rgba(120,150,200,.15);overflow:hidden;margin:6px 0 3px}
+.pl-sbar i{display:block;height:100%;border-radius:99px}.pl-sbar i.up{background:linear-gradient(90deg,#0fa876,#2ee6a6)}.pl-sbar i.dn{background:linear-gradient(90deg,#c23352,#ff5674)}
+.pl-srow small{color:var(--muted);font-size:11px;font-weight:700}
+.pl-card2{content-visibility:auto;contain-intrinsic-size:auto 260px}
+
+/* ===== Share options ===== */
+.share-opts{display:flex;flex-direction:column;gap:10px;margin-top:14px}
+.sh-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.sh-chip{min-height:40px;padding:6px 16px;border-radius:99px;border:1px solid var(--line);background:rgba(120,150,200,.1);color:var(--text);font-weight:800;cursor:pointer;transition:transform .15s}
+.sh-chip:active{transform:scale(.95)}
+.sh-chip.active{border-color:transparent;background:linear-gradient(135deg,#ffb020,#ff8a5b);color:#1a0d00;box-shadow:0 8px 20px -10px rgba(255,176,32,.8)}
+.sh-priv{display:flex;align-items:center;gap:8px;min-height:40px;padding:6px 14px;border-radius:99px;border:1px solid var(--line);background:rgba(120,150,200,.08);font-weight:800;cursor:pointer}
+.sh-priv input{width:18px;height:18px;min-height:0;accent-color:#ffb020}
+.sh-name{flex:1 1 150px;min-width:0;min-height:40px;border-radius:99px;padding:6px 14px;box-sizing:border-box;direction:ltr;text-align:center;background:rgba(120,150,200,.08);border:1px solid var(--line);color:var(--text)}

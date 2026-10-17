@@ -432,11 +432,28 @@
   /* ══════════════════════════════════════════════════════
      SHARE IMAGE — کیهانی افسانه‌ای
      ══════════════════════════════════════════════════════ */
+    /* ---- share options: style / privacy / name (saved on this device) ---- */
+    var SHARE_STYLES = {
+      neon:    { bgTop: '#05010f', bgMid: '#120533', bgBot: '#030008', primary: '#00f0ff', secondary: '#ff3df0', accent: '#7a5cff', glow: 'rgba(0,240,255,0.9)', softGlow: 'rgba(0,240,255,0.35)', nebula1: 'rgba(0,240,255,0.3)', nebula2: 'rgba(255,61,240,0.28)', nebula3: 'rgba(122,92,255,0.25)', starColors: ['#00f0ff', '#ff3df0', '#ffffff'] },
+      emerald: { bgTop: '#021208', bgMid: '#052a14', bgBot: '#010a04', primary: '#2ee6a6', secondary: '#d6ffee', accent: '#0fa876', glow: 'rgba(46,230,166,0.9)', softGlow: 'rgba(46,230,166,0.35)', nebula1: 'rgba(46,230,166,0.3)', nebula2: 'rgba(15,168,118,0.28)', nebula3: 'rgba(180,255,225,0.2)', starColors: ['#2ee6a6', '#d6ffee', '#ffffff'] },
+      rose:    { bgTop: '#1a0408', bgMid: '#32091a', bgBot: '#0a0204', primary: '#ff5f7e', secondary: '#ffd0da', accent: '#ff8a5b', glow: 'rgba(255,95,126,0.9)', softGlow: 'rgba(255,95,126,0.35)', nebula1: 'rgba(255,95,126,0.3)', nebula2: 'rgba(255,138,91,0.25)', nebula3: 'rgba(255,208,218,0.2)', starColors: ['#ff5f7e', '#ffd0da', '#ffffff'] },
+      ice:     { bgTop: '#020d18', bgMid: '#07233d', bgBot: '#01060d', primary: '#5ad1ff', secondary: '#e6f7ff', accent: '#8aa8ff', glow: 'rgba(90,209,255,0.9)', softGlow: 'rgba(90,209,255,0.35)', nebula1: 'rgba(90,209,255,0.3)', nebula2: 'rgba(138,168,255,0.25)', nebula3: 'rgba(230,247,255,0.2)', starColors: ['#5ad1ff', '#e6f7ff', '#ffffff'] }
+    };
+    function shareSettings() {
+      var st = 'auto', hide = false, name = '';
+      try {
+        var a = localStorage.getItem('po.share.style'); if (a && SHARE_STYLES[a]) st = a;
+        hide = localStorage.getItem('po.share.hide') === '1';
+        name = String(localStorage.getItem('po.share.name') || '').replace(/[^A-Za-z0-9._-]/g, '').slice(0, 24);
+      } catch (e) {}
+      return { style: st, hide: hide, name: name };
+    }
+
     function drawShare() {
     var trades = getLS('po.v4.trades', []);
     var tier = getTier(trades);
 
-    var W = 900, EX = 262, H = 1650 + EX; /* EX = room for the PRO dashboard block */
+    var W = 900, EX = 346, H = 1650 + EX; /* EX = room for the PRO dashboard block */
     var canvas = document.createElement('canvas');
     canvas.width = W;
     canvas.height = H;
@@ -484,6 +501,12 @@
       }
     };
     var C = CFG[tier.key] || CFG.bronze;
+    var SS = shareSettings();
+    if (SS.style !== 'auto' && SHARE_STYLES[SS.style]) C = Object.assign({}, C, SHARE_STYLES[SS.style]);
+    if (SS.hide) { /* privacy mode: every $ amount drawn on the image becomes $••• */
+      var _ft = ctx.fillText.bind(ctx);
+      ctx.fillText = function (t, x, y, mw) { return _ft(String(t).replace(/\$[\d,]+(\.\d+)?/g, '$\u2022\u2022\u2022'), x, y, mw); };
+    }
 
     // ══════════════════════════════════════════════════════
     // 50 نقل قول افسانه‌ای
@@ -696,7 +719,7 @@
     ctx.font = '700 13px Inter, sans-serif';
     ctx.fillStyle = 'rgba(200,215,240,0.6)';
     ctx.fillText('◆  PERFORMANCE REPORT  ◆  ' +
-                 new Date().toISOString().slice(0, 10), W / 2, 235);
+                 new Date().toISOString().slice(0, 10) + (SS.name ? '  \u25C6  @' + SS.name : ''), W / 2, 235);
 
     // ══════════════════════════════════════════════════════
     // 9) NET PNL
@@ -1011,6 +1034,20 @@
         ctx.font = '900 10px Inter, sans-serif'; ctx.fillStyle = 'rgba(200,215,240,0.55)';
         ctx.fillText(m[0], x + mw / 2, my + 47);
       });
+
+      /* form strip: last 20 trades */
+      var last20 = sortedD.slice(-20);
+      if (last20.length >= 2) {
+        var fy = my + mh + 24, fw = 30, fg = 9, fx = (W - (fw * last20.length + fg * (last20.length - 1))) / 2;
+        ctx.font = '900 11px Inter, sans-serif'; ctx.fillStyle = 'rgba(200,215,240,0.55)'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText('LAST ' + last20.length + ' TRADES', W / 2, fy);
+        last20.forEach(function (t, i) {
+          var x = fx + i * (fw + fg), clr = t.result === 'win' ? '#2ee6a6' : t.result === 'loss' ? '#ff5674' : 'rgba(180,195,230,0.5)';
+          ctx.fillStyle = clr; ctx.shadowColor = clr; ctx.shadowBlur = t.result === 'win' || t.result === 'loss' ? 10 : 0;
+          rr(ctx, x, fy + 16, fw, 26, 8); ctx.fill();
+        });
+        ctx.shadowBlur = 0;
+      }
     })();
     ctx.save(); ctx.translate(0, EX); /* everything from the quote card to the strategies moves down */
 
@@ -1216,6 +1253,16 @@
     ctx.fillStyle = vig;
     ctx.fillRect(0, 0, W, H);
 
+    /* glass frame + glowing corner ticks */
+    ctx.save();
+    ctx.strokeStyle = C.primary; ctx.globalAlpha = 0.35; ctx.lineWidth = 2;
+    rr(ctx, 16, 16, W - 32, H - 32, 34); ctx.stroke();
+    ctx.globalAlpha = 1; ctx.lineWidth = 5; ctx.lineCap = 'round'; ctx.strokeStyle = C.secondary; ctx.shadowColor = C.glow; ctx.shadowBlur = 16;
+    [[16, 16, 1, 1], [W - 16, 16, -1, 1], [16, H - 16, 1, -1], [W - 16, H - 16, -1, -1]].forEach(function (c) {
+      ctx.beginPath(); ctx.moveTo(c[0], c[1] + c[3] * 80); ctx.arcTo(c[0], c[1], c[0] + c[2] * 80, c[1], 34); ctx.lineTo(c[0] + c[2] * 80, c[1]); ctx.stroke();
+    });
+    ctx.restore();
+
     return canvas;
   }
 
@@ -1235,6 +1282,40 @@
         '</div>' +
         '<div class="share-preview" id="sharePreviewWrap"></div>' +
       '</div>';
+
+    /* options row: color style, hide amounts, name/handle (all optional, saved on this device) */
+    (function buildShareOptions() {
+      var fa = String(document.documentElement.lang || 'fa').slice(0, 2) !== 'en';
+      var S = shareSettings(), box = document.createElement('div'), row1 = document.createElement('div'), row2 = document.createElement('div');
+      box.className = 'share-opts'; row1.className = 'sh-row'; row2.className = 'sh-row';
+      function refresh() {
+        var pw = host.querySelector('#sharePreviewWrap');
+        if (pw && pw.classList.contains('show')) { var b = host.querySelector('[data-act="preview"]'); if (b) b.click(); }
+      }
+      [['auto', fa ? 'خودکار' : 'Auto'], ['neon', fa ? 'نئون' : 'Neon'], ['emerald', fa ? 'زمردی' : 'Emerald'], ['rose', fa ? 'رزی' : 'Rose'], ['ice', fa ? 'یخی' : 'Ice']].forEach(function (x) {
+        var b = document.createElement('button'); b.type = 'button'; b.className = 'sh-chip' + (S.style === x[0] ? ' active' : ''); b.textContent = x[1];
+        b.addEventListener('click', function () {
+          try { localStorage.setItem('po.share.style', x[0]); } catch (e) {}
+          row1.querySelectorAll('.sh-chip').forEach(function (c) { c.classList.toggle('active', c === b); });
+          refresh();
+        });
+        row1.appendChild(b);
+      });
+      var lab = document.createElement('label'); lab.className = 'sh-priv';
+      var cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = S.hide;
+      cb.addEventListener('change', function () { try { localStorage.setItem('po.share.hide', cb.checked ? '1' : '0'); } catch (e) {} refresh(); });
+      var sp = document.createElement('span'); sp.textContent = fa ? '🙈 مخفی کردن مبلغ‌ها' : '🙈 Hide amounts';
+      lab.appendChild(cb); lab.appendChild(sp);
+      var nm = document.createElement('input'); nm.type = 'text'; nm.className = 'sh-name'; nm.maxLength = 24; nm.autocomplete = 'off'; nm.placeholder = fa ? '@آیدی (انگلیسی، اختیاری)' : '@handle (optional)'; nm.value = S.name;
+      nm.setAttribute('aria-label', 'handle');
+      nm.addEventListener('change', function () {
+        var v = nm.value.replace(/[^A-Za-z0-9._-]/g, '').slice(0, 24); nm.value = v;
+        try { localStorage.setItem('po.share.name', v); } catch (e) {} refresh();
+      });
+      row2.appendChild(lab); row2.appendChild(nm);
+      box.appendChild(row1); box.appendChild(row2);
+      host.querySelector('.share-card').insertBefore(box, host.querySelector('#sharePreviewWrap'));
+    })();
 
     host.addEventListener('click', async function(e) {
       var btn = e.target.closest('button[data-act]');
