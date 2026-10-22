@@ -3,7 +3,7 @@
    ✅ بدون تکرار (dedup با Map در همه مراحل)
    ✅ حذف فوری از سرور
    ✅ سرعت بالا (debounce 30ms، push 100ms)
-   ✅ سینک کامل: trades + goal + rules + checklist + theme + lang
+   ✅ سینک کامل: trades + goal + rules + checklist + theme + lang + portfolio
    ✅ استفاده از constraint یکتایی در Supabase
    ============================================================ */
 (function() {
@@ -12,11 +12,30 @@
   var SUPABASE_URL = 'https://rodguhcuatixdbzwjfvy.supabase.co';
   var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJvZGd1aGN1YXRpeGRiendqZnZ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk5MTgyMTMsImV4cCI6MjEwNTQ5NDIxM30.oXGyCA3jOcsS5inqsXuSOhELZLoUG7pYagZox1SEmhY';
 
-  if (typeof supabase === 'undefined' || !supabase.createClient) { try { console.warn('[sync] Supabase library not loaded - cloud sync disabled, local mode active'); } catch (e) {} return; }
+  // Load the journal UI immediately; cloud sync must never hold the interface behind network latency.
+  function dispatchSyncReady() {
+    try { window.__poSyncReady = true; window.dispatchEvent(new CustomEvent('po:sync-ready', { detail: { ready: true, userId: uid || null } })); } catch (e) {}
+  }
+  function loadAppFast() {
+    if (document.querySelector('script[data-po-app="true"], script[src$="/app.js"], script[src="app.js"]')) return;
+    var s = document.createElement('script');
+    s.src = 'app.js';
+    s.dataset.poApp = 'true';
+    s.onerror = function() { try { console.error('[app] Could not load app.js'); } catch (e) {} };
+    s.onload = function() { if (window.__poSyncReady) dispatchSyncReady(); };
+    document.body.appendChild(s);
+  }
+  loadAppFast();
+  if (typeof supabase === 'undefined' || !supabase.createClient) {
+    try { console.warn('[sync] Supabase library not loaded - cloud sync disabled, local mode active'); } catch (e) {}
+    window.__poSyncReady = true;
+    dispatchSyncReady();
+    return;
+  }
   var sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   var TRADES_KEY    = 'po.v4.trades';
-  var SETTINGS_KEYS = ['po.v4.goal', 'po.v4.rules', 'po.v4.checklist', 'po.v4.theme', 'po.v4.preset', 'po.lang', 'po.v4.alerts'];
+  var SETTINGS_KEYS = ['po.v4.goal', 'po.v4.rules', 'po.v4.checklist', 'po.v4.theme', 'po.v4.preset', 'po.lang', 'po.v4.alerts', 'po.v4.portfolio', 'po.v4.privacy', 'po.v4.onboarding'];
   var PENDING_KEY   = 'po.v4.pending';
   var LAST_UID_KEY  = 'po.v4.lastUid';
   var SETTINGS_TABLE = 'user_settings';
@@ -33,6 +52,8 @@
   var tradesTimer = null;
   var settingsTimer = null;
   var pushTimer = null;
+  var pushRetryDelay = 1500;
+  var lastPushError = ''; 
 
   // ============================================================
   // Loader watchdog
@@ -77,7 +98,12 @@
     }
   }
   function savePending(p) {
-    try { origSetItem(PENDING_KEY, JSON.stringify(p)); } catch (e) {}
+    try { origSetItem(PENDING_KEY, JSON.stringify(p)); return true; }
+    catch (e) {
+      lastPushError = 'Local sync queue could not be saved: ' + String(e && e.message || e);
+      console.error('[Sync] Pending queue save failed; local changes are preserved but cloud sync needs storage space:', e);
+      return false;
+    }
   }
   function clearPending() {
     try { origRemoveItem(PENDING_KEY); } catch (e) {}
@@ -154,10 +180,17 @@
       p.add[t.id] = t;
     });
 
-    savePending(p);
+    if (!savePending(p)) {
+      // Do not advance the diff baseline until the queue is durable. Retry the diff later.
+      clearTimeout(tradesTimer);
+      tradesTimer = setTimeout(detectTrades, Math.min(pushRetryDelay, 60000));
+      pushRetryDelay = Math.min(pushRetryDelay * 2, 60000);
+      return;
+    }
     lastTrades = cur;
 
     if (changes.add.length || changes.update.length || changes.delete.length) {
+      pushRetryDelay = 1500;
       schedulePush();
     }
   }
@@ -166,10 +199,16 @@
     if (!uid || !ready) return;
     var cur = snapSettings();
     if (cur === lastSettings) return;
-    lastSettings = cur;
     var p = getPending();
     p.settingsDirty = true;
-    savePending(p);
+    if (!savePending(p)) {
+      clearTimeout(settingsTimer);
+      settingsTimer = setTimeout(detectSettings, Math.min(pushRetryDelay, 60000));
+      pushRetryDelay = Math.min(pushRetryDelay * 2, 60000);
+      return;
+    }
+    lastSettings = cur;
+    pushRetryDelay = 1500;
     schedulePush();
   }
 
@@ -203,71 +242,121 @@
   // ============================================================
   // Push to cloud
   // ============================================================
-  function schedulePush() {
+  function schedulePush(delay) {
     clearTimeout(pushTimer);
-    pushTimer = setTimeout(doPush, 100);
+    pushTimer = setTimeout(doPush, Number.isFinite(delay) ? Math.max(0, delay) : 100);
+  }
+
+  function sameJSON(a, b) {
+    try { return JSON.stringify(a) === JSON.stringify(b); } catch (_) { return false; }
+  }
+
+  function settingsSnapshot() {
+    var out = {};
+    SETTINGS_KEYS.forEach(function(k) { out[k] = origGetItem(k); });
+    return JSON.stringify(out);
+  }
+
+  function settingsPayload() {
+    var data = {};
+    SETTINGS_KEYS.forEach(function(k) {
+      var value = origGetItem(k);
+      if (value === null) return;
+      try { data[k] = JSON.parse(value); } catch (_) { data[k] = value; }
+    });
+    return data;
   }
 
   async function doPush() {
     if (!uid || !ready || pushing) return;
 
-    var p = getPending();
-    var delIds = Object.keys(p.delete);
+    var initial = getPending();
+    var delIds = Object.keys(initial.delete);
     var upItems = dedupe(
-      Object.keys(p.add).map(function(k) { return p.add[k]; })
-        .concat(Object.keys(p.update).map(function(k) { return p.update[k]; }))
-    );
-    var settings = p.settingsDirty;
-
-    if (!delIds.length && !upItems.length && !settings) return;
+      Object.keys(initial.add).map(function(k) { return initial.add[k]; })
+        .concat(Object.keys(initial.update).map(function(k) { return initial.update[k]; }))
+    ).filter(function(item) { return item && item.id && !initial.delete[item.id]; });
+    // Snapshot exact items. Changes arriving while the network is in flight must stay queued.
+    var upById = {};
+    upItems.forEach(function(item) { upById[item.id] = JSON.parse(JSON.stringify(item)); });
+    var syncSettings = !!initial.settingsDirty;
+    var settingsBefore = syncSettings ? settingsSnapshot() : null;
+    var settingsData = syncSettings ? settingsPayload() : null;
+    if (!delIds.length && !upItems.length && !syncSettings) return;
 
     pushing = true;
-    var ok = false;
+    var failed = false;
+    var deletedOK = false;
+    var upsertedOK = false;
+    var settingsOK = false;
 
-    try {
-      // ۱) حذف
-      if (delIds.length) {
-        var r1 = await sb.from('trades')
-          .delete()
-          .eq('user_id', uid)
-          .in('trade_id', delIds);
-        if (r1.error) throw r1.error;
+    // Process each queue independently. One failed endpoint must not discard other pending work.
+    if (delIds.length) {
+      try {
+        var delResult = await sb.from('trades').delete().eq('user_id', uid).in('trade_id', delIds);
+        if (delResult.error) throw delResult.error;
+        deletedOK = true;
+      } catch (e) {
+        failed = true; lastPushError = String(e && e.message || e);
+        console.error('[Sync] Delete push failed; keeping pending items:', lastPushError);
       }
+    } else deletedOK = true;
 
-      // ۲) upsert (با constraint یکتایی → آپدیت می‌کنه نه insert)
-      if (upItems.length) {
-        var r2 = await sb.from('trades').upsert(
-          upItems.map(function(t) {
-            return { user_id: uid, trade_id: t.id, data: t };
-          }),
-          { onConflict: 'user_id,trade_id' }
-        );
-        if (r2.error) throw r2.error;
+    if (upItems.length) {
+      try {
+        var upResult = await sb.from('trades').upsert(upItems.map(function(item) {
+          return { user_id: uid, trade_id: item.id, data: item };
+        }), { onConflict: 'user_id,trade_id' });
+        if (upResult.error) throw upResult.error;
+        upsertedOK = true;
+      } catch (e) {
+        failed = true; lastPushError = String(e && e.message || e);
+        console.error('[Sync] Trade upsert failed; keeping pending items:', lastPushError);
       }
+    } else upsertedOK = true;
 
-      // ۳) settings
-      if (settings) {
-        var sData = {};
-        SETTINGS_KEYS.forEach(function(k) {
-          var v = origGetItem(k);
-          if (v === null) return;
-          try { sData[k] = JSON.parse(v); } catch (e) { sData[k] = v; }
-        });
-        var r3 = await sb.from(SETTINGS_TABLE).upsert(
-          { user_id: uid, data: sData, updated_at: new Date().toISOString() },
+    if (syncSettings) {
+      try {
+        var settingsResult = await sb.from(SETTINGS_TABLE).upsert(
+          { user_id: uid, data: settingsData, updated_at: new Date().toISOString() },
           { onConflict: 'user_id' }
         );
-        if (r3.error) console.warn('[Sync] settings push:', r3.error.message);
+        if (settingsResult.error) throw settingsResult.error;
+        settingsOK = true;
+      } catch (e) {
+        failed = true; lastPushError = String(e && e.message || e);
+        console.error('[Sync] Settings push failed; keeping settings pending:', lastPushError);
       }
+    } else settingsOK = true;
 
-      ok = true;
-    } catch (e) {
-      console.error('[Sync] Push failed:', e.message);
+    // Merge acknowledgements back into the live queue, removing only unchanged snapshots.
+    var live = getPending();
+    if (deletedOK) {
+      delIds.forEach(function(id) {
+        // This exact delete snapshot succeeded. A newer re-add/update, if present, remains queued.
+        delete live.delete[id];
+      });
     }
-
+    if (upsertedOK) {
+      Object.keys(upById).forEach(function(id) {
+        if (live.add[id] && sameJSON(live.add[id], upById[id])) delete live.add[id];
+        if (live.update[id] && sameJSON(live.update[id], upById[id])) delete live.update[id];
+      });
+    }
+    if (settingsOK && syncSettings && settingsSnapshot() === settingsBefore) live.settingsDirty = false;
+    savePending(live);
     pushing = false;
-    if (ok) clearPending();
-    if (pendingTotal() > 0) schedulePush();
+
+    if (failed && pendingTotal() > 0) {
+      var wait = pushRetryDelay;
+      pushRetryDelay = Math.min(pushRetryDelay * 2, 60000);
+      schedulePush(wait);
+    } else if (pendingTotal() > 0) {
+      pushRetryDelay = 1500; lastPushError = '';
+      schedulePush(180);
+    } else {
+      pushRetryDelay = 1500; lastPushError = '';
+    }
   }
 
   // ============================================================
@@ -312,7 +401,10 @@
       var r = await sb.from('trades').delete().eq('user_id', uid);
       if (r.error) throw r.error;
       console.log('[Sync] 🗑️ ALL trades deleted from server');
-      clearPending();
+      var pending = getPending();
+      pending.add = {}; pending.update = {}; pending.delete = {};
+      savePending(pending); // preserve unrelated pending settings
+      lastTrades = origGetItem(TRADES_KEY) || '[]';
       return true;
     } catch (e) {
       console.error('[Sync] Delete all failed:', e.message);
@@ -480,8 +572,14 @@
       });
 
       var finalStr = JSON.stringify(merged);
-      origSetItem(TRADES_KEY, finalStr);
-      lastTrades = finalStr;
+      try {
+        origSetItem(TRADES_KEY, finalStr);
+        lastTrades = finalStr;
+      } catch (storageError) {
+        // Don't abort auth/settings hydration or pretend the cloud copy was cached locally.
+        lastTrades = origGetItem(TRADES_KEY) || '[]';
+        console.warn('[Sync] Local storage quota/access blocked journal hydration; cloud data remains on server:', storageError && storageError.message || storageError);
+      }
 
       // ۵) settings
       try {
@@ -492,7 +590,8 @@
               var v = typeof r2.data.data[k] === 'string'
                 ? r2.data.data[k]
                 : JSON.stringify(r2.data.data[k]);
-              origSetItem(k, v);
+              try { origSetItem(k, v); }
+              catch (storageError) { console.warn('[Sync] Could not cache setting locally:', k, storageError && storageError.message || storageError); }
             }
           });
         }
@@ -514,15 +613,11 @@
     }
   }
 
+  // Reconcile cloud state in the background without blocking the initial journal render.
+  // If hydration finishes before app.js has loaded, the script's onload callback replays the event.
   boot().finally(function() {
     if (!ready) ready = true;
-    if (document.querySelector('script[src*="app.js"]')) return;
-    var s = document.createElement('script');
-    s.src = 'app.js';
-    s.onerror = killLoader;
-    document.body.appendChild(s);
-    setTimeout(killLoader, 2500);
-    setTimeout(killLoader, 5000);
+    dispatchSyncReady();
   });
 
   // ============================================================
@@ -537,6 +632,7 @@
         uid: uid,
         ready: ready,
         pushing: pushing,
+        lastPushError: lastPushError || null,
         localCount: local.length,
         pending: {
           add: Object.keys(p.add).length,
@@ -571,39 +667,38 @@
     hardReset: async function() {
       if (!uid) return false;
       try {
-        await sb.from('trades').delete().eq('user_id', uid);
+        var tradeResult = await sb.from('trades').delete().eq('user_id', uid);
+        if (tradeResult.error) throw tradeResult.error;
         origRemoveItem(TRADES_KEY);
-        origRemoveItem(PENDING_KEY);
+        // Preserve pending account settings; only the trade queue is being reset.
+        var pending = getPending(); pending.add = {}; pending.update = {}; pending.delete = {};
+        savePending(pending);
         lastTrades = '[]';
-        console.log('[Sync] 🔥 Hard reset done');
+        console.log('[Sync] Trade journal reset completed');
         return true;
       } catch (e) {
-        console.error('[Sync] Hard reset failed:', e.message);
+        console.error('[Sync] Hard reset failed; local copy was preserved:', e.message);
         return false;
       }
     },
 
-    // ⚡ پاک کردن تکراری‌ها از سرور
+    // Inspect cloud duplicates without deleting them: a delete by trade_id could erase every copy.
     cleanCloud: async function() {
-      if (!uid) return { deleted: 0 };
+      if (!uid) return { deleted: 0, duplicates: 0, requiresManualReview: false };
       try {
-        var r = await sb.from('trades').select('trade_id').eq('user_id', uid);
+        var r = await sb.from('trades').select('trade_id').eq('user_id', uid).limit(5000);
         if (r.error) throw r.error;
-        var ids = (r.data || []).map(function(x) { return x.trade_id; });
-        var seen = {};
-        var dups = [];
-        ids.forEach(function(id) {
-          if (seen[id]) dups.push(id);
+        var seen = Object.create(null), duplicates = 0;
+        (r.data || []).forEach(function(row) {
+          var id = String(row.trade_id || '');
+          if (seen[id]) duplicates++;
           else seen[id] = 1;
         });
-        if (dups.length) {
-          await sb.from('trades').delete().eq('user_id', uid).in('trade_id', dups);
-          console.log('[Sync] 🧹 Cloud cleanup:', dups.length);
-        }
-        return { deleted: dups.length };
+        if (duplicates) console.warn('[Sync] Cloud duplicates detected; no rows removed automatically:', duplicates);
+        return { deleted: 0, duplicates: duplicates, requiresManualReview: duplicates > 0 };
       } catch (e) {
         console.error('[Sync] cleanCloud failed:', e.message);
-        return { deleted: 0 };
+        return { deleted: 0, duplicates: 0, requiresManualReview: true, error: String(e && e.message || e) };
       }
     }
   };

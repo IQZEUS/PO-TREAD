@@ -12,12 +12,14 @@
     fa: {
       title: 'PO-TRADE | ژورنال معاملات',
       brand: 'PO-TRADE', tagline: 'ثبت کن، تحلیل کن، پیشرفت کن',
-      tab_add: 'ثبت', tab_analysis: 'آنالیز', tab_calendar: 'تقویم', tab_trades: 'معاملات', tab_settings: 'تنظیمات',
+      tab_add: 'ثبت', tab_analysis: 'آنالیز', tab_calendar: 'تقویم', tab_trades: 'معاملات', tab_settings: 'تنظیمات', tab_profile: 'پروفایل',
+      analysis_eyebrow: 'TRADE PERFORMANCE STUDIO', analysis_title: 'مرکز تحلیل عملکرد', analysis_subtitle: 'تصویر واضح‌تری از تصمیم‌ها، ریسک و نتیجه‌هایت بساز.', analysis_period: 'بازه انتخابی', analysis_net_label: 'سود خالص در بازه', analysis_no_data: 'با ثبت معاملات، روند عملکرد اینجا نمایش داده می‌شود.', analysis_positive: 'در این بازه عملکرد خالص مثبت بوده است.', analysis_negative: 'در این بازه نتیجه خالص منفی بوده؛ مدیریت ریسک را مرور کن.', analysis_neutral: 'نتیجه خالص این بازه نزدیک به صفر است.', analysis_visual_caption: 'عملکردت را با داده بسنج', analysis_top_strategy: 'استراتژی برتر', analysis_top_strategy_sub: 'بالاترین سود خالص در این بازه', analysis_top_symbol: 'نماد شاخص', analysis_top_symbol_sub: 'نماد با بهترین نتیجه خالص', analysis_top_mood: 'احساس اثرگذار', analysis_top_mood_sub: 'نتیجه خالص به تفکیک احساس', analysis_no_insight: 'برای نمایش این بخش، معامله ثبت کن.',
+      account_joined: 'عضویت', account_trades: 'معاملات', account_profile: 'پروفایل من', account_analysis: 'آنالیز عملکرد', account_private_note: 'حساب شما در این دستگاه فعال است', analysis_more_stats: 'جزئیات تحلیلی تکمیلی', analysis_more_stats_hint: '۱۰ شاخص پیشرفته؛ برای خلوت ماندن داشبورد جمع شده‌اند', analysis_more_stats_count: '۱۰ شاخص', profile_username_kicker: 'شناسه اختصاصی شما', profile_username_title: 'نام کاربری من', profile_username_desc: 'یک شناسه ساده و یکتا بساز تا در منوی حساب به‌جای نام پیش‌فرض نمایش داده شود.', profile_username_optional: 'اختیاری', profile_username_edit: 'ویرایش', profile_username_label: 'شناسه کاربری', profile_username_rules: '۳ تا ۲۰ کاراکتر؛ فقط حروف انگلیسی، عدد و زیرخط.', profile_username_save: 'ثبت نام کاربری', profile_username_later: 'بعداً', profile_username_setup: 'تنظیم نام کاربری', profile_account_label: 'حساب کاربری', profile_member: 'عضو PO-TRADE', profile_joined_label: 'عضویت از', profile_manage: 'مدیریت حساب', profile_copy_id: 'کپی شناسه', profile_net: 'سود خالص کل', profile_net_hint: 'بر اساس ژورنال معاملات', profile_total: 'کل معاملات', profile_total_hint: 'تمام معاملات ثبت‌شده', profile_winrate: 'وین‌ریت', profile_winrate_hint: 'برد از معاملات بسته‌شده', profile_avg: 'انتظار ریاضی', profile_avg_hint: 'میانگین خالص هر معامله', profile_account_kicker: 'ACCOUNT', profile_details: 'جزئیات حساب', profile_email_label: 'ایمیل حساب', profile_available: 'فعال', profile_created_label: 'تاریخ ایجاد حساب', profile_uid_label: 'شناسه کاربری', profile_private_note: 'اطلاعات این بخش برای حساب واردشده نمایش داده می‌شود.', profile_tools_kicker: 'QUICK ACTIONS', profile_tools: 'دسترسی‌های سریع', profile_view_trades: 'مشاهده معاملات', profile_view_trades_sub: 'جستجو، فیلتر و مرور ژورنال', profile_view_analysis: 'رفتن به آنالیز', profile_view_analysis_sub: 'بررسی نتیجه‌ها و نمودارها', profile_change_password: 'تغییر رمز عبور', profile_change_password_sub: 'امنیت ورود به حساب', profile_logout: 'خروج از حساب', profile_logout_sub: 'خروج از این دستگاه', profile_activity_kicker: 'RECENT ACTIVITY', profile_recent: 'آخرین معاملات', profile_see_all: 'مشاهده همه', profile_empty_recent: 'هنوز معامله‌ای ثبت نشده است.', profile_copied: 'شناسه کپی شد', profile_copy_failed: 'کپی شناسه ممکن نشد', profile_win: 'سود', profile_loss: 'ضرر', profile_be: 'سربه‌سر', profile_trade_word: 'معامله',
       new_trade: '✍️ ثبت معامله جدید', saved_local: '🔒 ذخیره در مرورگر',
       date: '📅 تاریخ', symbol: '💱 نماد', strategy: '🎯 استراتژی',
       strategy_ph: 'بریک‌اوت لندن', side: '⚖️ جهت', result: '🏁 نتیجه',
       buy: 'خرید', sell: 'فروش', win: 'سود', loss: 'ضرر', be: 'سربه‌سر',
-      amount: '💰 مبلغ (دلار)', risk: '🎲 ریسک (اختیاری)',
+      amount: '💰 نتیجه خالص (ارز پایه)', risk: '🎲 ریسک (ارز پایه)',
       tags: '🏷️ تگ‌ها', tags_hint: '(با ویرگول جدا کن)', mood: '🧠 حالت روحی',
       emo_calm: 'آرام', emo_focused: 'متمرکز', emo_fear: 'ترس',
       emo_greed: 'طمع', emo_fomo: 'FOMO', emo_revenge: 'انتقام',
@@ -41,13 +43,13 @@
       clear_filters: 'پاک کردن فیلترها', all: 'همه',
       goals: '🎯 اهداف معاملاتی', goals_sub: 'پیشرفتت رو دنبال کن',
       goal_period: 'دوره هدف', week: 'هفتگی', month: 'ماهانه',
-      goal_metric: 'معیار', metric_pnl: 'سود $', metric_trades: 'تعداد', metric_winrate: 'وین‌ریت %',
+      goal_metric: 'معیار', metric_pnl: 'سود خالص', metric_trades: 'تعداد', metric_winrate: 'وین‌ریت %',
       goal_target: 'مقدار هدف', goal_target_ph: 'مثلاً 500',
       save_goal: '💾 ذخیره هدف', clear_goal: 'پاک کردن هدف',
       prop_rules: '🏦 قوانین پراپ فرم', prop_rules_sub: 'ردیابی خودکار سه قانون اصلی',
       enable_rules: 'فعال‌سازی ردیابی قوانین',
-      rule_balance: '💰 موجودی اولیه ($)', rule_daily: '💥 حداکثر ضرر روزانه ($)',
-      rule_dd: '⚠️ حداکثر افت کل ($)', rule_target: '🏆 هدف سود ($)',
+      rule_balance: '💰 موجودی اولیه (ارز پایه)', rule_daily: '💥 حداکثر ضرر روزانه (ارز پایه)',
+      rule_dd: '⚠️ حداکثر افت کل (ارز پایه)', rule_target: '🏆 هدف سود (ارز پایه)',
       save_rules: '💾 ذخیره قوانین',
       ok_saved: '✅ تغییرات ذخیره شد', ok_added: '✅ معامله ثبت شد',
       ok_goal: '✅ هدف ذخیره شد', ok_rules: '✅ قوانین ذخیره شد',
@@ -117,12 +119,14 @@
     en: {
       title: 'PO-TRADE | Trade Journal',
       brand: 'PO-TRADE', tagline: 'Log. Analyze. Progress.',
-      tab_add: 'Log', tab_analysis: 'Analysis', tab_calendar: 'Calendar', tab_trades: 'Trades', tab_settings: 'Settings',
+      tab_add: 'Log', tab_analysis: 'Analysis', tab_calendar: 'Calendar', tab_trades: 'Trades', tab_settings: 'Settings', tab_profile: 'Profile',
+      analysis_eyebrow: 'TRADE PERFORMANCE STUDIO', analysis_title: 'Performance Studio', analysis_subtitle: 'A clearer view of your decisions, risk, and results.', analysis_period: 'Selected range', analysis_net_label: 'Net P/L in range', analysis_no_data: 'Log trades to see your performance trend here.', analysis_positive: 'Net performance is positive in this range.', analysis_negative: 'Net result is negative in this range; review your risk management.', analysis_neutral: 'Net result is close to zero in this range.', analysis_visual_caption: 'Measure performance with data', analysis_top_strategy: 'Top strategy', analysis_top_strategy_sub: 'Highest net result in this range', analysis_top_symbol: 'Leading symbol', analysis_top_symbol_sub: 'Symbol with the strongest net result', analysis_top_mood: 'Mood impact', analysis_top_mood_sub: 'Net result grouped by mood', analysis_no_insight: 'Log a trade to populate this insight.',
+      account_joined: 'Member since', account_trades: 'Trades', account_profile: 'My profile', account_analysis: 'Performance analytics', account_private_note: 'Your account is active on this device', analysis_more_stats: 'Additional analytics', analysis_more_stats_hint: '10 advanced metrics, kept collapsed for a cleaner dashboard', analysis_more_stats_count: '10 metrics', profile_username_kicker: 'YOUR UNIQUE HANDLE', profile_username_title: 'My username', profile_username_desc: 'Choose a simple, unique handle to show in the account menu instead of the default name.', profile_username_optional: 'Optional', profile_username_edit: 'Edit', profile_username_label: 'Username', profile_username_rules: '3–20 characters; English letters, numbers, and underscore only.', profile_username_save: 'Save username', profile_username_later: 'Later', profile_username_setup: 'Set a username', profile_account_label: 'Account', profile_member: 'PO-TRADE member', profile_joined_label: 'Member since', profile_manage: 'Manage account', profile_copy_id: 'Copy ID', profile_net: 'Total net P/L', profile_net_hint: 'Based on your trade journal', profile_total: 'Total trades', profile_total_hint: 'All recorded trades', profile_winrate: 'Win rate', profile_winrate_hint: 'Wins among closed trades', profile_avg: 'Expectancy', profile_avg_hint: 'Average net per trade', profile_account_kicker: 'ACCOUNT', profile_details: 'Account details', profile_email_label: 'Account email', profile_available: 'Active', profile_created_label: 'Account created', profile_uid_label: 'User ID', profile_private_note: 'This information is shown for the signed-in account.', profile_tools_kicker: 'QUICK ACTIONS', profile_tools: 'Quick actions', profile_view_trades: 'View trades', profile_view_trades_sub: 'Search, filter, and review your journal', profile_view_analysis: 'Open analytics', profile_view_analysis_sub: 'Review results and charts', profile_change_password: 'Change password', profile_change_password_sub: 'Protect access to your account', profile_logout: 'Sign out', profile_logout_sub: 'Sign out on this device', profile_activity_kicker: 'RECENT ACTIVITY', profile_recent: 'Recent trades', profile_see_all: 'View all', profile_empty_recent: 'No trades recorded yet.', profile_copied: 'ID copied', profile_copy_failed: 'Could not copy ID', profile_win: 'Win', profile_loss: 'Loss', profile_be: 'Break-even', profile_trade_word: 'trades',
       new_trade: '✍️ Log New Trade', saved_local: '🔒 Saved in browser',
       date: '📅 Date', symbol: '💱 Symbol', strategy: '🎯 Strategy',
       strategy_ph: 'London Breakout', side: '⚖️ Side', result: '🏁 Result',
       buy: 'Buy', sell: 'Sell', win: 'Win', loss: 'Loss', be: 'Break-even',
-      amount: '💰 Amount ($)', risk: '🎲 Risk (optional)',
+      amount: '💰 Amount (base currency)', risk: '🎲 Risk (base currency, optional)',
       tags: '🏷️ Tags', tags_hint: '(comma separated)', mood: '🧠 Mood',
       emo_calm: 'Calm', emo_focused: 'Focused', emo_fear: 'Fear',
       emo_greed: 'Greed', emo_fomo: 'FOMO', emo_revenge: 'Revenge',
@@ -146,7 +150,7 @@
       clear_filters: 'Clear filters', all: 'All',
       goals: '🎯 Trading Goals', goals_sub: 'Track your progress',
       goal_period: 'Goal period', week: 'Weekly', month: 'Monthly',
-      goal_metric: 'Metric', metric_pnl: 'P/L $', metric_trades: 'Trades', metric_winrate: 'Win rate %',
+      goal_metric: 'Metric', metric_pnl: 'P/L (base currency)', metric_trades: 'Trades', metric_winrate: 'Win rate %',
       goal_target: 'Target value', goal_target_ph: 'e.g. 500',
       save_goal: '💾 Save Goal', clear_goal: 'Clear Goal',
       prop_rules: '🏦 Prop Firm Rules', prop_rules_sub: 'Auto-track 3 main rules',
@@ -251,18 +255,23 @@
     const p = String(iso).split('-');
     return p.length === 3 ? p[1] + '/' + p[2] : iso;
   };
+  const activeCurrency = () => {
+    try { const cfg = JSON.parse(localStorage.getItem('po.v4.portfolio') || '{}'); return ['USD','EUR','GBP','IRR','AED'].includes(cfg.currency) ? cfg.currency : 'USD'; }
+    catch (e) { return 'USD'; }
+  };
   const money = (n, withSign = true) => {
     const v = Number(n) || 0;
     const abs = Math.abs(v);
-    const hasFrac = Math.round(abs * 100) % 100 !== 0;
-    const s = abs.toLocaleString('en-US', {
-      minimumFractionDigits: hasFrac ? 2 : 0,
-      maximumFractionDigits: 2
-    });
-    if (!withSign) return '$' + s;
-    if (v > 0) return '+$' + s;
-    if (v < 0) return '-$' + s;
-    return '$' + s;
+    const c = activeCurrency();
+    const decimals = c === 'IRR' ? 0 : 2;
+    const hasFrac = decimals > 0 && Math.round(abs * 100) % 100 !== 0;
+    const s = abs.toLocaleString('en-US', { minimumFractionDigits: hasFrac ? 2 : 0, maximumFractionDigits: decimals });
+    const symbol = ({ USD:'$', EUR:'€', GBP:'£', AED:'د.إ ', IRR:'' })[c] || '$';
+    const core = c === 'IRR' ? s + ' ریال' : symbol + s;
+    if (!withSign) return core;
+    if (v > 0) return '+' + core;
+    if (v < 0) return '-' + core;
+    return core;
   };
   const num = (n, d = 0) => (Number(n) || 0).toLocaleString('en-US', {
     minimumFractionDigits: d, maximumFractionDigits: d
@@ -373,7 +382,7 @@
   const KEYS = {
     trades: 'po.v4.trades', theme: 'po.v4.theme',
     goal: 'po.v4.goal', rules: 'po.v4.rules',
-    checklist: 'po.v4.checklist'
+    checklist: 'po.v4.checklist', portfolio: 'po.v4.portfolio'
   };
   function loadJSON(key, fallback) {
     try {
@@ -384,8 +393,13 @@
     } catch (e) { return fallback; }
   }
   function saveJSON(key, val) {
-    try { localStorage.setItem(key, JSON.stringify(val)); }
-    catch (e) { console.warn('Storage error:', e); }
+    try {
+      localStorage.setItem(key, JSON.stringify(val));
+      return true;
+    } catch (e) {
+      console.warn('Storage error:', e);
+      return false;
+    }
   }
 
   /* ============================ STATE ============================ */
@@ -419,7 +433,7 @@
     search: '', strategy: 'all', tag: 'all', result: 'all',
     emotion: 'all', side: 'all', from: '', to: ''
   };
-  function saveTrades() { saveJSON(KEYS.trades, trades); }
+  function saveTrades() { return saveJSON(KEYS.trades, trades); }
 
   /* ============================ CALCULATIONS ============================ */
   const pnl = t => {
@@ -1016,9 +1030,10 @@
     html: document.documentElement,
     tabs: $('#tabs'), themeBtn: $('#theme-btn'), langBtn: $('#lang-btn'), langLabel: $('#lang-label'),
     pageAdd: $('#page-add'), pageAnalysis: $('#page-analysis'),
-    pageCalendar: $('#page-calendar'), pageTrades: $('#page-trades'), pageSettings: $('#page-settings'),
+    pageCalendar: $('#page-calendar'), pageTrades: $('#page-trades'), pageSettings: $('#page-settings'), pageProfile: $('#page-profile'),
     form: $('#trade-form'),
     fDate: $('#f-date'), fSymbol: $('#f-symbol'), fStrategy: $('#f-strategy'),
+    fAssetClass: $('#f-asset-class'), fPositionSize: $('#f-position-size'), fEntryPrice: $('#f-entry-price'), fExitPrice: $('#f-exit-price'),
     fAmount: $('#f-amount'), fRisk: $('#f-risk'), fTags: $('#f-tags'), fNote: $('#f-note'),
     sideSeg: $('#f-side'), resultSeg: $('#f-result'),
     emotionWrap: $('#f-emotion'), checklistWrap: $('#f-checklist'),
@@ -1143,7 +1158,7 @@ function applyTheme(th) {
       meta.content = th === 'aurora' ? '#eef2f9' : th === 'cyber' ? '#06001a' : '#05070f';
     }
 
-    saveJSON(KEYS.theme, th);
+    if (!saveJSON(KEYS.theme, th)) console.warn('[PO-TRADE] Theme could not be persisted on this device.');
 
     document.querySelectorAll('.theme-pick').forEach(b => {
       b.classList.toggle('active', b.dataset.themePick === th);
@@ -1305,17 +1320,24 @@ function applyTheme(th) {
     el.pageCalendar.classList.toggle('active', name === 'calendar');
     el.pageTrades.classList.toggle('active', name === 'trades');
     el.pageSettings.classList.toggle('active', name === 'settings');
-    if (name === 'analysis') requestAnimationFrame(renderCharts);
+    if (el.pageProfile) el.pageProfile.classList.toggle('active', name === 'profile');
+    if (name === 'analysis') { requestAnimationFrame(renderCharts); renderAnalysisOverview(); }
     if (name === 'calendar') renderCalendar();
     if (name === 'trades') renderAllTrades();
     if (name === 'settings') renderSettingsPage();
+    if (name === 'profile') renderProfile();
   }
+  window.POTradeNavigate = switchView;
 
   /* ============================ FORM SUBMIT ============================ */
   function resetForm() {
     editingId = null;
     el.form.reset();
     el.fDate.value = todayISO();
+    if (el.fAssetClass) el.fAssetClass.value = 'forex';
+    if (el.fPositionSize) el.fPositionSize.value = '';
+    if (el.fEntryPrice) el.fEntryPrice.value = '';
+    if (el.fExitPrice) el.fExitPrice.value = '';
     el.submitBtn.textContent = t('submit_trade');
     el.cancelEdit.hidden = true;
     setSeg(el.sideSeg, 'buy');
@@ -1332,6 +1354,10 @@ function applyTheme(th) {
     el.fDate.value = tr.date;
     el.fSymbol.value = tr.symbol;
     el.fStrategy.value = tr.strategy;
+    if (el.fAssetClass) el.fAssetClass.value = tr.assetClass || (String(tr.symbol || '').includes('BTC') || String(tr.symbol || '').includes('ETH') ? 'crypto' : String(tr.symbol || '').startsWith('XAU') || String(tr.symbol || '').startsWith('XAG') ? 'metals' : 'forex');
+    if (el.fPositionSize) el.fPositionSize.value = tr.positionSize != null ? tr.positionSize : '';
+    if (el.fEntryPrice) el.fEntryPrice.value = tr.entryPrice != null ? tr.entryPrice : '';
+    if (el.fExitPrice) el.fExitPrice.value = tr.exitPrice != null ? tr.exitPrice : '';
     el.fAmount.value = tr.amount;
     el.fRisk.value = tr.risk || '';
     el.fTags.value = (tr.tags || []).join(', ');
@@ -1349,6 +1375,7 @@ function applyTheme(th) {
   }
   function onSubmit(e) {
     e.preventDefault();
+    const previousTrades = trades.slice(); // rollback in-memory edits if local storage is full/blocked
     const date = el.fDate.value || todayISO();
     const symbol = el.fSymbol.value.trim();
     const strategy = el.fStrategy.value.trim();
@@ -1356,6 +1383,10 @@ function applyTheme(th) {
     const amount = Math.abs(parseFloat(amountRaw));
     const riskRaw = el.fRisk.value;
     const risk = riskRaw ? Math.abs(parseFloat(riskRaw)) : null;
+    const assetClass = el.fAssetClass ? String(el.fAssetClass.value || 'other') : 'other';
+    const positionSize = el.fPositionSize && el.fPositionSize.value !== '' ? Math.abs(parseFloat(el.fPositionSize.value)) : null;
+    const entryPrice = el.fEntryPrice && el.fEntryPrice.value !== '' ? Math.abs(parseFloat(el.fEntryPrice.value)) : null;
+    const exitPrice = el.fExitPrice && el.fExitPrice.value !== '' ? Math.abs(parseFloat(el.fExitPrice.value)) : null;
 
     if (!symbol)   { toast(el.formMsg, t('err_symbol'), true);   el.fSymbol.focus();   return; }
     if (!strategy) { toast(el.formMsg, t('err_strategy'), true); el.fStrategy.focus(); return; }
@@ -1363,7 +1394,10 @@ function applyTheme(th) {
 
     const trade = {
       id: editingId || uid(),
-      date, symbol, strategy,
+      date, symbol, strategy, assetClass,
+      positionSize: Number.isFinite(positionSize) ? positionSize : null,
+      entryPrice: Number.isFinite(entryPrice) ? entryPrice : null,
+      exitPrice: Number.isFinite(exitPrice) ? exitPrice : null,
       side: el.sideSeg.dataset.value,
       result: el.resultSeg.dataset.value,
       amount,
@@ -1382,13 +1416,16 @@ function applyTheme(th) {
         trade.createdAt = trades[i].createdAt || Date.now();
         trades[i] = trade;
       } else trades.push(trade);
-      toast(el.formMsg, t('ok_saved'));
     } else {
       trades.push(trade);
-      toast(el.formMsg, t('ok_added'));
     }
-    try { saveTrades(); }
-    catch (err) { toast(el.formMsg, t('err_storage'), true); return; }
+    if (!saveTrades()) {
+      trades = previousTrades;
+      renderAll();
+      toast(el.formMsg, t('err_storage'), true);
+      return;
+    }
+    toast(el.formMsg, editingId ? t('ok_saved') : t('ok_added'));
     resetForm();
     renderAll();
   }
@@ -1420,6 +1457,8 @@ function applyTheme(th) {
           '<span class="ti-meta">' +
             '<span class="emo" title="' + esc(emoLabel(tr.emotion)) + '">' + emo.ico + '</span>' +
             '<span>🎯 ' + esc(tr.strategy) + '</span>' +
+            (tr.assetClass ? '<span class="ti-asset">' + esc(({crypto:'CRYPTO',forex:'FOREX',metals:'METALS',indices:'INDICES',stocks:'STOCKS',other:'OTHER'})[tr.assetClass] || String(tr.assetClass).toUpperCase()) + '</span>' : '') +
+            (tr.positionSize != null ? '<span>SIZE ' + esc(num(tr.positionSize, 2)) + '</span>' : '') +
             '<span>' + SIDE[tr.side] + ' · ' + fullDate(tr.date) + '</span>' +
             (rmTxt ? '<span>' + rmTxt + '</span>' : '') +
           '</span>' +
@@ -1468,11 +1507,8 @@ function applyTheme(th) {
       if (dc != null) { dcSum += dc; dcCount++; }
     }
     const avgDiscipline = dcCount ? Math.round(dcSum / dcCount) : 0;
+    /* Four primary metrics already live in the hero; keep this panel for the 10 complementary metrics. */
     const cards = [
-      { ico: '💎', l: t('kpi_net'),      v: money(s.net),            c: s.net > 0 ? 'pos' : s.net < 0 ? 'neg' : '' },
-      { ico: '🎯', l: t('kpi_winrate'),  v: pct(s.winRate),          c: s.winRate >= 50 ? 'pos' : 'neg' },
-      { ico: '📊', l: t('kpi_total'),    v: num(s.total),            c: '' },
-      { ico: '⚖️', l: t('kpi_pf'),       v: isFinite(s.profitFactor) ? s.profitFactor.toFixed(2) : '∞', c: s.profitFactor >= 1 ? 'pos' : 'neg' },
       { ico: '📐', l: t('kpi_avgr'),     v: s.rCount ? ((s.avgR > 0 ? '+' : '') + s.avgR.toFixed(2) + 'R') : '—', c: s.avgR > 0 ? 'pos' : s.avgR < 0 ? 'neg' : '' },
       { ico: '🧮', l: t('kpi_exp'),      v: money(s.expectancy),     c: s.expectancy > 0 ? 'pos' : 'neg' },
       { ico: '✅', l: t('kpi_disc'),     v: dcCount ? pct(avgDiscipline) : '—', c: avgDiscipline >= 75 ? 'pos' : avgDiscipline >= 50 ? '' : 'neg' },
@@ -1493,12 +1529,111 @@ function applyTheme(th) {
     ).join('');
   }
 
+  /* ============================ RENDER: PREMIUM ANALYTICS OVERVIEW ============================ */
+  function renderAnalysisOverview() {
+    const filtered = inRange(trades, range);
+    const stats = computeStats(filtered);
+    const net = $('#analysis-net-value');
+    const status = $('#analysis-net-status');
+    const rangeLabel = $('#analysis-range-label');
+    if (net) {
+      net.textContent = money(stats.net);
+      net.classList.toggle('is-positive', stats.net > 0);
+      net.classList.toggle('is-negative', stats.net < 0);
+    }
+    if (status) {
+      status.classList.remove('is-positive', 'is-negative');
+      if (!filtered.length) status.textContent = t('analysis_no_data');
+      else if (stats.net > 0) { status.textContent = t('analysis_positive'); status.classList.add('is-positive'); }
+      else if (stats.net < 0) { status.textContent = t('analysis_negative'); status.classList.add('is-negative'); }
+      else status.textContent = t('analysis_neutral');
+    }
+    if (rangeLabel) rangeLabel.textContent = range === 'all' ? t('rall') : t('r' + range);
+    const total = $('#analysis-overview-trades'); if (total) total.textContent = num(stats.total);
+    const wr = $('#analysis-overview-winrate'); if (wr) wr.textContent = pct(stats.winRate);
+    const pf = $('#analysis-overview-pf'); if (pf) pf.textContent = Number.isFinite(stats.profitFactor) ? stats.profitFactor.toFixed(2) : (stats.grossProfit > 0 ? '∞' : '—');
+    const artWr = $('#analysis-art-winrate'); if (artWr) artWr.textContent = stats.total ? pct(stats.winRate) : '—';
+
+    const strategyRows = byStrategy(filtered);
+    const bestStrategy = strategyRows.length ? strategyRows[0] : null;
+    const emotionRows = byEmotion(filtered);
+    const bestEmotion = emotionRows.length ? emotionRows[0] : null;
+    const symbolsMap = new Map();
+    filtered.forEach(tr => {
+      const key = String(tr.symbol || '—');
+      const row = symbolsMap.get(key) || { name: key, count: 0, net: 0 };
+      row.count += 1; row.net += pnl(tr); symbolsMap.set(key, row);
+    });
+    const symbolRows = Array.from(symbolsMap.values()).sort((a, b) => b.net - a.net);
+    const bestSymbol = symbolRows.length ? symbolRows[0] : null;
+    const host = $('#analysis-insights');
+    if (!host) return;
+    const insightCard = (icon, label, sub, value, meta, cls) =>
+      '<article class="analysis-insight-card ' + (cls || '') + '">' +
+        '<div class="analysis-insight-icon">' + icon + '</div>' +
+        '<div class="analysis-insight-copy"><span>' + esc(label) + '</span><strong>' + esc(value) + '</strong><small>' + esc(meta || sub) + '</small></div>' +
+        '<div class="analysis-insight-arrow">↗</div>' +
+      '</article>';
+    host.innerHTML = [
+      insightCard('✦', t('analysis_top_strategy'), t('analysis_top_strategy_sub'), bestStrategy ? bestStrategy.name : '—', bestStrategy ? (num(bestStrategy.count) + ' ' + t('profile_trade_word') + ' · ' + money(bestStrategy.net)) : t('analysis_no_insight'), bestStrategy && bestStrategy.net < 0 ? 'is-negative' : 'is-positive'),
+      insightCard('⌁', t('analysis_top_symbol'), t('analysis_top_symbol_sub'), bestSymbol ? bestSymbol.name : '—', bestSymbol ? (num(bestSymbol.count) + ' ' + t('profile_trade_word') + ' · ' + money(bestSymbol.net)) : t('analysis_no_insight'), bestSymbol && bestSymbol.net < 0 ? 'is-negative' : 'is-positive'),
+      insightCard('◉', t('analysis_top_mood'), t('analysis_top_mood_sub'), bestEmotion ? emoLabel(bestEmotion.key) : '—', bestEmotion ? (num(bestEmotion.count) + ' ' + t('profile_trade_word') + ' · ' + money(bestEmotion.net)) : t('analysis_no_insight'), bestEmotion && bestEmotion.net < 0 ? 'is-negative' : 'is-positive')
+    ].join('');
+  }
+
+  /* ============================ RENDER: PROFILE ============================ */
+  function renderProfile() {
+    if (!el.pageProfile) return;
+    const stats = computeStats(trades);
+    const set = (id, value) => { const node = $('#' + id); if (node) node.textContent = value; };
+    set('profileNet', money(stats.net));
+    set('profileTrades', num(stats.total));
+    set('profileWinrate', pct(stats.winRate));
+    set('profileExpectancy', money(stats.expectancy));
+    const netNode = $('#profileNet');
+    if (netNode) { netNode.classList.toggle('is-positive', stats.net > 0); netNode.classList.toggle('is-negative', stats.net < 0); }
+    const expectancyNode = $('#profileExpectancy');
+    if (expectancyNode) { expectancyNode.classList.toggle('is-positive', stats.expectancy > 0); expectancyNode.classList.toggle('is-negative', stats.expectancy < 0); }
+    const bar = $('#profileWinrateBar'); if (bar) bar.style.width = Math.max(0, Math.min(100, stats.winRate)) + '%';
+    const u = window.PT_USER || {};
+    if (u.name) set('profileName', u.name);
+    if (u.email) { set('profileEmail', u.email); set('profileDetailEmail', u.email); }
+    if (u.createdAt) {
+      const d = new Date(u.createdAt);
+      if (!Number.isNaN(d.getTime())) {
+        const iso = d.getFullYear() + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + String(d.getDate()).padStart(2, '0');
+        set('profileJoined', iso); set('profileDetailJoined', iso);
+      }
+    }
+    const list = $('#profileRecentTrades');
+    if (list) {
+      const latest = trades.slice().sort((a, b) => (b.date || '').localeCompare(a.date || '') || (Number(b.createdAt) || 0) - (Number(a.createdAt) || 0)).slice(0, 5);
+      if (!latest.length) list.innerHTML = '<div class="profile-empty-state"><span>◌</span><strong>' + esc(t('profile_empty_recent')) + '</strong><small>' + esc(t('analysis_no_data')) + '</small></div>';
+      else list.innerHTML = latest.map(tr => {
+        const value = pnl(tr);
+        const state = tr.result === 'win' ? 'win' : tr.result === 'loss' ? 'loss' : 'be';
+        const resultLabel = tr.result === 'win' ? t('profile_win') : tr.result === 'loss' ? t('profile_loss') : t('profile_be');
+        return '<article class="profile-recent-item">' +
+          '<span class="profile-recent-symbol ' + state + '">' + esc(String(tr.symbol || '—').slice(0, 2)) + '</span>' +
+          '<div class="profile-recent-main"><strong>' + esc(tr.symbol || '—') + '</strong><small>' + esc(tr.strategy || '—') + ' · ' + esc(fullDate(tr.date || '—')) + '</small></div>' +
+          '<div class="profile-recent-result ' + state + '"><strong>' + (tr.result === 'be' ? esc(t('profile_be')) : esc(money(value))) + '</strong><small>' + esc(resultLabel) + '</small></div>' +
+        '</article>';
+      }).join('');
+    }
+  }
+
   /* ============================ RENDER: CHARTS ============================ */
   function renderCharts() {
     const filtered = inRange(trades, range);
-    const days = byDay(filtered);
-    chartLine(el.equityChart, days.map(d => ({ label: d.date, value: d.cum })));
-    chartBars(el.dailyChart,  days.map(d => ({ label: d.date, value: d.net })));
+    const rangeDates = new Set(filtered.map(tr => tr.date));
+    const allDays = byDay(trades);
+    let portfolio = {};
+    try { portfolio = JSON.parse(localStorage.getItem('po.v4.portfolio') || '{}'); } catch (e) {}
+    const base = Math.max(0, Number(portfolio.startingBalance) || 0);
+    const equityDays = allDays.filter(d => rangeDates.has(d.date));
+    chartLine(el.equityChart, equityDays.map(d => ({ label: d.date, value: r2(base + d.cum) })));
+    chartBars(el.dailyChart, byDay(filtered).map(d => ({ label: d.date, value: d.net })));
+    try { if (window.PTPrism && typeof window.PTPrism.renderAnalyticsCharts === 'function') window.PTPrism.renderAnalyticsCharts(filtered, allDays); } catch (e) {}
   }
 
   /* ============================ RENDER: EMOTIONS ============================ */
@@ -1973,6 +2108,7 @@ function applyTheme(th) {
   function renderAll() {
     renderRecent();
     renderKPIs();
+    renderAnalysisOverview();
     renderCharts();
     renderEmotions();
     renderStrategyTable();
@@ -1982,9 +2118,32 @@ function applyTheme(th) {
     if (el.pageCalendar.classList.contains('active')) renderCalendar();
     if (el.pageTrades.classList.contains('active')) renderAllTrades();
     if (el.pageSettings.classList.contains('active')) renderSettingsPage();
+    if (el.pageProfile && el.pageProfile.classList.contains('active')) renderProfile();
     try { if (window.POAlerts) window.POAlerts.check(getGoalProgress(), checkRules()); } catch (e) {}
     try { if (window.POPlus) window.POPlus.render(); } catch (e) {}
+    try { if (window.PTPrism && typeof window.PTPrism.refreshDashboard === 'function') window.PTPrism.refreshDashboard(); } catch (e) {}
   }
+
+  // Cloud sync hydrates localStorage after the interface has already rendered. Re-read the
+  // persisted state once it is ready so the UI is both fast and consistent with the server.
+  window.addEventListener('po:sync-ready', function () {
+    try {
+      const restoredTrades = loadJSON(KEYS.trades, []);
+      trades = Array.isArray(restoredTrades) ? restoredTrades : [];
+      goal = loadJSON(KEYS.goal, null);
+      const restoredRules = loadJSON(KEYS.rules, null);
+      if (restoredRules && typeof restoredRules === 'object') rules = restoredRules;
+      const restoredChecklist = loadJSON(KEYS.checklist, null);
+      if (Array.isArray(restoredChecklist) && restoredChecklist.length) {
+        const clean = restoredChecklist.filter(x => x && x.id && (x.text || x.fa || x.en))
+          .map(x => ({ id: x.id, text: x.text || x.fa || x.en }));
+        if (clean.length) checklistItems = clean;
+      }
+      const restoredTheme = loadJSON(KEYS.theme, theme);
+      if (restoredTheme && restoredTheme !== theme) applyTheme(restoredTheme);
+      renderAll();
+    } catch (e) { console.warn('[app] Could not refresh synced state:', e); }
+  });
 
   /* ============================ DATALISTS ============================ */
   function populateDatalists() {
@@ -2059,6 +2218,7 @@ function applyTheme(th) {
       try {
         const parsed = JSON.parse(reader.result);
         if (!Array.isArray(parsed)) throw new Error('Invalid file structure');
+        const beforeImport = trades.slice();
         const existing = new Set(trades.map(tr => tr.id));
         let added = 0;
         for (const raw of parsed) {
@@ -2070,6 +2230,10 @@ function applyTheme(th) {
             date: /^\d{4}-\d{2}-\d{2}$/.test(raw.date) ? raw.date : todayISO(),
             symbol: String(raw.symbol || '—').slice(0, 24),
             strategy: String(raw.strategy || '—').slice(0, 48),
+            assetClass: ['crypto','forex','metals','indices','stocks','other'].includes(raw.assetClass) ? raw.assetClass : 'other',
+            positionSize: raw.positionSize != null && Number.isFinite(Number(raw.positionSize)) ? Math.abs(Number(raw.positionSize)) : null,
+            entryPrice: raw.entryPrice != null && Number.isFinite(Number(raw.entryPrice)) ? Math.abs(Number(raw.entryPrice)) : null,
+            exitPrice: raw.exitPrice != null && Number.isFinite(Number(raw.exitPrice)) ? Math.abs(Number(raw.exitPrice)) : null,
             side: raw.side === 'sell' ? 'sell' : 'buy',
             result: ['win','loss','be'].indexOf(raw.result) > -1 ? raw.result : 'be',
             amount: Math.abs(Number(raw.amount) || 0),
@@ -2084,7 +2248,11 @@ function applyTheme(th) {
           existing.add(id);
           added++;
         }
-        saveTrades();
+        if (!saveTrades()) {
+          trades = beforeImport; renderAll();
+          toast(el.formMsg, t('err_storage'), true);
+          return;
+        }
         renderAll();
         toast(el.formMsg, fmt('ok_import', { n: added }));
       } catch (err) {
@@ -2102,6 +2270,27 @@ function applyTheme(th) {
     el.tabs.addEventListener('click', e => {
       const tab = e.target.closest('.tab');
       if (tab) switchView(tab.dataset.view);
+    });
+    document.addEventListener('click', e => {
+      const route = e.target.closest('[data-go-view]');
+      if (route) { switchView(route.dataset.goView); return; }
+      const copyBtn = e.target.closest('#profile-copy-id');
+      if (copyBtn) {
+        const value = copyBtn.dataset.copyValue || '';
+        const label = copyBtn.querySelector('span:last-child');
+        const original = label ? label.textContent : '';
+        const done = () => { if (label) { label.textContent = t('profile_copied'); setTimeout(() => { label.textContent = original; }, 1500); } };
+        const failed = () => { if (label) { label.textContent = t('profile_copy_failed'); setTimeout(() => { label.textContent = original; }, 1800); } };
+        if (!value) { failed(); return; }
+        if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(value).then(done).catch(failed);
+        else {
+          const field = document.createElement('textarea'); field.value = value; field.style.position = 'fixed'; field.style.opacity = '0'; document.body.appendChild(field); field.select();
+          try { if (document.execCommand('copy')) done(); else failed(); } catch (err) { failed(); } finally { field.remove(); }
+        }
+        return;
+      }
+      if (e.target.closest('#profile-change-password')) { if (typeof window.openChangePassword === 'function') window.openChangePassword(); return; }
+      if (e.target.closest('#profile-logout')) { if (typeof window.poLogout === 'function') window.poLogout(); return; }
     });
 
     el.form.addEventListener('submit', onSubmit);
@@ -2136,8 +2325,14 @@ function applyTheme(th) {
           cancelText: t('md_cancel')
         });
         if (!ok) return;
+        const beforeDelete = trades;
         trades = trades.filter(tr => tr.id !== id);
-        saveTrades(); renderAll();
+        if (!saveTrades()) {
+          trades = beforeDelete; renderAll();
+          toast(el.formMsg, t('err_storage'), true);
+          return;
+        }
+        renderAll();
         toast(el.formMsg, t('del_done'));
       }
     }
@@ -2173,8 +2368,14 @@ function applyTheme(th) {
         });
         if (!ok) return;
       }
+      const previousTrades = trades;
       trades = trades.concat(demoData());
-      saveTrades(); renderAll();
+      if (!saveTrades()) {
+        trades = previousTrades; renderAll();
+        toast(el.formMsg, t('err_storage'), true);
+        return;
+      }
+      renderAll();
       switchView('analysis');
       toast(el.formMsg, t('ok_demo'));
     });
@@ -2196,8 +2397,13 @@ function applyTheme(th) {
         cancelText: t('md_cancel')
       });
       if (!ok) return;
+      const previousTrades = trades;
       trades = [];
-      try { localStorage.removeItem(KEYS.trades); } catch (err) {}
+      if (!saveTrades()) {
+        trades = previousTrades; renderAll();
+        toast(el.formMsg, t('err_storage'), true);
+        return;
+      }
       renderAll();
       toast(el.formMsg, t('cleared'));
     });
@@ -2229,14 +2435,14 @@ function applyTheme(th) {
 
     /* ===== GOAL ===== */
     el.saveGoal.addEventListener('click', () => {
-      const target = Math.abs(parseFloat(el.goalTarget.value));
-      if (!target || isNaN(target)) { toast(el.goalMsg, t('err_goal_target'), true); return; }
+      const target = parseFloat(el.goalTarget.value);
+      if (!Number.isFinite(target) || target <= 0) { toast(el.goalMsg, t('err_goal_target'), true); el.goalTarget.focus(); return; }
       goal = {
         period: el.goalPeriod.dataset.value || 'week',
         metric: el.goalMetric.dataset.value || 'pnl',
         target
       };
-      saveJSON(KEYS.goal, goal);
+      if (!saveJSON(KEYS.goal, goal)) { goal = loadJSON(KEYS.goal, null); toast(el.goalMsg, t('err_storage'), true); return; }
       renderGoalsPreview();
       renderGoalsMini();
       toast(el.goalMsg, t('ok_goal'));
@@ -2252,8 +2458,10 @@ function applyTheme(th) {
         cancelText: t('md_cancel')
       });
       if (!ok) return;
+      const previousGoal = goal;
+      try { localStorage.removeItem(KEYS.goal); }
+      catch (err) { goal = previousGoal; toast(el.goalMsg, t('err_storage'), true); return; }
       goal = null;
-      try { localStorage.removeItem(KEYS.goal); } catch (err) {}
       el.goalTarget.value = '';
       renderGoalsPreview();
       renderGoalsMini();
@@ -2269,7 +2477,7 @@ function applyTheme(th) {
         target: Math.abs(parseFloat(el.ruleTarget.value)) || 0,
         balance: Math.abs(parseFloat(el.ruleBalance.value)) || 10000
       };
-      saveJSON(KEYS.rules, rules);
+      if (!saveJSON(KEYS.rules, rules)) { rules = loadJSON(KEYS.rules, { enabled: false, dailyLoss: 0, maxDD: 0, target: 0, balance: 10000 }); toast(el.rulesMsg, t('err_storage'), true); return; }
       renderRulesStatus();
       renderRulesBanner();
       toast(el.rulesMsg, t('ok_rules'));
@@ -2281,8 +2489,11 @@ function applyTheme(th) {
         const v = el.clNewInput.value.trim();
         if (!v) return;
         if (checklistItems.length >= 12) { toast(el.clMsg, t('checklist_max'), true); return; }
+        const previousChecklist = checklistItems.slice();
         checklistItems.push({ id: 'ci_' + uid(), text: v });
-        saveJSON(KEYS.checklist, checklistItems);
+        if (!saveJSON(KEYS.checklist, checklistItems)) {
+          checklistItems = previousChecklist; toast(el.clMsg, t('err_storage'), true); return;
+        }
         el.clNewInput.value = '';
         renderChecklistManager();
         renderChecklistForm(getChecklistValues());
@@ -2315,10 +2526,14 @@ function applyTheme(th) {
           const inp = itemEl.querySelector('.cl-edit-input');
           const v = inp ? inp.value.trim() : '';
           if (!v) return;
+          const previousChecklist = checklistItems.map(x => Object.assign({}, x));
           const item = checklistItems.find(x => x.id === id);
           if (item) { item.text = v; delete item.fa; delete item.en; }
+          if (!saveJSON(KEYS.checklist, checklistItems)) {
+            checklistItems = previousChecklist; clEditingId = null;
+            renderChecklistManager(); toast(el.clMsg, t('err_storage'), true); return;
+          }
           clEditingId = null;
-          saveJSON(KEYS.checklist, checklistItems);
           renderChecklistManager();
           renderChecklistForm(getChecklistValues());
           renderAll();
@@ -2333,8 +2548,12 @@ function applyTheme(th) {
             cancelText: t('md_cancel')
           });
           if (!ok) return;
+          const previousChecklist = checklistItems;
           checklistItems = checklistItems.filter(x => x.id !== id);
-          saveJSON(KEYS.checklist, checklistItems);
+          if (!saveJSON(KEYS.checklist, checklistItems)) {
+            checklistItems = previousChecklist; renderChecklistManager();
+            toast(el.clMsg, t('err_storage'), true); return;
+          }
           renderChecklistManager();
           renderChecklistForm({});
           renderAll();
@@ -2434,6 +2653,7 @@ function applyTheme(th) {
     el.fDate.value = todayISO();
     renderTagsPreview();
     populateDatalists();
+    try { if (window.PTPrism && typeof window.PTPrism.refreshAssetSuggestions === 'function') window.PTPrism.refreshAssetSuggestions(); } catch (e) {}
 
     bindEvents();
     renderAll();

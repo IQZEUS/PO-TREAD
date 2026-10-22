@@ -1,8 +1,8 @@
 /* PO-TRADE service worker — faster repeat loads + offline shell.
    SECURITY: only same-origin GET requests are ever handled. Auth / reset / confirm pages, any URL with a query string
    (tokens!), the banner config and every cross-origin request (Supabase, GitHub, fonts) go straight to the network and are never cached. */
-const VER = 'po-v1';
-const SHELL = ['./', 'index.html', 'style.css', 'themes.css', 'legend.css', 'app.js', 'sync.js', 'assistant.js', 'alerts.js', 'analysis-plus.js', 'tools.js', 'manifest.webmanifest', 'icon-192.png'];
+const VER = 'po-v18-profile-dock-explore-logo-20261022';
+const SHELL = ['./', 'index.html', 'style.css', 'themes.css', 'legend.css', 'redesign.css', 'prism.css', 'nebula.css', 'onboarding.css', 'community-layout-fix.css', 'prism.js', 'nebula.js', 'app.js', 'cosmos-coach.css', 'social-explore.css', 'social-explore.js', 'community-profile.js', 'ai-coach.js', 'ai-coach-content.js', 'sync.js', 'assistant.js', 'alerts.js', 'analysis-plus.js', 'tools.js', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'icon-maskable-512.png', 'apple-touch-icon.png', 'favicon.ico', 'favicon-32.png', 'favicon-16.png', 'brand-emblem.png'];
 const NEVER = /(^|\/)(auth|reset-password|confirm|welcome)\.html$|(^|\/)banner-config\.js$|(^|\/)sw\.js$/i;
 
 self.addEventListener('install', e => {

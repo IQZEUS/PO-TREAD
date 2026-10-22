@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#03040a">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" href="favicon.ico">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <title>ورود | PO-TRADE</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap');
@@ -224,6 +227,7 @@ body{
   backdrop-filter:blur(10px);
   z-index:2;
 }
+.brand-logo-image{display:block;width:100%;height:100%;object-fit:contain;padding:3px;border-radius:inherit;filter:drop-shadow(0 0 8px rgba(57,227,208,.22))}
 @keyframes logoBounce{
   0%,100%{transform:translateY(0) rotate(0deg)}
   50%{transform:translateY(-6px) rotate(-2deg)}
@@ -654,6 +658,7 @@ input.input-error{
   }
 }
 </style>
+  <link rel="stylesheet" href="nebula.css" />
 </head>
 <body>
 
@@ -673,7 +678,7 @@ input.input-error{
   <div class="auth-card">
     <div class="brand">
       <div class="brand-logo-wrap">
-        <div class="brand-logo">📈</div>
+        <div class="brand-logo"><img class="brand-logo-image" src="brand-emblem.png" alt="PO-TRADE" width="80" height="80" decoding="async"></div>
       </div>
       <div class="brand-title">PO-TRADE</div>
       <div class="brand-sub">ژورنال معاملات — ثبت‌نام کن یا وارد شو</div>

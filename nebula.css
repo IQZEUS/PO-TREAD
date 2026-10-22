@@ -1,0 +1,391 @@
+/* PO-TRADE Nebula Studio — unified visual system and compact animated navigation */
+:root{
+  --neb-bg:#070a14;--neb-panel:rgba(17,22,42,.88);--neb-panel-2:rgba(11,16,32,.94);
+  --neb-line:rgba(159,176,230,.16);--neb-line-strong:rgba(153,128,255,.32);
+  --neb-text:#f2f5ff;--neb-muted:#8794b3;--neb-cyan:#43e9d1;--neb-purple:#a18aff;
+  --neb-violet:#795cff;--neb-pink:#ff80ca;--neb-shadow:0 22px 70px rgba(0,0,0,.38);
+}
+html{scroll-behavior:smooth;scroll-padding-top:90px}
+body{background:var(--neb-bg);color:var(--neb-text);background-image:radial-gradient(ellipse at 8% 0%,rgba(71,79,198,.12),transparent 33%),radial-gradient(ellipse at 92% 28%,rgba(28,206,194,.07),transparent 31%)}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;background:linear-gradient(rgba(130,146,211,.018) 1px,transparent 1px),linear-gradient(90deg,rgba(130,146,211,.018) 1px,transparent 1px);background-size:34px 34px;mask-image:linear-gradient(to bottom,black,transparent 75%)}
+.app{max-width:1320px!important;margin-inline:auto!important;padding-bottom:44px}
+.topbar{border:1px solid var(--neb-line)!important;background:linear-gradient(135deg,rgba(15,20,40,.91),rgba(9,14,28,.82))!important;box-shadow:0 14px 46px rgba(0,0,0,.24),inset 0 1px 0 rgba(255,255,255,.05)!important;backdrop-filter:blur(28px)!important}
+.brand .logo{border:1px solid rgba(67,233,209,.24)!important;background:linear-gradient(145deg,rgba(67,233,209,.13),rgba(121,92,255,.18))!important;box-shadow:0 0 23px rgba(67,233,209,.08),inset 0 1px 0 rgba(255,255,255,.1)}
+.brand-text p{color:#8e9bb9!important}
+button,.btn,input,select,textarea{font-family:inherit}
+button{transition:transform .22s ease,filter .22s ease,box-shadow .22s ease,border-color .22s ease,background .22s ease}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid rgba(67,233,209,.8)!important;outline-offset:3px!important}
+button:active{transform:translateY(1px) scale(.985)}
+.field input,.field select,.field textarea,.cp-input,.profile-username-form input{border:1px solid rgba(145,164,222,.17)!important;background:linear-gradient(145deg,rgba(5,9,21,.85),rgba(13,18,35,.88))!important;color:var(--neb-text)!important;border-radius:13px!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.02)!important}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:rgba(67,233,209,.44)!important;box-shadow:0 0 0 3px rgba(67,233,209,.08),0 0 25px rgba(67,233,209,.035)!important}
+.card,.profile-panel,.profile-username-card,.analysis-overview,.prism-future-card{border-color:var(--neb-line)!important;background:linear-gradient(145deg,rgba(17,23,43,.89),rgba(9,14,28,.91))!important;box-shadow:0 15px 42px rgba(0,0,0,.17),inset 0 1px 0 rgba(255,255,255,.025)!important}
+.card-head{gap:14px}
+.card-head h2{letter-spacing:-.25px}
+
+/* App-like grouped dock: route buttons still use .tab/data-view so the original app router stays intact. */
+#tabs.nebula-dock{position:relative;z-index:1200;display:block!important;width:min(940px,100%)!important;max-width:940px!important;margin:16px auto 24px!important;padding:8px!important;border:1px solid rgba(150,134,235,.22)!important;border-radius:24px!important;background:linear-gradient(125deg,rgba(13,18,36,.95),rgba(17,14,38,.94))!important;box-shadow:0 20px 55px rgba(0,0,0,.31),inset 0 1px 0 rgba(255,255,255,.065),0 0 34px rgba(121,92,255,.055)!important;backdrop-filter:blur(30px)!important}
+.nebula-dock-row{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px;align-items:stretch}
+.nebula-dock-item{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;min-width:0;min-height:65px;padding:9px 6px;border:1px solid transparent;border-radius:17px;background:transparent;color:#8d9aba;cursor:pointer;overflow:hidden}
+.nebula-dock-item:before{content:"";position:absolute;inset:0;opacity:0;border-radius:inherit;background:radial-gradient(ellipse at 50% -12%,rgba(161,138,255,.28),transparent 68%),linear-gradient(145deg,rgba(67,233,209,.075),rgba(121,92,255,.07));transition:opacity .28s ease}
+.nebula-dock-item>*{position:relative;z-index:1}
+.nebula-dock-item:hover{color:#f4f5ff;border-color:rgba(148,131,232,.13)}
+.nebula-dock-item.active{color:#f6f4ff;border-color:rgba(156,133,255,.18);box-shadow:inset 0 0 0 1px rgba(156,133,255,.025),0 5px 18px rgba(0,0,0,.08)}
+.nebula-dock-item.active:before{opacity:1}
+.nebula-dock-icon{display:grid;place-items:center;width:31px;height:31px;border:1px solid rgba(150,164,223,.12);border-radius:11px;background:linear-gradient(145deg,rgba(255,255,255,.06),rgba(255,255,255,.015));font-size:20px;line-height:1;color:#b4c0de;transition:transform .25s cubic-bezier(.2,.9,.2,1),color .25s ease,box-shadow .25s ease}
+.nebula-dock-item.active .nebula-dock-icon{color:var(--neb-cyan);border-color:rgba(67,233,209,.28);background:linear-gradient(140deg,rgba(67,233,209,.13),rgba(161,138,255,.14));box-shadow:0 0 19px rgba(67,233,209,.08),inset 0 1px 0 rgba(255,255,255,.09);transform:translateY(-1px)}
+.nebula-dock-label{max-width:100%;font-size:11px;font-weight:850;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center}
+.nebula-dock-caret{position:absolute;inset-inline-end:8px;top:7px;font-size:12px;opacity:.6;transition:transform .25s ease}
+.nebula-dock-item[aria-expanded="true"] .nebula-dock-caret{transform:rotate(180deg);color:var(--neb-cyan)}
+.nebula-dock-soon{position:absolute;inset-inline-end:7px;inset-block-start:6px;padding:2px 4px;border-radius:5px;background:rgba(161,138,255,.12);color:#c3b6ff;font-size:7px;letter-spacing:.04em;line-height:1.15}
+.nebula-dock-panel{position:absolute;z-index:5;inset-inline:0;bottom:calc(100% + 12px);padding:16px;border:1px solid rgba(155,137,255,.27);border-radius:23px;background:linear-gradient(140deg,rgba(15,20,39,.97),rgba(10,14,28,.97));box-shadow:0 30px 88px rgba(0,0,0,.5),0 0 40px rgba(121,92,255,.09),inset 0 1px 0 rgba(255,255,255,.055);backdrop-filter:blur(34px);transform-origin:50% 100%;animation:nebulaPanelIn .28s cubic-bezier(.2,.8,.2,1) both}
+.nebula-dock-panel[hidden]{display:none!important}
+.nebula-dock-panel-head{display:flex;align-items:center;justify-content:space-between;gap:14px;margin:0 0 12px;padding:0 2px 12px;border-bottom:1px solid rgba(152,166,221,.1)}
+.nebula-dock-panel-head>div{display:grid;gap:4px}
+.nebula-dock-panel-head strong{font-size:14px;font-weight:900;color:#f2f4ff}
+.nebula-kicker{display:block;color:#8c9cbe;font-size:8px;letter-spacing:.16em;font-weight:900;line-height:1.4}
+.nebula-panel-close{display:grid;place-items:center;flex:0 0 30px;width:30px;height:30px;border:1px solid rgba(153,167,221,.15);border-radius:10px;background:rgba(255,255,255,.035);color:#bdc8e3;font-size:20px;line-height:1}
+.nebula-route-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
+.nebula-account-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+#tabs .tab.dock-route{position:relative;display:grid!important;grid-template-columns:34px minmax(0,1fr);grid-template-rows:auto auto;align-items:center;justify-items:start;gap:2px 10px;min-width:0;min-height:70px;padding:12px!important;border:1px solid rgba(149,165,220,.115)!important;border-radius:16px!important;background:linear-gradient(145deg,rgba(255,255,255,.035),rgba(255,255,255,.012))!important;color:#e9eeff!important;text-align:start;overflow:hidden}
+#tabs .tab.dock-route:before{content:"";position:absolute;inset:0;background:linear-gradient(130deg,rgba(67,233,209,.055),rgba(161,138,255,.08));opacity:0;transform:translateY(4px);transition:opacity .22s ease,transform .22s ease}
+#tabs .tab.dock-route>*{position:relative;z-index:1}
+#tabs .tab.dock-route:hover,#tabs .tab.dock-route.active{border-color:rgba(67,233,209,.27)!important;box-shadow:inset 0 0 0 1px rgba(67,233,209,.035),0 7px 20px rgba(0,0,0,.12)!important}
+#tabs .tab.dock-route:hover:before,#tabs .tab.dock-route.active:before{opacity:1;transform:translateY(0)}
+#tabs .tab.dock-route:after{display:none!important}
+.dock-route-icon{grid-row:1/3;display:grid;place-items:center;width:34px;height:34px;border-radius:12px;border:1px solid rgba(154,172,228,.15);background:rgba(255,255,255,.035);color:var(--neb-cyan);font-size:19px;font-weight:800}
+#tabs .dock-route.dock-route-dynamic strong{font-size:11px;font-weight:900;line-height:1.3;max-width:100%;overflow-wrap:anywhere}
+#tabs .dock-route.dock-route-dynamic small{font-size:9px;color:#7e8cac;line-height:1.3;max-width:100%;overflow-wrap:anywhere}
+.nebula-dock-account-foot{display:flex;align-items:center;gap:8px;margin-top:12px;padding:10px 12px;border-radius:12px;background:rgba(67,233,209,.035);color:#91a2c1;font-size:10px}
+.nebula-lock-dot{width:6px;height:6px;flex:0 0 6px;border-radius:50%;background:var(--neb-cyan);box-shadow:0 0 10px rgba(67,233,209,.6)}
+@keyframes nebulaPanelIn{from{opacity:0;transform:translateY(12px) scale(.975);filter:blur(4px)}to{opacity:1;transform:translateY(0) scale(1);filter:blur(0)}}
+
+/* Global page rhythm and analytics/chart polish */
+.page.active{animation:nebulaPageIn .32s ease both;min-width:0}
+@keyframes nebulaPageIn{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+.prism-portfolio-hero{border:1px solid rgba(151,134,255,.21)!important;background:radial-gradient(ellipse at 84% 12%,rgba(139,106,255,.16),transparent 34%),radial-gradient(ellipse at 10% 98%,rgba(67,233,209,.10),transparent 38%),linear-gradient(135deg,#11172a,#0b1222 60%,#151129)!important;box-shadow:0 25px 65px rgba(0,0,0,.24),inset 0 1px 0 rgba(255,255,255,.055)!important}
+.prism-hero-balance{border-color:rgba(67,233,209,.17)!important;background:linear-gradient(145deg,rgba(7,18,31,.86),rgba(17,15,39,.8))!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 16px 42px rgba(0,0,0,.16)!important}
+.analysis-overview{border:1px solid rgba(154,135,255,.25)!important;background:radial-gradient(ellipse at 84% 10%,rgba(143,113,255,.17),transparent 38%),radial-gradient(ellipse at 7% 96%,rgba(67,233,209,.08),transparent 35%),linear-gradient(130deg,rgba(17,22,42,.96),rgba(9,14,28,.97))!important}
+.analysis-net-panel{border-color:rgba(67,233,209,.16)!important;background:linear-gradient(140deg,rgba(67,233,209,.055),rgba(255,255,255,.02))!important}
+.analysis-quick-stat{border:1px solid rgba(154,168,224,.12)!important;border-radius:15px!important;background:linear-gradient(145deg,rgba(255,255,255,.045),rgba(255,255,255,.012))!important}
+.analysis-insight-card{border:1px solid rgba(148,164,222,.12)!important;background:linear-gradient(140deg,rgba(255,255,255,.035),rgba(255,255,255,.012))!important;border-radius:17px!important}
+.analysis-kpi-details{border:1px solid rgba(151,166,221,.14)!important;border-radius:17px!important;background:rgba(255,255,255,.022)!important;overflow:hidden}
+.analysis-kpi-details[open]{border-color:rgba(153,130,255,.25)!important}
+.kpi{border:1px solid rgba(147,163,220,.13)!important;background:linear-gradient(145deg,rgba(17,24,45,.87),rgba(10,15,29,.92))!important;border-radius:17px!important;box-shadow:0 13px 30px rgba(0,0,0,.14)!important}
+.chart-card,.chart-box,.prism-chart-card{border-color:rgba(148,166,225,.14)!important;min-width:0}
+.chart-box{padding:13px!important;border:1px solid rgba(146,164,222,.10);border-radius:16px;background:radial-gradient(ellipse at 50% 0,rgba(110,93,218,.08),transparent 60%),rgba(5,9,20,.35);overflow:hidden}
+.chart-box canvas{display:block;width:100%!important;max-width:100%;height:clamp(190px,27vw,290px)!important}
+.prism-chart-card{border:1px solid rgba(146,164,222,.13)!important;background:linear-gradient(145deg,rgba(17,23,43,.91),rgba(9,14,27,.93))!important}
+.prism-chart-wrap{min-width:0;overflow:hidden;border-radius:13px}
+.prism-chart-wrap canvas{display:block;width:100%;max-width:100%}
+.prism-chart-foot{border-top:1px solid rgba(146,164,222,.08)!important}
+.table-wrap,.trade-list,.profile-recent-list{max-width:100%;min-width:0;overflow-x:auto;overscroll-behavior-x:contain}
+.trade-item{border:1px solid rgba(146,164,222,.11)!important;background:linear-gradient(120deg,rgba(255,255,255,.026),rgba(255,255,255,.008))!important}
+.trade-item .ti-right{flex-shrink:0}
+
+/* Privacy controls */
+.nebula-privacy-panel{position:relative;overflow:hidden;border:1px solid rgba(153,134,255,.19)!important;background:radial-gradient(ellipse at 100% 0,rgba(132,103,255,.11),transparent 35%),linear-gradient(145deg,rgba(17,23,43,.93),rgba(9,14,28,.95))!important}
+.nebula-panel-title-row{display:flex;align-items:flex-start;justify-content:space-between;gap:15px;margin-bottom:16px}
+.nebula-panel-title-row h2{margin:5px 0 7px;font-size:clamp(16px,2.3vw,22px);font-weight:950;letter-spacing:-.35px}
+.nebula-panel-title-row p{margin:0;max-width:650px;color:#8d9aba;font-size:11px;line-height:1.9}
+.nebula-privacy-shield{display:grid;place-items:center;flex:0 0 48px;width:48px;height:48px;border:1px solid rgba(67,233,209,.22);border-radius:16px;background:linear-gradient(145deg,rgba(67,233,209,.1),rgba(153,134,255,.16));color:var(--neb-cyan);font-size:23px;box-shadow:0 0 25px rgba(67,233,209,.05)}
+.nebula-privacy-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.nebula-privacy-option{position:relative;display:grid;grid-template-columns:37px minmax(0,1fr) 36px;align-items:center;gap:10px;min-width:0;padding:12px;border:1px solid rgba(146,164,222,.12);border-radius:15px;background:rgba(255,255,255,.022);cursor:pointer;transition:border-color .2s ease,background .2s ease}
+.nebula-privacy-option:hover{border-color:rgba(67,233,209,.22);background:rgba(67,233,209,.025)}
+.nebula-privacy-icon{display:grid;place-items:center;width:37px;height:37px;border:1px solid rgba(151,134,255,.17);border-radius:12px;background:rgba(151,134,255,.07);color:#c1b3ff;font-size:17px;font-weight:900}
+.nebula-privacy-copy{display:grid;gap:4px;min-width:0}
+.nebula-privacy-copy strong{font-size:11px;color:#e8edff;font-weight:850;line-height:1.55}
+.nebula-privacy-copy small{font-size:9px;color:#7f8eaf;line-height:1.7}
+.nebula-privacy-option input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.nebula-switch{position:relative;display:block;justify-self:end;width:34px;height:20px;border:1px solid rgba(145,164,222,.2);border-radius:999px;background:rgba(113,128,160,.22);transition:background .2s ease,border-color .2s ease,box-shadow .2s ease}
+.nebula-switch:after{content:"";position:absolute;top:3px;inset-inline-start:3px;width:12px;height:12px;border-radius:50%;background:#9aa8c9;box-shadow:0 1px 4px rgba(0,0,0,.28);transition:transform .22s cubic-bezier(.2,.85,.25,1),background .22s ease}
+.nebula-privacy-option input:checked+.nebula-switch{background:linear-gradient(90deg,#4adfce,#a18aff);border-color:rgba(67,233,209,.48);box-shadow:0 0 15px rgba(67,233,209,.11)}
+.nebula-privacy-option input:checked+.nebula-switch:after{background:#fff;transform:translateX(-14px)}
+html[dir="ltr"] .nebula-privacy-option input:checked+.nebula-switch:after{transform:translateX(14px)}
+.nebula-privacy-option input:focus-visible+.nebula-switch{outline:2px solid var(--neb-cyan);outline-offset:3px}
+.nebula-privacy-footer{margin-top:13px;padding-top:13px;border-top:1px solid rgba(146,164,222,.10)}
+.nebula-privacy-note{display:flex;align-items:flex-start;gap:8px;color:#8898b8;font-size:10px;line-height:1.85}
+.nebula-privacy-note>span:first-child{flex:0 0 auto}
+.nebula-privacy-save-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:13px}
+#pt-privacy-status{font-size:10px;color:#8495b8;line-height:1.6}
+#pt-privacy-status[data-state="success"]{color:var(--neb-cyan)}
+#pt-privacy-status[data-state="warning"]{color:#f0c780}
+.nebula-save-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:9px 15px;border:1px solid rgba(67,233,209,.22);border-radius:12px;background:linear-gradient(110deg,rgba(67,233,209,.14),rgba(151,124,255,.17));color:#edfaff;font-size:11px;font-weight:900;box-shadow:0 8px 24px rgba(0,0,0,.14)}
+.nebula-save-btn:hover{border-color:rgba(67,233,209,.45);box-shadow:0 0 25px rgba(67,233,209,.08)}
+
+/* Future modules: feature-complete layout, explicitly disconnected until real services are ready. */
+.nebula-future-page{display:none;min-width:0}
+.nebula-future-page.active{display:block!important}
+.nebula-future-hero{position:relative;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(230px,.9fr);align-items:center;gap:22px;min-height:260px;margin:0 0 17px;padding:clamp(22px,3.2vw,38px);border:1px solid rgba(152,134,255,.25);border-radius:27px;overflow:hidden;background:radial-gradient(ellipse at 80% 0,rgba(151,124,255,.22),transparent 38%),radial-gradient(ellipse at 4% 100%,rgba(67,233,209,.1),transparent 40%),linear-gradient(132deg,#151a32,#0b1122 60%,#15102d);box-shadow:0 26px 70px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.05)}
+.nebula-future-hero:after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(115deg,transparent 20%,rgba(255,255,255,.018) 50%,transparent 74%);transform:translateX(-100%);animation:nebulaShimmer 9s ease-in-out infinite}
+@keyframes nebulaShimmer{0%,72%,100%{transform:translateX(-100%)}86%{transform:translateX(100%)}}
+.nebula-future-copy{position:relative;z-index:2;min-width:0}
+.nebula-future-copy h2{margin:12px 0 10px;font-size:clamp(25px,4.2vw,43px);font-weight:950;line-height:1.25;letter-spacing:-.8px;color:#f6f5ff}
+.nebula-future-copy p{max-width:670px;margin:0;color:#9ba8c7;font-size:12px;line-height:2}
+.nebula-coming-pill{display:inline-flex;align-items:center;gap:8px;margin-top:20px;padding:8px 12px;border:1px solid rgba(67,233,209,.18);border-radius:999px;background:rgba(67,233,209,.055);color:#b7f9ef;font-size:10px;font-weight:850}
+.nebula-coming-pill i{width:6px;height:6px;border-radius:50%;background:var(--neb-cyan);box-shadow:0 0 10px rgba(67,233,209,.8);animation:nebulaPulse 1.7s ease-in-out infinite}
+@keyframes nebulaPulse{50%{opacity:.4;box-shadow:0 0 0 rgba(67,233,209,0)}}
+.nebula-future-orbit{position:relative;width:min(100%,270px);aspect-ratio:1/1;justify-self:center;display:grid;place-items:center;border:1px solid rgba(157,139,255,.19);border-radius:50%;background:radial-gradient(circle,rgba(157,139,255,.1),rgba(10,16,32,.12) 54%,transparent 70%);box-shadow:inset 0 0 55px rgba(157,139,255,.05),0 0 60px rgba(157,139,255,.055)}
+.nebula-future-orbit:before,.nebula-future-orbit:after{content:"";position:absolute;inset:13%;border:1px solid rgba(67,233,209,.16);border-radius:50%;transform:rotate(-32deg) scaleX(.56)}
+.nebula-future-orbit:after{inset:2%;border-color:rgba(157,139,255,.22);transform:rotate(45deg) scaleX(.67)}
+.nebula-future-orbit i{position:absolute;width:7px;height:7px;border-radius:50%;background:var(--neb-cyan);box-shadow:0 0 18px rgba(67,233,209,.75)}
+.nebula-future-orbit i:nth-child(1){top:18%;left:28%}.nebula-future-orbit i:nth-child(2){bottom:24%;right:13%;background:var(--neb-purple)}.nebula-future-orbit i:nth-child(3){bottom:14%;left:25%;width:4px;height:4px}
+.nebula-future-orbit span{display:grid;place-items:center;width:92px;height:92px;border:1px solid rgba(67,233,209,.29);border-radius:30px;background:linear-gradient(140deg,rgba(67,233,209,.12),rgba(151,124,255,.19));color:#d4fff9;font-size:42px;box-shadow:0 0 42px rgba(67,233,209,.09),inset 0 1px 0 rgba(255,255,255,.1);animation:nebulaFloat 5s ease-in-out infinite}
+@keyframes nebulaFloat{50%{transform:translateY(-7px) rotate(4deg)}}
+.nebula-future-grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:14px}
+.nebula-future-card{min-width:0;padding:clamp(16px,2.2vw,23px);border:1px solid rgba(148,164,222,.13);border-radius:20px;background:linear-gradient(145deg,rgba(17,23,43,.91),rgba(9,14,28,.94));box-shadow:0 16px 38px rgba(0,0,0,.14)}
+.nebula-future-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:17px}
+.nebula-future-card h3{margin:6px 0 0;font-size:15px;font-weight:900;color:#f0f3ff;line-height:1.5}
+.nebula-feature-icon{display:grid;place-items:center;flex:0 0 39px;width:39px;height:39px;border-radius:13px;border:1px solid rgba(67,233,209,.18);background:rgba(67,233,209,.07);color:var(--neb-cyan);font-size:20px}
+.nebula-feature-icon.violet{border-color:rgba(161,138,255,.22);background:rgba(161,138,255,.08);color:#c0b2ff}
+.nebula-empty-ranking{display:flex;flex-direction:column;align-items:center;text-align:center;padding:12px 10px 5px}
+.nebula-ranking-orb{display:grid;place-items:center;width:59px;height:59px;margin-bottom:12px;border:1px solid rgba(161,138,255,.24);border-radius:21px;background:radial-gradient(circle at 30% 20%,rgba(161,138,255,.22),rgba(67,233,209,.06));color:#d3c8ff;font-size:26px;box-shadow:0 0 30px rgba(161,138,255,.08)}
+.nebula-empty-ranking strong{font-size:12px;font-weight:900;color:#e7ecff}
+.nebula-empty-ranking p{max-width:400px;margin:8px auto 10px;color:#8493b5;font-size:10px;line-height:1.9}
+.nebula-skeleton-rows{display:grid;gap:7px;width:min(100%,400px);margin-top:4px}
+.nebula-skeleton-rows i{display:block;height:31px;border:1px solid rgba(145,164,222,.07);border-radius:10px;background:linear-gradient(100deg,rgba(255,255,255,.018),rgba(161,138,255,.055),rgba(255,255,255,.018));background-size:210% 100%;animation:nebulaSkeleton 3s ease-in-out infinite}
+.nebula-skeleton-rows i:nth-child(2){width:93%}.nebula-skeleton-rows i:nth-child(3){width:86%}
+@keyframes nebulaSkeleton{50%{background-position:100% 0}}
+.nebula-feature-steps{display:grid;gap:8px}
+.nebula-feature-steps>div{display:flex;align-items:center;gap:12px;padding:11px;border:1px solid rgba(148,164,222,.09);border-radius:13px;background:rgba(255,255,255,.018)}
+.nebula-feature-steps>div>span{display:grid;place-items:center;flex:0 0 30px;width:30px;height:30px;border-radius:10px;background:rgba(161,138,255,.08);color:#b9abff;font-size:10px;font-weight:900}
+.nebula-feature-steps p{margin:0;color:#c8d2eb;font-size:10px;font-weight:750;line-height:1.7}
+.nebula-future-footnote{margin:15px 0 0;padding-top:12px;border-top:1px solid rgba(145,164,222,.09);font-size:9px;color:#7585a7;line-height:1.9}
+.nebula-chart-hero{grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr)}
+.nebula-chart-visual{position:relative;display:grid;align-items:end;min-width:0;min-height:180px;padding:12px;border:1px solid rgba(67,233,209,.14);border-radius:19px;background:linear-gradient(135deg,rgba(7,15,27,.68),rgba(14,15,34,.66));overflow:hidden}
+.nebula-chart-visual:before{content:"";position:absolute;inset:0;background:linear-gradient(rgba(130,146,211,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(130,146,211,.07) 1px,transparent 1px);background-size:28px 28px;mask-image:linear-gradient(to bottom,black,transparent)}
+.nebula-chart-visual svg{position:relative;width:100%;height:210px;overflow:visible}
+.nebula-chart-area{fill:url(#nebulaChartLine);fill-opacity:.08}
+.nebula-chart-line{fill:none;stroke:url(#nebulaChartLine);stroke-width:3;stroke-linecap:round;filter:drop-shadow(0 0 7px rgba(67,233,209,.37));stroke-dasharray:640;stroke-dashoffset:0;animation:nebulaDraw 3.5s ease both}
+@keyframes nebulaDraw{from{stroke-dashoffset:640}to{stroke-dashoffset:0}}
+.nebula-chart-glow{position:absolute;width:140px;height:140px;right:24%;top:18%;border-radius:50%;background:rgba(67,233,209,.07);filter:blur(40px)}
+.nebula-chart-preview-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.nebula-chart-preview-grid p{margin:8px 0 0;color:#8291b1;font-size:10px;line-height:1.9}
+
+/* Account popover and modals above the dock; fix prior mobile click-layer conflicts. */
+.user-backdrop{z-index:1700!important}
+.user-dropdown{z-index:1710!important;max-height:min(78dvh,700px);overscroll-behavior:contain}
+.user-dropdown.open{animation:nebulaPanelIn .24s cubic-bezier(.2,.8,.2,1) both}
+#cpOverlay,.confirm-overlay,.prism-share-preview{z-index:2200!important}
+
+@media(max-width:760px){
+ .app{width:calc(100% - 18px)!important;padding-bottom:calc(130px + env(safe-area-inset-bottom))!important}
+ .topbar{position:relative;z-index:1100}
+ #tabs.nebula-dock{position:fixed!important;left:8px!important;right:8px!important;bottom:calc(8px + env(safe-area-inset-bottom))!important;width:auto!important;max-width:580px!important;margin:0 auto!important;padding:6px!important;border-radius:23px!important;z-index:1500!important;box-shadow:0 18px 50px rgba(0,0,0,.53),0 0 38px rgba(121,92,255,.1),inset 0 1px 0 rgba(255,255,255,.065)!important}
+ .nebula-dock-row{grid-template-columns:repeat(5,minmax(0,1fr));gap:3px}
+ .nebula-dock-item{min-height:59px;padding:6px 2px;gap:4px;border-radius:16px}
+ .nebula-dock-icon{width:28px;height:28px;font-size:18px;border-radius:10px}
+ .nebula-dock-label{font-size:clamp(7.5px,2.1vw,9.5px);letter-spacing:-.18px}
+ .nebula-dock-caret{inset-inline-end:5px;top:4px;font-size:10px}
+ .nebula-dock-soon{inset-inline-end:3px;inset-block-start:3px;font-size:6px;padding:2px 3px}
+ .nebula-dock-panel{position:absolute;max-height:min(58dvh,480px);overflow-y:auto;padding:12px;border-radius:20px;bottom:calc(100% + 10px)}
+ .nebula-dock-panel-head{margin-bottom:10px;padding-bottom:10px}
+ .nebula-dock-panel-head strong{font-size:13px}
+ .nebula-route-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+ .nebula-account-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ #tabs .tab.dock-route{grid-template-columns:30px minmax(0,1fr);gap:2px 8px;min-height:63px;padding:9px!important;border-radius:13px!important}
+ .dock-route-icon{width:30px;height:30px;border-radius:10px;font-size:17px}
+ #tabs .dock-route.dock-route-dynamic strong{font-size:10px}
+ #tabs .dock-route.dock-route-dynamic small{font-size:8px}
+ .nebula-dock-account-foot{margin-top:9px;font-size:9px;padding:8px 10px}
+ .nebula-future-hero{grid-template-columns:1fr;gap:18px;min-height:0;padding:22px;border-radius:22px}
+ .nebula-future-copy h2{font-size:clamp(25px,7vw,34px)}
+ .nebula-future-copy p{font-size:11px}
+ .nebula-future-orbit{width:175px;grid-row:1}
+ .nebula-future-orbit span{width:64px;height:64px;border-radius:22px;font-size:31px}
+ .nebula-future-grid{grid-template-columns:1fr;gap:10px}
+ .nebula-chart-hero{grid-template-columns:1fr}
+ .nebula-chart-visual{grid-row:1;min-height:140px}
+ .nebula-chart-visual svg{height:160px}
+ .nebula-chart-preview-grid{grid-template-columns:1fr;gap:10px}
+ .nebula-privacy-list{grid-template-columns:1fr;gap:8px}
+ .nebula-privacy-option{padding:10px;grid-template-columns:34px minmax(0,1fr) 34px;gap:9px}
+ .nebula-privacy-icon{width:34px;height:34px}
+ .nebula-privacy-copy strong{font-size:10px}
+ .nebula-privacy-copy small{font-size:9px}
+ .nebula-privacy-save-row{align-items:stretch;flex-direction:column}
+ .nebula-save-btn{width:100%}
+ .nebula-panel-title-row h2{font-size:17px}
+ .nebula-panel-title-row p{font-size:10px}
+ .nebula-privacy-shield{flex-basis:40px;width:40px;height:40px;border-radius:13px}
+ .analysis-overview-art{max-width:100%;overflow:hidden}
+ .chart-box canvas{height:220px!important}
+ .table-wrap table{min-width:520px}
+}
+@media(max-width:360px){
+ #tabs.nebula-dock{left:5px!important;right:5px!important;padding:4px!important}
+ .nebula-dock-row{grid-template-columns:repeat(5,minmax(0,1fr));gap:2px}
+ .nebula-dock-item{min-height:55px}
+ .nebula-dock-icon{width:25px;height:25px;font-size:16px}
+ .nebula-dock-label{font-size:7.2px;letter-spacing:-.3px}
+ .nebula-dock-soon{display:none}
+ .app{width:calc(100% - 14px)!important}
+ .nebula-privacy-note{font-size:9px}
+}
+@media(prefers-reduced-motion:reduce){
+ html{scroll-behavior:auto!important}
+ *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+}
+
+/* Critical layout and loading fixes from responsive audit */
+html,body{max-width:100%;overflow-x:clip}
+.app{box-sizing:border-box;min-width:0}
+/* The original empty banner skeleton covered the header while the banner service was loading.
+   Hide only the placeholder; the real banner renderer/configuration stays untouched. */
+#banner-host>.pt-banner-skeleton{display:none!important}
+@media(min-width:761px){
+ .user-dropdown{left:auto!important;right:0!important;transform-origin:top right!important}
+}
+@media(max-width:760px){
+ .app{width:calc(100% - 18px)!important;max-width:calc(100% - 18px)!important;box-sizing:border-box}
+}
+@media(max-width:360px){
+ .app{width:calc(100% - 14px)!important;max-width:calc(100% - 14px)!important}
+}
+
+/* Final account-sheet regression fix: keep the mobile profile panel inside the viewport. */
+@media(max-width:760px){
+  .user-dropdown{position:fixed!important;top:auto!important;bottom:calc(8px + env(safe-area-inset-bottom))!important;left:8px!important;right:8px!important;width:auto!important;max-width:540px!important;margin-inline:auto!important;max-height:min(78dvh,700px)!important;overflow-y:auto!important;box-sizing:border-box!important;transform:translateY(calc(100% + 24px))!important;transform-origin:bottom center!important;border-radius:24px!important;overscroll-behavior:contain!important}
+  .user-dropdown.open{animation:none!important;transform:translateY(0)!important;opacity:1!important;visibility:visible!important}
+}
+@media(max-width:360px){.user-dropdown{left:5px!important;right:5px!important;bottom:calc(5px + env(safe-area-inset-bottom))!important}}
+/* Prevent decorative ambient glows from widening the document's scrollable area. */
+body{overflow-x:hidden!important}
+/* Hide clipped decorative glow from the body's own overflow metrics on narrow devices. */
+@media(max-width:390px){body{overflow-x:hidden!important}}
+
+/* Mobile navigation audit: equal six-action dock, reliable tap targets, no wrapping/overflow. */
+#tabs.nebula-dock{isolation:isolate;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.nebula-dock-row{min-width:0;width:100%}
+.nebula-dock-item{touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none}
+.nebula-dock-panel{z-index:10;max-width:100%;box-sizing:border-box}
+@media(max-width:760px){
+  .nebula-dock-row{grid-template-columns:repeat(5,minmax(0,1fr))!important}
+  .nebula-dock-item{min-width:0;width:100%;min-height:58px;padding:5px 1px!important;gap:4px}
+  .nebula-dock-icon{flex:0 0 auto}
+  .nebula-dock-label{display:block;width:100%;font-size:clamp(6.4px,1.85vw,8.8px)!important;letter-spacing:-.28px!important;line-height:1.1;white-space:nowrap;text-overflow:clip;overflow:visible}
+  .nebula-dock-caret{inset-inline-end:2px;top:2px;font-size:9px}
+  .nebula-dock-soon{display:none}
+  .nebula-dock-panel{left:0;right:0;bottom:calc(100% + 9px);max-height:min(62dvh,520px);overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y}
+}
+@media(max-width:390px){
+  #tabs.nebula-dock{left:5px!important;right:5px!important;padding:4px!important}
+  .nebula-dock-row{gap:2px!important}
+  .nebula-dock-item{min-height:54px!important;border-radius:12px!important}
+  .nebula-dock-icon{width:24px!important;height:24px!important;font-size:15px!important;border-radius:8px!important}
+  .nebula-dock-label{font-size:6.2px!important;letter-spacing:-.42px!important}
+  .nebula-dock-caret{display:none}
+}
+
+/* Consent-filtered trader discovery and public aggregate profiles. */
+.nebula-trader-search{display:grid;gap:7px;margin:12px 0 10px;padding:11px;border:1px solid rgba(150,130,220,.13);border-radius:14px;background:rgba(255,255,255,.018)}
+.nebula-trader-search>label{font-size:10px;font-weight:850;color:var(--neb-text)}
+.nebula-trader-search-row{display:grid;grid-template-columns:20px minmax(0,1fr) auto;align-items:center;gap:7px;min-width:0;padding:5px 7px 5px 10px;border:1px solid rgba(150,130,220,.19);border-radius:12px;background:rgba(4,8,19,.48)}
+.nebula-trader-search-row>span{font-size:20px;color:var(--neb-cyan);line-height:1}
+.nebula-trader-search-row input{width:100%;min-width:0;min-height:34px;border:0!important;outline:0!important;background:transparent!important;color:var(--neb-text)!important;font-size:11px;box-shadow:none!important}
+.nebula-trader-search-row button{min-height:32px;padding:5px 8px;border:1px solid rgba(150,130,220,.17);border-radius:9px;background:rgba(150,130,220,.06);color:var(--neb-muted);font-size:9px;font-weight:800;cursor:pointer;touch-action:manipulation}
+.nebula-trader-search-results{display:grid;gap:6px;max-height:240px;overflow-y:auto;overscroll-behavior:contain}
+.nebula-trader-search-results[hidden]{display:none!important}
+.nebula-trader-search-note{padding:12px;border:1px dashed rgba(150,130,220,.2);border-radius:11px;color:var(--neb-muted);font-size:10px;line-height:1.8}
+.nebula-trader-search-note.is-warning{color:#ffbd82;border-color:rgba(255,180,104,.25)}
+.nebula-trader-result{display:grid;grid-template-columns:34px minmax(0,1fr) auto;align-items:center;gap:9px;min-width:0;padding:9px;border:1px solid rgba(150,130,220,.12);border-radius:12px;background:linear-gradient(120deg,rgba(146,117,255,.055),rgba(56,234,208,.02));color:var(--neb-text);text-align:start;cursor:pointer;touch-action:manipulation}
+.nebula-trader-result:hover,.nebula-trader-result:focus-visible{border-color:rgba(67,233,209,.32);outline:0;box-shadow:0 0 0 2px rgba(67,233,209,.06)}
+.nebula-trader-result-avatar,.nebula-public-profile-avatar{display:grid;place-items:center;border:1px solid rgba(146,117,255,.25);border-radius:12px;background:linear-gradient(145deg,rgba(146,117,255,.24),rgba(56,234,208,.12));color:#e6dcff;font-size:13px;font-weight:950}
+.nebula-trader-result-avatar{width:34px;height:34px}
+.nebula-trader-result-info{display:grid;gap:3px;min-width:0}
+.nebula-trader-result-info strong{font-size:11px;overflow-wrap:anywhere}
+.nebula-trader-result-info small{font-size:8px;color:var(--neb-muted);line-height:1.5}
+.nebula-trader-result-pnl{max-width:118px;font-size:9px;direction:ltr;text-align:end;overflow-wrap:anywhere;color:var(--neb-cyan)}
+.nebula-trader-result-pnl.is-loss{color:#ff719e}
+.nebula-leader-row[data-public-username]{cursor:pointer;touch-action:manipulation}
+.nebula-leader-row[data-public-username]:focus-visible{outline:2px solid rgba(67,233,209,.75);outline-offset:2px}
+.nebula-public-profile-modal{position:fixed;inset:0;z-index:40000;display:grid;place-items:center;padding:18px;box-sizing:border-box}
+.nebula-public-profile-modal[hidden]{display:none!important}
+.nebula-public-profile-backdrop{position:absolute;inset:0;background:rgba(2,4,12,.76);backdrop-filter:blur(12px)}
+.nebula-public-profile-card{position:relative;z-index:1;width:min(500px,100%);max-height:min(82dvh,720px);overflow:auto;overscroll-behavior:contain;padding:clamp(18px,4vw,27px);box-sizing:border-box;border:1px solid rgba(156,133,255,.28);border-radius:24px;background:radial-gradient(ellipse at 90% 0,rgba(146,117,255,.17),transparent 42%),linear-gradient(145deg,#12182b,#080d19);box-shadow:0 30px 100px rgba(0,0,0,.55),0 0 60px rgba(121,92,255,.08);color:var(--neb-text);outline:0}
+.nebula-public-profile-close{position:sticky;top:0;float:inline-end;display:grid;place-items:center;width:34px;height:34px;margin:-6px -5px 0 7px;border:1px solid rgba(150,164,223,.16);border-radius:11px;background:rgba(255,255,255,.05);color:var(--neb-text);font-size:23px;cursor:pointer;touch-action:manipulation}
+.nebula-public-profile-hero{display:flex;align-items:center;gap:13px;margin:9px 0 18px;padding:13px;border:1px solid rgba(146,117,255,.16);border-radius:17px;background:linear-gradient(120deg,rgba(146,117,255,.09),rgba(56,234,208,.035));clear:both}
+.nebula-public-profile-avatar{flex:0 0 48px;width:48px;height:48px;border-radius:17px;font-size:20px}
+.nebula-public-profile-identity{min-width:0;display:grid;gap:4px}.nebula-public-profile-identity h2{margin:0;font-size:18px;overflow-wrap:anywhere}.nebula-public-profile-identity p{margin:0;color:var(--neb-muted);font-size:10px}
+.nebula-public-profile-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.nebula-public-stat{display:grid;gap:8px;min-width:0;padding:13px;border:1px solid rgba(150,130,220,.14);border-radius:15px;background:rgba(255,255,255,.025)}
+.nebula-public-stat small{color:var(--neb-muted);font-size:9px}.nebula-public-stat strong{font-size:clamp(11px,3vw,15px);overflow-wrap:anywhere;direction:auto}.nebula-public-stat.is-positive strong{color:var(--neb-cyan)}.nebula-public-stat.is-loss strong{color:#ff719e}
+.nebula-public-profile-footnote{margin:15px 0 0;color:var(--neb-muted);font-size:9px;line-height:1.9}
+body.nebula-profile-open{overflow:hidden}
+html[data-theme="aurora"] .nebula-public-profile-card,html[data-theme="light"] .nebula-public-profile-card{background:linear-gradient(145deg,#fffaf4,#f1e8de);color:#302641;border-color:rgba(102,77,133,.24)}
+html[data-theme="aurora"] .nebula-trader-search-row,html[data-theme="light"] .nebula-trader-search-row{background:rgba(255,255,255,.72);border-color:rgba(90,66,117,.18)}
+html[data-theme="aurora"] .nebula-trader-result,html[data-theme="light"] .nebula-trader-result{color:#302641;background:rgba(108,80,140,.04)}
+@media(max-width:440px){
+ .nebula-trader-search{padding:9px}
+ .nebula-trader-search-row{grid-template-columns:16px minmax(0,1fr) auto;gap:4px;padding-inline:6px}
+ .nebula-trader-search-row input{font-size:10px}
+ .nebula-public-profile-modal{padding:9px;align-items:end}
+ .nebula-public-profile-card{max-height:min(86dvh,740px);border-radius:23px 23px 14px 14px;padding:17px}
+ .nebula-public-profile-stats{gap:7px}
+ .nebula-public-stat{padding:10px}
+}
+
+
+/* Mobile navigation final tap audit: large hit areas, readable captions, contained animation. */
+#tabs.nebula-dock,.nebula-dock-item,.nebula-panel-close,.dock-route{pointer-events:auto;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.nebula-dock-panel{will-change:transform,opacity;overscroll-behavior:contain}
+@media(max-width:760px){
+  #tabs.nebula-dock{bottom:calc(7px + env(safe-area-inset-bottom))!important}
+  .nebula-dock-item{min-height:60px!important;position:relative;z-index:2}
+  .nebula-dock-label{font-size:clamp(7.4px,2.05vw,9px)!important;letter-spacing:-.18px!important;line-height:1.2!important;overflow:hidden!important;text-overflow:ellipsis!important}
+  .nebula-dock-panel{max-height:min(64dvh,520px)!important;overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch}
+}
+@media(max-width:390px){
+  .nebula-dock-item{min-height:57px!important}
+  .nebula-dock-label{font-size:clamp(7px,2.0vw,8px)!important;letter-spacing:-.2px!important}
+}
+
+
+/* COSMOS Dock Drawer v3 — crisp custom icons, readable six-item mobile dock, center-origin drawer. */
+#tabs.nebula-dock{overflow:visible!important;isolation:isolate!important}
+.nebula-dock-row{position:relative!important;z-index:2!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:clamp(2px,.6vw,7px)!important}
+.nebula-dock-item{min-width:0!important;width:100%!important;min-height:66px!important;padding:7px 3px 6px!important;gap:5px!important;border-radius:16px!important;overflow:hidden!important;touch-action:manipulation!important}
+.nebula-dock-icon{width:34px!important;height:34px!important;flex:0 0 34px!important;border-radius:12px!important;font-size:0!important;color:#b8c5e8!important;display:grid!important;place-items:center!important}
+.nebula-dock-icon svg{display:block!important;width:21px!important;height:21px!important;fill:none!important;stroke:currentColor!important;stroke-width:1.7!important;stroke-linecap:round!important;stroke-linejoin:round!important}
+.nebula-dock-item.active .nebula-dock-icon{color:var(--neb-cyan)!important;box-shadow:0 0 22px rgba(67,233,209,.11),inset 0 1px 0 rgba(255,255,255,.14)!important}
+.nebula-dock-label{display:block!important;width:100%!important;max-width:100%!important;font-size:10px!important;letter-spacing:0!important;line-height:1.2!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;text-align:center!important;font-weight:850!important}
+.nebula-dock-caret{position:absolute!important;inset-inline-end:6px!important;top:4px!important;font-size:10px!important;display:block!important;opacity:.48!important}
+.nebula-dock-soon{display:none!important}
+.nebula-dock-panel{left:0!important;right:0!important;bottom:calc(100% + 11px)!important;max-width:100%!important;box-sizing:border-box!important;transform-origin:var(--dock-origin-x,50%) 100%!important;animation:nebulaDrawerPop .28s cubic-bezier(.16,1,.3,1) both!important;z-index:12!important;overflow-y:auto!important;overscroll-behavior:contain!important}
+.nebula-dock-panel[hidden]{display:none!important}
+.nebula-dock-panel-head{align-items:center!important}
+.nebula-dock-panel-head strong{letter-spacing:-.2px!important}
+.nebula-route-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:10px!important}
+#tabs .dock-route.dock-route-dynamic{min-height:78px!important;grid-template-columns:39px minmax(0,1fr)!important;grid-template-rows:auto auto!important;gap:4px 11px!important;padding:12px!important;border-radius:17px!important;touch-action:manipulation!important}
+#tabs .dock-route.dock-route-dynamic .dock-route-icon{grid-row:1/3!important;width:39px!important;height:39px!important;border-radius:13px!important;display:grid!important;place-items:center!important;font-size:0!important}
+#tabs .dock-route.dock-route-dynamic .dock-route-icon svg{width:22px!important;height:22px!important;fill:none!important;stroke:currentColor!important;stroke-width:1.7!important;stroke-linecap:round!important;stroke-linejoin:round!important}
+#tabs .dock-route.dock-route-dynamic strong{font-size:12px!important;line-height:1.35!important}
+#tabs .dock-route.dock-route-dynamic small{font-size:10px!important;line-height:1.55!important;white-space:normal!important}
+.nebula-dock-account-foot{font-size:10px!important;line-height:1.6!important}
+@keyframes nebulaDrawerPop{from{opacity:0;transform:translateY(16px) scale(.94);filter:blur(3px)}to{opacity:1;transform:translateY(0) scale(1);filter:blur(0)}}
+@media(max-width:760px){
+  #tabs.nebula-dock{left:7px!important;right:7px!important;bottom:calc(7px + env(safe-area-inset-bottom))!important;width:auto!important;max-width:none!important;margin:0!important;padding:5px!important;border-radius:22px!important}
+  .nebula-dock-row{grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:2px!important}
+  .nebula-dock-item{min-height:60px!important;padding:5px 1px 4px!important;gap:4px!important;border-radius:14px!important}
+  .nebula-dock-icon{width:29px!important;height:29px!important;flex-basis:29px!important;border-radius:10px!important}
+  .nebula-dock-icon svg{width:19px!important;height:19px!important}
+  .nebula-dock-label{font-size:clamp(7.8px,2.2vw,9.5px)!important;letter-spacing:0!important;line-height:1.18!important;text-overflow:clip!important}
+  .nebula-dock-caret{inset-inline-end:2px!important;top:2px!important;font-size:9px!important;opacity:.35!important}
+  .nebula-dock-panel{bottom:calc(100% + 9px)!important;max-height:min(63dvh,520px)!important;padding:12px!important;border-radius:21px!important}
+  .nebula-route-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}
+  #tabs .dock-route.dock-route-dynamic{min-height:68px!important;grid-template-columns:32px minmax(0,1fr)!important;gap:3px 8px!important;padding:9px!important;border-radius:14px!important}
+  #tabs .dock-route.dock-route-dynamic .dock-route-icon{width:32px!important;height:32px!important;border-radius:10px!important}
+  #tabs .dock-route.dock-route-dynamic .dock-route-icon svg{width:18px!important;height:18px!important}
+  #tabs .dock-route.dock-route-dynamic strong{font-size:11px!important}
+  #tabs .dock-route.dock-route-dynamic small{font-size:9px!important;line-height:1.45!important}
+  .nebula-dock-account-foot{margin-top:8px!important;padding:9px!important;font-size:9px!important}
+}
+@media(max-width:380px){
+  #tabs.nebula-dock{left:5px!important;right:5px!important;padding:4px!important}
+  .nebula-dock-row{gap:1px!important}
+  .nebula-dock-item{min-height:56px!important;padding-inline:0!important}
+  .nebula-dock-icon{width:26px!important;height:26px!important;flex-basis:26px!important}
+  .nebula-dock-icon svg{width:17px!important;height:17px!important}
+  .nebula-dock-label{font-size:7.7px!important}
+  .nebula-dock-caret{display:none!important}
+}
+@media(prefers-reduced-motion:reduce){.nebula-dock-panel{animation:none!important}}

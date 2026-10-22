@@ -9,6 +9,15 @@
 
   var $ = function(s, r) { return (r || document).querySelector(s); };
   var $$ = function(s, r) { return Array.from((r || document).querySelectorAll(s)); };
+  var refreshStreakText = null;
+  var refreshCmdPalette = null;
+  function isEnglish() { return String(document.documentElement.lang || 'fa').slice(0, 2) === 'en'; }
+  function L(fa, en) { return isEnglish() ? en : fa; }
+  function tierName(key) {
+    var fa = { bronze: 'برنز', silver: 'نقره‌ای', gold: 'طلایی', diamond: 'الماس' };
+    var en = { bronze: 'BRONZE', silver: 'SILVER', gold: 'GOLD', diamond: 'DIAMOND' };
+    return (isEnglish() ? en : fa)[key] || key;
+  }
 
   function getLS(k, fb) {
     try {
@@ -71,7 +80,7 @@
       '<div class="pmc-head">' +
         '<div class="pmc-title">' +
           '<div class="pmc-icon">🌍</div>' +
-          '<div><h3>بازارهای جهانی</h3><p>ساعت زنده معاملاتی</p></div>' +
+          '<div><h3>' + L('بازارهای جهانی', 'Global markets') + '</h3><p>' + L('ساعت زنده معاملاتی', 'Live trading sessions') + '</p></div>' +
         '</div>' +
         '<div class="pmc-time">' +
           '<div class="pmc-clock" id="pmcClock">--:--:--</div>' +
@@ -87,7 +96,7 @@
               '<div class="pmc-hours">' + s.hours + '</div>' +
             '</div>' +
             '<div class="pmc-status"><span class="pmc-dot"></span><span>' +
-              (s.open ? 'باز' : 'بسته') + '</span></div>' +
+              (s.open ? L('باز', 'Open') : L('بسته', 'Closed')) + '</span></div>' +
           '</div>';
         }).join('') +
       '</div>' +
@@ -126,7 +135,7 @@
         el.classList.toggle('open', s.open);
         el.classList.toggle('closed', !s.open);
         var st = el.querySelector('.pmc-status span:last-child');
-        if (st) st.textContent = s.open ? 'باز' : 'بسته';
+        if (st) st.textContent = s.open ? L('باز', 'Open') : L('بسته', 'Closed');
       });
     }, 60000);
   }
@@ -163,25 +172,25 @@
     }
 
     var next = tiers[idx + 1];
-    var pct = 100, label = 'به بالاترین سطح رسیدی';
+    var pct = 100, label = L('به بالاترین سطح رسیدی', 'Highest tier reached');
 
     if (next) {
       pct = Math.max(0, Math.min(100, ((net - cur.min) / (next.min - cur.min)) * 100));
-      label = 'تا ' + next.name + ': ' + money(next.min - net);
+      label = isEnglish() ? ('Next: ' + tierName(next.key) + ' · ' + money(next.min - net)) : ('تا ' + tierName(next.key) + ': ' + money(next.min - net));
     }
 
     return {
       key: cur.key,
-      name: cur.name,
-      subtitle: month.length ? month.length + ' معامله این ماه' : 'هنوز معامله‌ای نیست',
+      name: tierName(cur.key),
+      subtitle: month.length ? (month.length + L(' معامله این ماه', ' trades this month')) : L('هنوز معامله‌ای نیست', 'No trades yet'),
       monthPnL: money(net),
       monthCount: month.length + '',
-      winRate: wr.toFixed(1) + '٪',
-      progressPct: pct.toFixed(0) + '٪',
+      winRate: wr.toFixed(1) + (isEnglish() ? '%' : '٪'),
+      progressPct: pct.toFixed(0) + (isEnglish() ? '%' : '٪'),
       progressLabel: label,
       net: net,
       ladder: tiers.map(function(t, i) {
-        return { key: t.key, name: t.name, unlocked: i <= idx, current: i === idx };
+        return { key: t.key, name: tierName(t.key), unlocked: i <= idx, current: i === idx };
       })
     };
   }
@@ -190,69 +199,53 @@
      ANALYZE
      ══════════════════════════════════════════════════════ */
   function analyze(trades) {
+    var en = isEnglish();
     if (!trades.length) return {
-      icon: '🤖', title: '👋 خوش آمدی!',
-      text: 'اولین معامله رو ثبت کن تا تحلیل بگیری.', badges: []
+      icon: '🤖', title: en ? '👋 Welcome!' : '👋 خوش آمدی!',
+      text: en ? 'Log your first trade to unlock your personal insights.' : 'اولین معامله رو ثبت کن تا تحلیل بگیری.', badges: []
     };
 
     var w = 0, l = 0, net = 0, gp = 0, gl = 0;
     var byStrat = {}, maxStreak = 0, lossStreak = 0, maxLoss = 0;
-
     trades.slice().sort(function(a, b) { return (a.createdAt || 0) - (b.createdAt || 0); })
     .forEach(function(t) {
-      var p = t.result === 'win' ? Math.abs(+t.amount || 0) :
-              t.result === 'loss' ? -Math.abs(+t.amount || 0) : 0;
+      var p = t.result === 'win' ? Math.abs(+t.amount || 0) : t.result === 'loss' ? -Math.abs(+t.amount || 0) : 0;
       net += p;
       if (t.result === 'win') { w++; gp += p; maxStreak++; lossStreak = 0; }
-      else if (t.result === 'loss') {
-        l++; gl += Math.abs(p); lossStreak++;
-        if (lossStreak > maxLoss) maxLoss = lossStreak;
-      }
-      var s = t.strategy || '—';
-      if (!byStrat[s]) byStrat[s] = { net: 0, w: 0, l: 0 };
-      byStrat[s].net += p;
-      if (t.result === 'win') byStrat[s].w++;
-      else if (t.result === 'loss') byStrat[s].l++;
+      else if (t.result === 'loss') { l++; gl += Math.abs(p); lossStreak++; if (lossStreak > maxLoss) maxLoss = lossStreak; }
+      var strategy = t.strategy || '—';
+      if (!byStrat[strategy]) byStrat[strategy] = { net: 0, w: 0, l: 0 };
+      byStrat[strategy].net += p;
+      if (t.result === 'win') byStrat[strategy].w++;
+      else if (t.result === 'loss') byStrat[strategy].l++;
     });
 
     var closed = w + l;
     var wr = closed ? (w / closed) * 100 : 0;
     var pf = gl > 0 ? gp / gl : (gp > 0 ? Infinity : 0);
-
-    var strats = Object.keys(byStrat).map(function(k) {
-      return { name: k, net: byStrat[k].net };
-    }).sort(function(a, b) { return b.net - a.net; });
-
-    var best = strats[0];
-    var worst = strats[strats.length - 1];
-    var profit = net > 0;
-
+    var strats = Object.keys(byStrat).map(function(k) { return { name: k, net: byStrat[k].net }; }).sort(function(a, b) { return b.net - a.net; });
+    var best = strats[0], worst = strats[strats.length - 1], profit = net > 0;
     var icon, title, text;
     if (profit) {
-      icon = '🏆';
-      title = '🎉 عملکردت سودده بوده!';
-      text = 'خالص سودت <strong>' + money(net) + '</strong>. ';
-      if (best) text += 'بهترین: <em>' + best.name + '</em>. ';
-      text += 'وین‌ریت <strong>' + wr.toFixed(1) + '٪</strong>.';
+      icon = '🏆'; title = en ? '🎉 You are net profitable' : '🎉 عملکردت سودده بوده!';
+      text = (en ? 'Net PnL: ' : 'خالص سودت ') + '<strong>' + money(net) + '</strong>. ';
+      if (best) text += (en ? 'Top strategy: ' : 'بهترین: ') + '<em>' + best.name + '</em>. ';
+      text += (en ? 'Win rate ' : 'وین‌ریت ') + '<strong>' + wr.toFixed(1) + (en ? '%' : '٪') + '</strong>.';
     } else if (net < 0) {
-      icon = '🎯';
-      title = '⚠️ عملکردت در ضرر بوده';
-      text = 'خالص ضررت <strong>' + money(net) + '</strong>. ';
-      if (worst) text += 'بیشترین ضرر: <em>' + worst.name + '</em>. ';
-      if (maxLoss >= 3) text += ' <strong>' + maxLoss + ' ضرر پشت‌سرهم</strong>.';
+      icon = '🎯'; title = en ? '⚠️ You are net negative' : '⚠️ عملکردت در ضرر بوده';
+      text = (en ? 'Net PnL: ' : 'خالص ضررت ') + '<strong>' + money(net) + '</strong>. ';
+      if (worst) text += (en ? 'Weakest strategy: ' : 'بیشترین ضرر: ') + '<em>' + worst.name + '</em>. ';
+      if (maxLoss >= 3) text += '<strong>' + maxLoss + (en ? ' consecutive losses' : ' ضرر پشت‌سرهم') + '</strong>.';
     } else {
-      icon = '📊';
-      title = '📊 سربه‌سر';
-      text = 'نه سود، نه ضرر.';
+      icon = '📊'; title = en ? '📊 Break-even' : '📊 سربه‌سر'; text = en ? 'No net profit or loss in the selected data.' : 'نه سود، نه ضرر.';
     }
 
     var badges = [];
     if (best && best.net > 0) badges.push({ label: '🏆 ' + best.name, cls: 'good' });
     if (worst && worst !== best && worst.net < 0) badges.push({ label: '📉 ' + worst.name, cls: 'bad' });
-    badges.push({ label: '🎯 ' + wr.toFixed(1) + '٪', cls: wr >= 55 ? 'good' : wr < 45 ? 'bad' : 'neutral' });
+    badges.push({ label: '🎯 ' + wr.toFixed(1) + (en ? '%' : '٪'), cls: wr >= 55 ? 'good' : wr < 45 ? 'bad' : 'neutral' });
     if (isFinite(pf)) badges.push({ label: '⚖️ ' + pf.toFixed(2), cls: pf >= 1.5 ? 'good' : pf < 1 ? 'bad' : 'neutral' });
-    if (maxStreak >= 3) badges.push({ label: '🔥 ' + maxStreak + ' برد', cls: 'good' });
-
+    if (maxStreak >= 3) badges.push({ label: '🔥 ' + maxStreak + (en ? ' wins' : ' برد'), cls: 'good' });
     return { icon: icon, title: title, text: text, badges: badges };
   }
 
@@ -268,15 +261,15 @@
         '<div class="tier-head">' +
           '<div class="tier-icon-wrap"><div class="tier-icon"></div></div>' +
           '<div class="tier-info">' +
-            '<div class="tier-label">سطح فعلی</div>' +
+            '<div class="tier-label">' + L('سطح فعلی', 'Current level') + '</div>' +
             '<div class="tier-name">' + tier.name + '</div>' +
             '<div class="tier-sub">' + tier.subtitle + '</div>' +
           '</div>' +
         '</div>' +
         '<div class="tier-stats">' +
-          '<div class="tier-stat"><span class="v">' + tier.monthPnL + '</span><span class="l">سود ماه</span></div>' +
-          '<div class="tier-stat"><span class="v">' + tier.monthCount + '</span><span class="l">معاملات</span></div>' +
-          '<div class="tier-stat"><span class="v">' + tier.winRate + '</span><span class="l">وین‌ریت</span></div>' +
+          '<div class="tier-stat"><span class="v">' + tier.monthPnL + '</span><span class="l">' + L('سود ماه', 'Monthly PnL') + '</span></div>' +
+          '<div class="tier-stat"><span class="v">' + tier.monthCount + '</span><span class="l">' + L('معاملات', 'Trades') + '</span></div>' +
+          '<div class="tier-stat"><span class="v">' + tier.winRate + '</span><span class="l">' + L('وین‌ریت', 'Win rate') + '</span></div>' +
         '</div>' +
         '<div class="tier-progress-wrap">' +
           '<div class="tier-progress-label"><span>' + tier.progressLabel + '</span><span>' + tier.progressPct + '</span></div>' +
@@ -351,24 +344,24 @@
       function fmt(v, m) {
         if (m === 'pnl') return money(v);
         if (m === 'trades') return Math.round(v) + '';
-        return (+v).toFixed(1) + '٪';
+        return (+v).toFixed(1) + (isEnglish() ? '%' : '٪');
       }
 
       var cls = prog >= 100 ? 'success' : prog >= 70 ? 'warning' : 'neutral';
       var ic = prog >= 100 ? '🏆' : prog >= 70 ? '⚡' : '🎯';
-      var ti = prog >= 100 ? '🎉 به هدفت رسیدی!' :
-               prog >= 70 ? 'داری نزدیک میشی!' :
-               'هدف ' + (goal.period === 'week' ? 'هفتگی' : 'ماهانه');
-      var sb = prog >= 100 ? 'هدف تکمیل شد' :
-               prog >= 70 ? (100 - prog).toFixed(0) + '٪ تا هدف' :
-               'در مسیر هدفت';
+      var ti = prog >= 100 ? L('🎉 به هدفت رسیدی!', '🎉 Goal reached!') :
+               prog >= 70 ? L('داری نزدیک میشی!', 'You are getting close!') :
+               L('هدف ' + (goal.period === 'week' ? 'هفتگی' : 'ماهانه'), (goal.period === 'week' ? 'Weekly goal' : 'Monthly goal'));
+      var sb = prog >= 100 ? L('هدف تکمیل شد', 'Goal completed') :
+               prog >= 70 ? (100 - prog).toFixed(0) + (isEnglish() ? '% to go' : '٪ تا هدف') :
+               L('در مسیر هدفت', 'Keep going');
 
       banner = {
         cls: cls, icon: ic, title: ti, sub: sb,
         stats: [
-          { v: fmt(cur, goal.metric), l: 'فعلی' },
-          { v: fmt(goal.target, goal.metric), l: 'هدف' },
-          { v: prog.toFixed(0) + '٪', l: 'پیشرفت' }
+          { v: fmt(cur, goal.metric), l: L('فعلی', 'Current') },
+          { v: fmt(goal.target, goal.metric), l: L('هدف', 'Target') },
+          { v: prog.toFixed(0) + (isEnglish() ? '%' : '٪'), l: L('پیشرفت', 'Progress') }
         ],
         progress: prog
       };
@@ -386,23 +379,23 @@
 
       if (du >= 100) {
         banner = {
-          cls: 'danger', icon: '🚨', title: 'حد ضرر نقض شد!',
-          sub: 'معامله رو متوقف کن',
+          cls: 'danger', icon: '🚨', title: L('حد ضرر نقض شد!', 'Daily loss limit reached!'),
+          sub: L('معامله رو متوقف کن', 'Stop trading for today'),
           stats: [
-            { v: money(-tl), l: 'ضرر' },
-            { v: money(-rules.dailyLoss), l: 'حد' },
-            { v: du.toFixed(0) + '٪', l: 'مصرف' }
+            { v: money(-tl), l: L('ضرر', 'Loss') },
+            { v: money(-rules.dailyLoss), l: L('حد', 'Limit') },
+            { v: du.toFixed(0) + (isEnglish() ? '%' : '٪'), l: L('مصرف', 'Used') }
           ],
           progress: Math.min(100, du)
         };
       } else if (du >= 80 && (!banner || banner.cls === 'neutral')) {
         banner = {
-          cls: 'warning', icon: '⚠️', title: 'نزدیک حد ضرر',
-          sub: du.toFixed(0) + '٪ مصرف شده',
+          cls: 'warning', icon: '⚠️', title: L('نزدیک حد ضرر', 'Approaching daily loss limit'),
+          sub: du.toFixed(0) + (isEnglish() ? '% used' : '٪ مصرف شده'),
           stats: [
-            { v: money(-tl), l: 'ضرر' },
-            { v: money(-rules.dailyLoss), l: 'حد' },
-            { v: du.toFixed(0) + '٪', l: 'مصرف' }
+            { v: money(-tl), l: L('ضرر', 'Loss') },
+            { v: money(-rules.dailyLoss), l: L('حد', 'Limit') },
+            { v: du.toFixed(0) + (isEnglish() ? '%' : '٪'), l: L('مصرف', 'Used') }
           ],
           progress: du
         };
@@ -501,8 +494,15 @@
       }
     };
     var C = CFG[tier.key] || CFG.bronze;
+    var privacy = getLS('po.v4.privacy', {});
+    var showPnL = privacy.showPnL === true, showWinRate = privacy.showWinRate === true;
+    var showTradeSummary = privacy.showTradeSummary === true, showUsername = privacy.showUsername === true;
+    var privateText = L('خصوصی', 'PRIVATE');
     var SS = shareSettings();
+    if (!showUsername) SS.name = '';
+    if (!showPnL) SS.hide = true;
     if (SS.style !== 'auto' && SHARE_STYLES[SS.style]) C = Object.assign({}, C, SHARE_STYLES[SS.style]);
+    C.label = showPnL ? tierName(tier.key) : privateText;
     if (SS.hide) { /* privacy mode: every $ amount drawn on the image becomes $••• */
       var _ft = ctx.fillText.bind(ctx);
       ctx.fillText = function (t, x, y, mw) { return _ft(String(t).replace(/\$[\d,]+(\.\d+)?/g, '$\u2022\u2022\u2022'), x, y, mw); };
@@ -608,7 +608,7 @@
 
     // انتخاب قوی بر اساس تعداد معاملات (همیشه یکسان بمونه)
     var pick = (trades.length * 31 + Math.round(wr * 7)) % pool.length;
-    var Q = pool[pick];
+    var Q = !showPnL ? { t: L('اطلاعات عملکرد خصوصی است؛ به فرایندت پایبند بمان.', 'Performance data is private; stay focused on your process.'), a: 'PO-TRADE' } : (isEnglish() ? { t: ['Plan the trade. Trade the plan.', 'Consistency beats intensity.', 'Protect your downside first.'][pick % 3], a: 'PO-TRADE INSIGHT' } : pool[pick]);
 
     // ══════════════════════════════════════════════════════
     // 3) پس‌زمینه
@@ -718,7 +718,7 @@
 
     ctx.font = '700 13px Inter, sans-serif';
     ctx.fillStyle = 'rgba(200,215,240,0.6)';
-    ctx.fillText('◆  PERFORMANCE REPORT  ◆  ' +
+    ctx.fillText(L('◆  گزارش عملکرد  ◆  ', '◆  PERFORMANCE REPORT  ◆  ') +
                  new Date().toISOString().slice(0, 10) + (SS.name ? '  \u25C6  @' + SS.name : ''), W / 2, 235);
 
     // ══════════════════════════════════════════════════════
@@ -728,7 +728,7 @@
     var pnlColor = isProfit ? '#2ee6a6' : net < 0 ? '#ff5674' : '#8697b8';
     var pnlColor2 = isProfit ? '#7bffd0' : net < 0 ? '#ff95a8' : '#c7d3ea';
     var sgn = net > 0 ? '+' : net < 0 ? '-' : '';
-    var nTxt = sgn + '$' + Math.abs(net).toLocaleString('en-US', { maximumFractionDigits: 2 });
+    var nTxt = showPnL ? (sgn + '$' + Math.abs(net).toLocaleString('en-US', { maximumFractionDigits: 2 })) : privateText;
 
     var halo = ctx.createRadialGradient(W / 2, 430, 0, W / 2, 430, 400);
     halo.addColorStop(0, isProfit ? 'rgba(46,230,166,0.4)' : 'rgba(255,86,116,0.4)');
@@ -754,7 +754,7 @@
     ctx.font = '900 14px Inter, sans-serif';
     ctx.fillStyle = 'rgba(200,215,240,0.55)';
     ctx.textBaseline = 'top';
-    ctx.fillText('N E T   P R O F I T   /   L O S S', W / 2, 520);
+    ctx.fillText(L('سود / ضرر خالص', 'N E T   P R O F I T   /   L O S S'), W / 2, 520);
 
     // ══════════════════════════════════════════════════════
     // 10) 4 کارت آمار
@@ -811,11 +811,11 @@
       ctx.fillText(label, x + cw / 2, y + 98);
     }
 
-    statCard(sx, cy, 'TOTAL TRADES', trades.length + '', C.primary, '📊');
-    statCard(sx + cw + gap, cy, 'WIN RATE', wr.toFixed(1) + '%',
+    statCard(sx, cy, L('تعداد معاملات', 'TOTAL TRADES'), showTradeSummary ? (trades.length + '') : privateText, C.primary, '📊');
+    statCard(sx + cw + gap, cy, L('وین‌ریت', 'WIN RATE'), showWinRate ? (wr.toFixed(1) + '%') : privateText,
              wr >= 50 ? '#2ee6a6' : '#ff5674', '🎯');
-    statCard(sx + (cw + gap) * 2, cy, 'WINS', w + '', '#2ee6a6', '✅');
-    statCard(sx + (cw + gap) * 3, cy, 'LOSSES', l + '', '#ff5674', '❌');
+    statCard(sx + (cw + gap) * 2, cy, L('بردها', 'WINS'), showTradeSummary ? (w + '') : privateText, '#2ee6a6', '✅');
+    statCard(sx + (cw + gap) * 3, cy, L('باخت‌ها', 'LOSSES'), showTradeSummary ? (l + '') : privateText, '#ff5674', '❌');
 
     // ══════════════════════════════════════════════════════
     // 11) Equity Curve
@@ -831,7 +831,7 @@
       return cum;
     });
 
-    if (points.length > 1) {
+    if (points.length > 1 && showPnL) {
       var chartY = 800;
       var chartH = 130;
       var chartX = 70;
@@ -850,7 +850,7 @@
       ctx.fillStyle = C.secondary;
       ctx.textAlign = 'left';
       ctx.textBaseline = 'top';
-      ctx.fillText('◆  EQUITY CURVE', chartX, chartY - 25);
+      ctx.fillText(L('◆  منحنی سرمایه', '◆  EQUITY CURVE'), chartX, chartY - 25);
 
       var maxV = Math.max.apply(null, points.concat([0]));
       var minV = Math.min.apply(null, points.concat([0]));
@@ -966,12 +966,12 @@
     ctx.fillStyle = 'rgba(200,215,240,0.65)';
     ctx.textAlign = 'left';
     ctx.textBaseline = 'bottom';
-    ctx.fillText('WIN RATE ' + wr.toFixed(1) + '%', barX, barY - 10);
+    ctx.fillText(showWinRate ? (L('وین‌ریت ', 'WIN RATE ') + wr.toFixed(1) + '%') : privateText, barX, barY - 10);
 
     var pfT = isFinite(pf) ? pf.toFixed(2) : '∞';
     ctx.textAlign = 'right';
     ctx.fillStyle = pf >= 1.5 ? '#2ee6a6' : pf < 1 ? '#ff5674' : '#ffb020';
-    ctx.fillText('PROFIT FACTOR ' + pfT, barX + barW, barY - 10);
+    ctx.fillText(showPnL ? (L('ضریب سود ', 'PROFIT FACTOR ') + pfT) : privateText, barX + barW, barY - 10);
 
     // ══════════════════════════════════════════════════════
     // 13) کارت نقل قول — NEW!
@@ -1017,12 +1017,12 @@
         ctx.fillText(lbl, cx, cy + r + 26);
       }
       var rc = 62, cyR = y0 + 78;
-      ring(165, cyR, rc, isFinite(pf) ? pf / 3 : 1, pf >= 1.5 ? '#2ee6a6' : pf < 1 ? '#ff5674' : '#ffb020', isFinite(pf) ? pf.toFixed(2) : '\u221e', 'PROFIT FACTOR');
-      ring(450, cyR, rc, score / 100, C.primary, String(score), 'EDGE SCORE');
-      ring(735, cyR, rc, rrv / 3, rrv >= 1 ? '#2ee6a6' : '#ff5674', avgL > 0 ? rrv.toFixed(2) : '\u2014', 'REWARD : RISK');
+      ring(165, cyR, rc, showPnL && isFinite(pf) ? pf / 3 : 0, pf >= 1.5 ? '#2ee6a6' : pf < 1 ? '#ff5674' : '#ffb020', showPnL ? (isFinite(pf) ? pf.toFixed(2) : '\u221e') : '•••', L('ضریب سود', 'PROFIT FACTOR'));
+      ring(450, cyR, rc, showPnL && showWinRate ? score / 100 : 0, C.primary, showPnL && showWinRate ? String(score) : '•••', L('امتیاز برتری', 'EDGE SCORE'));
+      ring(735, cyR, rc, showPnL ? rrv / 3 : 0, rrv >= 1 ? '#2ee6a6' : '#ff5674', showPnL ? (avgL > 0 ? rrv.toFixed(2) : '\u2014') : '•••', L('ریسک به پاداش', 'REWARD : RISK'));
 
       var mw = 205, mh = 62, mg = 10, mx = (W - (mw * 4 + mg * 3)) / 2, my = y0 + 190;
-      [['BEST DAY', money0(best), '#2ee6a6'], ['WORST DAY', money0(worst), '#ff5674'], ['AVG WIN', money0(avgW), '#2ee6a6'], ['AVG LOSS', money0(-avgL), '#ff5674']].forEach(function (m, i) {
+      [[L('بهترین روز','BEST DAY'), showPnL ? money0(best) : privateText, '#2ee6a6'], [L('بدترین روز','WORST DAY'), showPnL ? money0(worst) : privateText, '#ff5674'], [L('میانگین برد','AVG WIN'), showPnL ? money0(avgW) : privateText, '#2ee6a6'], [L('میانگین باخت','AVG LOSS'), showPnL ? money0(-avgL) : privateText, '#ff5674']].forEach(function (m, i) {
         var x = mx + i * (mw + mg);
         var g2 = ctx.createLinearGradient(x, my, x, my + mh);
         g2.addColorStop(0, 'rgba(20,25,45,0.9)'); g2.addColorStop(1, 'rgba(8,10,22,0.9)');
@@ -1037,10 +1037,10 @@
 
       /* form strip: last 20 trades */
       var last20 = sortedD.slice(-20);
-      if (last20.length >= 2) {
+      if (last20.length >= 2 && showTradeSummary) {
         var fy = my + mh + 24, fw = 30, fg = 9, fx = (W - (fw * last20.length + fg * (last20.length - 1))) / 2;
         ctx.font = '900 11px Inter, sans-serif'; ctx.fillStyle = 'rgba(200,215,240,0.55)'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        ctx.fillText('LAST ' + last20.length + ' TRADES', W / 2, fy);
+        ctx.fillText(isEnglish() ? ('LAST ' + last20.length + ' TRADES') : ('آخرین ' + last20.length + ' معامله'), W / 2, fy);
         last20.forEach(function (t, i) {
           var x = fx + i * (fw + fg), clr = t.result === 'win' ? '#2ee6a6' : t.result === 'loss' ? '#ff5674' : 'rgba(180,195,230,0.5)';
           ctx.fillStyle = clr; ctx.shadowColor = clr; ctx.shadowBlur = t.result === 'win' || t.result === 'loss' ? 10 : 0;
@@ -1176,10 +1176,10 @@
     ctx.textBaseline = 'top';
     ctx.shadowColor = C.glow;
     ctx.shadowBlur = 12;
-    ctx.fillText('◆  TOP STRATEGIES  ◆', W / 2, sY + 12);
+    ctx.fillText(L('◆  استراتژی‌های برتر  ◆', '◆  TOP STRATEGIES  ◆'), W / 2, sY + 12);
     ctx.shadowBlur = 0;
 
-    strats.slice(0, 4).forEach(function(s, i) {
+    (showTradeSummary && showPnL ? strats.slice(0, 4) : []).forEach(function(s, i) {
       var y = sY + 48 + i * 42;
       var isP = s.net > 0;
       var color = isP ? '#2ee6a6' : s.net < 0 ? '#ff5674' : '#8697b8';
@@ -1273,11 +1273,11 @@
     host.innerHTML =
       '<div class="share-card">' +
         '<div class="share-head">' +
-          '<h3>📤 اشتراک‌گذاری وضعیت</h3>' +
+          '<h3>📤 ' + L('اشتراک‌گذاری وضعیت', 'Share your performance') + '</h3>' +
           '<div class="share-actions">' +
-            '<button class="share-btn" data-act="preview">👁️ پیش‌نمایش</button>' +
-            '<button class="share-btn primary" data-act="download">⬇️ دانلود</button>' +
-            '<button class="share-btn" data-act="share">📱 اشتراک</button>' +
+            '<button class="share-btn" data-act="preview">👁️ ' + L('پیش‌نمایش', 'Preview') + '</button>' +
+            '<button class="share-btn primary" data-act="download">⬇️ ' + L('دانلود', 'Download') + '</button>' +
+            '<button class="share-btn" data-act="share">📱 ' + L('اشتراک', 'Share') + '</button>' +
           '</div>' +
         '</div>' +
         '<div class="share-preview" id="sharePreviewWrap"></div>' +
@@ -1354,6 +1354,28 @@
   /* ══════════════════════════════════════════════════════
      THEME + STREAK + CONFETTI + COMMAND PALETTE
      ══════════════════════════════════════════════════════ */
+  function refreshShareLanguage() {
+    var host = $('#share-host');
+    if (!host) return;
+    var h = host.querySelector('.share-head h3');
+    if (h) h.textContent = '📤 ' + L('اشتراک‌گذاری وضعیت', 'Share your performance');
+    var p = host.querySelector('[data-act="preview"]'); if (p) p.textContent = '👁️ ' + L('پیش‌نمایش', 'Preview');
+    var d = host.querySelector('[data-act="download"]'); if (d) d.textContent = '⬇️ ' + L('دانلود', 'Download');
+    var sh = host.querySelector('[data-act="share"]'); if (sh) sh.textContent = '📱 ' + L('اشتراک', 'Share');
+    var priv = host.querySelector('.sh-priv span'); if (priv) priv.textContent = L('🙈 مخفی کردن مبلغ‌ها', '🙈 Hide amounts');
+    var name = host.querySelector('.sh-name');
+    if (name) { name.placeholder = L('@آیدی (انگلیسی، اختیاری)', '@handle (optional)'); name.setAttribute('aria-label', L('شناسه اشتراک', 'Share handle')); }
+    var names = { auto: ['خودکار','Auto'], neon: ['نئون','Neon'], emerald: ['زمردی','Emerald'], rose: ['رزی','Rose'], ice: ['یخی','Ice'] };
+    host.querySelectorAll('.sh-chip').forEach(function(b) {
+      var key = b.dataset.style || b.dataset.value || '';
+      if (!key) {
+        var idx = Array.prototype.indexOf.call(b.parentElement.children, b);
+        key = ['auto','neon','emerald','rose','ice'][idx] || '';
+      }
+      if (names[key]) b.textContent = names[key][isEnglish() ? 1 : 0];
+    });
+  }
+
   function initThemeSwitcher() {
     var host = $('#theme-switcher-host');
     if (!host) return;
@@ -1423,19 +1445,20 @@
     if (!br || document.querySelector('.streak-badge')) return;
     var el = document.createElement('div');
     el.className = 'streak-badge';
-    el.title = 'روزهای سوددهی متوالی';
+    el.title = L('روزهای سوددهی متوالی', 'Consecutive profitable days');
     br.appendChild(el);
 
     function r() {
       var s = calcStreak();
       if (s > 0) {
         el.classList.remove('cold'); el.classList.add('hot');
-        el.innerHTML = '<span class="fire">🔥</span><span class="num">' + s + '</span><span class="lbl">روز</span>';
+        el.innerHTML = '<span class="fire">🔥</span><span class="num">' + s + '</span><span class="lbl">' + L('روز', 'days') + '</span>';
       } else {
         el.classList.remove('hot'); el.classList.add('cold');
-        el.innerHTML = '<span class="fire">❄️</span><span class="lbl">صفر</span>';
+        el.innerHTML = '<span class="fire">❄️</span><span class="lbl">' + L('صفر', 'zero') + '</span>';
       }
     }
+    refreshStreakText = r;
     r();
     setInterval(r, 30000);
   }
@@ -1503,7 +1526,7 @@
       '<div class="cmd-card">' +
         '<div class="cmd-input-wrap">' +
           '<span class="icon">🔍</span>' +
-          '<input class="cmd-input" type="text" placeholder="جستجو..." autocomplete="off" />' +
+          '<input class="cmd-input" type="text" placeholder="' + L('جستجو...', 'Search commands…') + '" autocomplete="off" />' +
         '</div>' +
         '<div class="cmd-list" id="cmdList"></div>' +
       '</div>';
@@ -1516,28 +1539,30 @@
     function switchTab(n) { var t = document.querySelector('.tab[data-view="' + n + '"]'); if (t) t.click(); }
 
     var cmds = [
-      { e: '✍️', l: 'ثبت معامله', a: function() { switchTab('add'); } },
-      { e: '📊', l: 'آنالیز', a: function() { switchTab('analysis'); } },
-      { e: '📅', l: 'تقویم', a: function() { switchTab('calendar'); } },
-      { e: '📋', l: 'معاملات', a: function() { switchTab('trades'); } },
-      { e: '⚙️', l: 'تنظیمات', a: function() { switchTab('settings'); } },
-      { e: '🔄', l: 'همگام‌سازی', a: function() { if (window.PT_Sync) window.PT_Sync.forcePush(); } },
-      { e: '🚪', l: 'خروج', a: function() { if (window.poLogout) window.poLogout(); } }
+      { e: '✍️', fa: 'ثبت معامله', en: 'Log trade', a: function() { switchTab('add'); } },
+      { e: '📊', fa: 'آنالیز', en: 'Analytics', a: function() { switchTab('analysis'); } },
+      { e: '📅', fa: 'تقویم', en: 'Calendar', a: function() { switchTab('calendar'); } },
+      { e: '📋', fa: 'معاملات', en: 'Trades', a: function() { switchTab('trades'); } },
+      { e: '⚙️', fa: 'تنظیمات', en: 'Settings', a: function() { switchTab('settings'); } },
+      { e: '🔄', fa: 'همگام‌سازی', en: 'Sync now', a: function() { if (window.PT_Sync) window.PT_Sync.forcePush(); } },
+      { e: '🚪', fa: 'خروج', en: 'Sign out', a: function() { if (window.poLogout) window.poLogout(); } }
     ];
+    function cmdLabel(c) { return isEnglish() ? c.en : c.fa; }
     var f = cmds.slice();
 
     function render() {
-      if (!f.length) { list.innerHTML = '<div class="cmd-empty">نیست</div>'; return; }
+      if (!f.length) { list.innerHTML = '<div class="cmd-empty">' + L('موردی پیدا نشد', 'No commands found') + '</div>'; return; }
       list.innerHTML = f.map(function(c, i) {
         return '<button class="cmd-item' + (i === active ? ' active' : '') + '" data-i="' + i + '">' +
-          '<span class="emoji">' + c.e + '</span><span class="label">' + c.l + '</span></button>';
+          '<span class="emoji">' + c.e + '</span><span class="label">' + cmdLabel(c) + '</span></button>';
       }).join('');
     }
     function filter(q) {
       q = (q || '').trim().toLowerCase();
-      f = !q ? cmds.slice() : cmds.filter(function(c) { return c.l.toLowerCase().indexOf(q) !== -1; });
+      f = !q ? cmds.slice() : cmds.filter(function(c) { return c.fa.toLowerCase().indexOf(q) !== -1 || c.en.toLowerCase().indexOf(q) !== -1; });
       active = 0; render();
     }
+    refreshCmdPalette = function() { input.placeholder = L('جستجو...', 'Search commands…'); filter(input.value); };
     function open() { ov.classList.add('open'); input.value = ''; filter(''); setTimeout(function() { input.focus(); }, 80); }
     function close() { ov.classList.remove('open'); }
     function exec() { if (!f[active]) return; var c = f[active]; close(); setTimeout(function() { c.a(); }, 120); }
@@ -1587,6 +1612,20 @@
       renderGoals();
     }, 5000);
     setInterval(checkGoal, 2000);
+
+    var lastLang = isEnglish() ? 'en' : 'fa';
+    var assistantLangObserver = new MutationObserver(function() {
+      var nextLang = isEnglish() ? 'en' : 'fa';
+      if (nextLang === lastLang) return;
+      lastLang = nextLang;
+      renderAssistant();
+      renderGoals();
+      initClock();
+      if (refreshStreakText) refreshStreakText();
+      if (refreshCmdPalette) refreshCmdPalette();
+      refreshShareLanguage();
+    });
+    assistantLangObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
 
     document.querySelectorAll('.tab').forEach(function(t) {
       t.addEventListener('click', function() { setTimeout(initClock, 100); });
